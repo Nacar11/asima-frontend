@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/cn';
 
 /**
@@ -7,9 +10,15 @@ import { cn } from '@/lib/cn';
  *   - White content area, max-width 1280px, centered, generous padding.
  *
  * Page-scoped widgets (user menu, breadcrumbs) compose into the right
- * slot via the `actions` prop. The `(app)/layout.tsx` route group passes
- * the current user once F4 lands.
+ * slot via the `actions` prop.
  */
+const NAV_LINKS = [
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/me/time-entries', label: 'Time entries' },
+  { href: '/me/schedule', label: 'Schedule' },
+  { href: '/me', label: 'Profile' },
+] as const;
+
 export function AppShell({
   children,
   actions,
@@ -17,16 +26,41 @@ export function AppShell({
   children: React.ReactNode;
   actions?: React.ReactNode;
 }) {
+  const pathname = usePathname();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-neutral-900 bg-neutral-950 text-white">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <Link
-            href="/dashboard"
-            className="text-base font-semibold tracking-tight transition-opacity hover:opacity-80"
-          >
-            asima
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/dashboard"
+              className="text-base font-semibold tracking-tight transition-opacity hover:opacity-80"
+            >
+              asima
+            </Link>
+            <nav className="hidden items-center gap-1 md:flex">
+              {NAV_LINKS.map((link) => {
+                const active =
+                  link.href === '/me'
+                    ? pathname === '/me'
+                    : pathname?.startsWith(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                      active
+                        ? 'bg-neutral-800 text-white'
+                        : 'text-neutral-300 hover:bg-neutral-900 hover:text-white',
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
           <nav className="flex items-center gap-2">{actions}</nav>
         </div>
       </header>
