@@ -8,6 +8,7 @@ import {
   Clock,
   Home,
   Menu,
+  Users,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -50,6 +51,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { href: '/employee/home', label: 'Home', icon: Home, section: 'me' },
   { href: '/employee/timesheet', label: 'Time sheet', icon: Clock, section: 'me' },
   { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
+  {
+    href: '/admin/users',
+    label: 'Employees',
+    icon: Users,
+    section: 'admin',
+    requires: 'USER:View',
+  },
 ];
 
 const SECTION_ORDER: SidebarSection[] = ['me', 'admin'];
