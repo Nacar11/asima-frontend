@@ -5,7 +5,6 @@ import {
   type MyProfile,
   type UpdateMyProfileInput,
 } from './schemas';
-import { MyPermissionsSchema, type MyPermissions } from '@/features/auth/schemas';
 
 export type ChangeMyPasswordRequest = {
   current_password: string;
@@ -15,12 +14,6 @@ export type ChangeMyPasswordRequest = {
 export const profileApi = {
   me(client: ApiClient = apiClient()): Promise<MyProfile> {
     return client.get<unknown>('/users/me').then((res) => MyProfileSchema.parse(res));
-  },
-
-  permissions(client: ApiClient = apiClient()): Promise<MyPermissions> {
-    return client
-      .get<unknown>('/users/me/permissions')
-      .then((res) => MyPermissionsSchema.parse(res));
   },
 
   update(input: UpdateMyProfileInput, client: ApiClient = apiClient()): Promise<MyProfile> {

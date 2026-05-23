@@ -4,10 +4,12 @@ import {
   LoginResponseSchema,
   RefreshResponseSchema,
   AuthUserSchema,
+  MyPermissionsSchema,
   type LoginInput,
   type LoginResponse,
   type RefreshResponse,
   type AuthUser,
+  type MyPermissions,
 } from './schemas';
 
 /**
@@ -54,5 +56,16 @@ export const authApi = {
 
   me(client: ApiClient = apiClient()): Promise<AuthUser> {
     return client.get<unknown>('/auth/me').then((res) => AuthUserSchema.parse(res));
+  },
+
+  /**
+   * Flat permission codes the current user can act on. Drives UI gating
+   * per the parent CLAUDE.md ("Frontend should drive UI gating from
+   * /users/me/permissions — never parse role.permissions client-side").
+   */
+  permissions(client: ApiClient = apiClient()): Promise<MyPermissions> {
+    return client
+      .get<unknown>('/users/me/permissions')
+      .then((res) => MyPermissionsSchema.parse(res));
   },
 };

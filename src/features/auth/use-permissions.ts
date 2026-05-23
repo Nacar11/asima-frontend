@@ -1,0 +1,39 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { authApi } from './api';
+import { useAuth } from './use-auth';
+
+/**
+ * Query key for the current user's permissions. Exported so AuthProvider
+ * can invalidate the cache on logout — keeping the cache key in one
+ * place is the only way to avoid permission leakage between sessions on
+ * the same tab.
+ */
+export const PERMISSIONS_QUERY_KEY = ['auth', 'me', 'permissions'] as const;
+
+/**
+ * Fetches and caches the flat array of permission codes the current
+ * user can act on. Gated on auth status so we never fire while
+ * unauthenticated (the endpoint would return 401 and pollute the
+ * cache with an error).
+ *
+ * 5-minute staleTime: permissions change only on role edits, which are
+ * rare and admin-initiated — no need to refetch on every nav. A full
+ * reload will invalidate.
+ */
+export function usePermissions() {
+  const { status } = useAuth();
+  const query = useQuery({
+    queryKey: PERMISSIONS_QUERY_KEY,
+    queryFn: () => authApi.permissions(),
+    enabled: status === 'authenticated',
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    permissions: query.data?.permissions ?? [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
