@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Providers } from './providers';
 import './globals.css';
 
 /*
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen bg-white font-sans text-neutral-950 antialiased">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
