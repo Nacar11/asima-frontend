@@ -1,0 +1,36 @@
+# Frontend-only compose. The backend lives in ../asima-backend with its
+# own docker-compose.yml; run that first (postgres + api on port 3000),
+# then this file brings up the Next.js server on port 3001 and points
+# it at the running backend.
+#
+# Typical local flow:
+#   cd ../asima-backend && docker compose up -d
+#   cd ../asima-frontend && docker compose up --build
+#
+# In production you'd compose this into a single stack file alongside
+# the backend; we keep them separate in v0 so each repo can be deployed
+# independently (Vercel for the frontend, anywhere-with-docker for the
+# backend).
+
+services:
+  asima-web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        # Baked into the build because next/font + metadata read it at
+        # build time. For runtime-only config, use the `environment`
+        # block below.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3000/api/v1}
+    container_name: asima-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+    ports:
+      - '${WEB_PORT:-3001}:3001'
+    # On the same host, the browser talks to localhost:3000 to reach
+    # the backend, so we don't need cross-container DNS here. If you
+    # later compose this with asima-api in one stack, override the
+    # base URL to use the backend's docker network alias.
