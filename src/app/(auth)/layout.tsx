@@ -10,8 +10,8 @@ import { useAuth } from '@/features/auth/use-auth';
  * SPEC §5b (black chrome, white canvas) without the navbar.
  *
  * If a user lands here while already authenticated (e.g. backed into
- * /login from /dashboard), bounce them to /dashboard so they don't
- * accidentally re-enter credentials.
+ * /login from /employee/home), bounce them so they don't accidentally
+ * re-enter credentials.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/dashboard');
+      router.replace('/employee/home');
     }
   }, [status, router]);
 

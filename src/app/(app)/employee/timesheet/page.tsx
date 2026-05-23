@@ -3,54 +3,55 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { timeEntriesApi } from '@/features/time-entries/api';
-import { PunchButton } from '@/features/time-entries/components/punch-button';
 import { EntriesTable } from '@/features/time-entries/components/entries-table';
+import { scheduleApi } from '@/features/schedule/api';
 import { cn } from '@/lib/cn';
 
 const PAGE_LIMIT = 20;
 
-export default function MyTimeEntriesPage() {
+export default function MyTimeSheetPage() {
   const [page, setPage] = useState(1);
 
   const listQuery = useQuery({
     queryKey: ['time-entries', 'me', page],
     queryFn: () => timeEntriesApi.listMine({ page, limit: PAGE_LIMIT }),
-    // Keep previous data while paginating so the table doesn't flicker.
     placeholderData: (prev) => prev,
+  });
+
+  const scheduleQuery = useQuery({
+    queryKey: ['schedule', 'me'],
+    queryFn: () => scheduleApi.mySchedule(),
   });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">My time entries</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">Time sheet</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Punch in to start your shift; punch out to close it.
+          Daily attendance and hours worked. Punch in/out from Home.
         </p>
       </div>
 
-      <PunchButton />
+      {listQuery.isLoading && (
+        <p className="text-sm text-neutral-500">Loading entries…</p>
+      )}
+      {listQuery.error && (
+        <p className="text-sm text-red-700">Could not load entries.</p>
+      )}
+      {listQuery.data && (
+        <EntriesTable rows={listQuery.data.data} schedules={scheduleQuery.data ?? []} />
+      )}
 
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-neutral-950">History</h2>
-        {listQuery.isLoading && (
-          <p className="text-sm text-neutral-500">Loading entries…</p>
-        )}
-        {listQuery.error && (
-          <p className="text-sm text-red-700">Could not load history.</p>
-        )}
-        {listQuery.data && <EntriesTable rows={listQuery.data.data} />}
-
-        {listQuery.data && (listQuery.data.total > PAGE_LIMIT) && (
-          <Paginator
-            page={listQuery.data.page}
-            hasMore={listQuery.data.has_more}
-            total={listQuery.data.total}
-            limit={listQuery.data.limit}
-            onPrev={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => p + 1)}
-          />
-        )}
-      </div>
+      {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
+        <Paginator
+          page={listQuery.data.page}
+          hasMore={listQuery.data.has_more}
+          total={listQuery.data.total}
+          limit={listQuery.data.limit}
+          onPrev={() => setPage((p) => Math.max(1, p - 1))}
+          onNext={() => setPage((p) => p + 1)}
+        />
+      )}
     </div>
   );
 }
@@ -100,7 +101,5 @@ const PagerButton = ({
       'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
     )}
     {...rest}
-  >
-    {children}
-  </button>
+  />
 );

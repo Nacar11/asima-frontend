@@ -7,14 +7,12 @@ import { useAuth } from '@/features/auth/use-auth';
 /*
  * Route guard for the (app) group. Gates protected pages on auth status:
  *   - loading        → show a non-blocking placeholder (no flash of /login)
- *   - unauthenticated → redirect to /login?reason=expired
+ *   - unauthenticated → redirect to /login
  *   - authenticated  → render children
  *
- * Why `reason=expired` and not a clean /login? The login form picks up
- * that query and surfaces a "your session expired" toast (SPEC §6).
- * A direct unauth navigation (no prior session) is rare from a route
- * guard — by definition the user got here from a protected URL, so
- * "expired" is the truthful framing.
+ * The session-expired toast is fired by AuthProvider, which is the only
+ * code that can actually witness an expiry (a failed refresh on bootstrap
+ * or during a live request). This gate just routes.
  */
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -22,7 +20,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/login?reason=expired');
+      router.replace('/login');
     }
   }, [status, router]);
 

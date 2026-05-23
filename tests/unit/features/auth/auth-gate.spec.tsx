@@ -38,9 +38,9 @@ describe('AuthGate', () => {
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
-  it('redirects to /login?reason=expired when unauthenticated', () => {
+  it('redirects to /login when unauthenticated', () => {
     render(wrap({ status: 'unauthenticated' }));
-    expect(replace).toHaveBeenCalledWith('/login?reason=expired');
+    expect(replace).toHaveBeenCalledWith('/login');
     expect(screen.queryByText('secret content')).not.toBeInTheDocument();
   });
 

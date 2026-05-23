@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 import { LoginInputSchema, type LoginInput } from '@/features/auth/schemas';
 import { useAuth } from '@/features/auth/use-auth';
 import { ApiError } from '@/lib/api-client';
@@ -20,7 +19,6 @@ import { useThrottleCountdown } from '@/lib/use-throttle-countdown';
  */
 export function LoginForm() {
   const router = useRouter();
-  const search = useSearchParams();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
   const throttle = useThrottleCountdown();
@@ -34,18 +32,11 @@ export function LoginForm() {
     defaultValues: { email: '', password: '' },
   });
 
-  // Banner on session expiry — set by the (app) guard when refresh fails.
-  useEffect(() => {
-    if (search.get('reason') === 'expired') {
-      toast.warning('Your session expired. Please sign in again.');
-    }
-  }, [search]);
-
   const onSubmit = handleSubmit(async (input) => {
     setServerError(null);
     try {
       await login(input);
-      router.replace('/dashboard');
+      router.replace('/employee/home');
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
         throttle.arm(err.retryAfterSec ?? 60);
