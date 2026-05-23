@@ -9,9 +9,14 @@ import {
   Home,
   Menu,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { useAuth } from '@/features/auth/use-auth';
+import { usePermissions } from '@/features/auth/use-permissions';
+import { hasPermission } from '@/features/auth/permission-utils';
+import type { PermissionCode } from '@/features/auth/permission-codes';
 
 /**
  * Top-level layout wrapper for authenticated pages (SPEC §5b).
@@ -26,11 +31,33 @@ import { UserMenu } from '@/features/auth/components/user-menu';
  *   - Content: padded for both — `md:pl-64` for the sidebar, `pt-14` for
  *     the topbar.
  */
-const NAV_LINKS = [
-  { href: '/employee/home', label: 'Home', icon: Home },
-  { href: '/employee/timesheet', label: 'Time sheet', icon: Clock },
-  { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays },
-] as const;
+type SidebarSection = 'me' | 'admin';
+
+type SidebarItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  section: SidebarSection;
+  /**
+   * Permission codes required to see this item. AND-semantics when an
+   * array. Omit for items every authenticated user can see (the default
+   * for the 'me' section).
+   */
+  requires?: PermissionCode | PermissionCode[];
+};
+
+const SIDEBAR_ITEMS: SidebarItem[] = [
+  { href: '/employee/home', label: 'Home', icon: Home, section: 'me' },
+  { href: '/employee/timesheet', label: 'Time sheet', icon: Clock, section: 'me' },
+  { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
+];
+
+const SECTION_ORDER: SidebarSection[] = ['me', 'admin'];
+
+/** Only the 'admin' section gets a header; 'me' is the default cluster. */
+const SECTION_HEADERS: Partial<Record<SidebarSection, string>> = {
+  admin: 'Administration',
+};
 
 function isActive(pathname: string | null, href: string) {
   return pathname?.startsWith(href) ?? false;
@@ -39,6 +66,21 @@ function isActive(pathname: string | null, href: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const { permissions } = usePermissions();
+  const isSystemAdmin = user?.system_admin ?? false;
+
+  // Group visible items by section, preserving SECTION_ORDER. Items the
+  // user lacks permission for are filtered out; section headers render
+  // only when their section has ≥1 visible item.
+  const visibleSections = SECTION_ORDER.map((section) => ({
+    section,
+    items: SIDEBAR_ITEMS.filter(
+      (item) =>
+        item.section === section &&
+        hasPermission(permissions, item.requires, isSystemAdmin),
+    ),
+  })).filter((s) => s.items.length > 0);
 
   useEffect(() => {
     setOpen(false);
@@ -82,29 +124,41 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <ul className="space-y-1">
-            {NAV_LINKS.map((link) => {
-              const Icon = link.icon;
-              const active = isActive(pathname, link.href);
-              return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-neutral-800 text-white'
-                        : 'text-neutral-300 hover:bg-neutral-900 hover:text-white',
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                    <span>{link.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          {visibleSections.map(({ section, items }, index) => {
+            const header = SECTION_HEADERS[section];
+            return (
+              <div key={section} className={index > 0 ? 'mt-6' : undefined}>
+                {header && (
+                  <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                    {header}
+                  </div>
+                )}
+                <ul className="space-y-1">
+                  {items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(pathname, item.href);
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          aria-current={active ? 'page' : undefined}
+                          className={cn(
+                            'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                            active
+                              ? 'bg-neutral-800 text-white'
+                              : 'text-neutral-300 hover:bg-neutral-900 hover:text-white',
+                          )}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
         </nav>
       </aside>
 
