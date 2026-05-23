@@ -9,6 +9,7 @@ import { LoginInputSchema, type LoginInput } from '@/features/auth/schemas';
 import { useAuth } from '@/features/auth/use-auth';
 import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
+import { useThrottleCountdown } from '@/lib/use-throttle-countdown';
 
 /**
  * Login form. SPEC §11b throttle UX:
@@ -22,7 +23,7 @@ export function LoginForm() {
   const search = useSearchParams();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [throttleSecondsLeft, setThrottleSecondsLeft] = useState(0);
+  const throttle = useThrottleCountdown();
 
   const {
     register,
@@ -40,13 +41,6 @@ export function LoginForm() {
     }
   }, [search]);
 
-  // Countdown tick for the 429 throttle banner.
-  useEffect(() => {
-    if (throttleSecondsLeft <= 0) return;
-    const t = setInterval(() => setThrottleSecondsLeft((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(t);
-  }, [throttleSecondsLeft]);
-
   const onSubmit = handleSubmit(async (input) => {
     setServerError(null);
     try {
@@ -54,8 +48,7 @@ export function LoginForm() {
       router.replace('/dashboard');
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
-        const wait = err.retryAfterSec ?? 60;
-        setThrottleSecondsLeft(wait);
+        throttle.arm(err.retryAfterSec ?? 60);
         setServerError(null);
         return;
       }
@@ -67,8 +60,7 @@ export function LoginForm() {
     }
   });
 
-  const locked = throttleSecondsLeft > 0;
-  const buttonDisabled = isSubmitting || locked;
+  const buttonDisabled = isSubmitting || throttle.locked;
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
@@ -118,15 +110,13 @@ export function LoginForm() {
         </p>
       )}
 
-      {locked && (
+      {throttle.locked && (
         <p
           role="status"
           className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
         >
           Too many attempts. Try again in{' '}
-          <span className="font-mono font-semibold">
-            {formatCountdown(throttleSecondsLeft)}
-          </span>
+          <span className="font-mono font-semibold">{throttle.formatted}</span>
         </p>
       )}
 
@@ -139,14 +129,8 @@ export function LoginForm() {
           buttonDisabled && 'cursor-not-allowed opacity-60 hover:bg-neutral-950',
         )}
       >
-        {isSubmitting ? 'Signing in…' : locked ? 'Locked' : 'Sign in'}
+        {isSubmitting ? 'Signing in…' : throttle.locked ? 'Locked' : 'Sign in'}
       </button>
     </form>
   );
-}
-
-function formatCountdown(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
