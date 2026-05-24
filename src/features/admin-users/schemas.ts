@@ -77,4 +77,6 @@ export type AdminUsersQuery = {
   page?: number;
   limit?: number;
   search?: string;
+  role_id?: number;
+  is_active?: boolean;
 };

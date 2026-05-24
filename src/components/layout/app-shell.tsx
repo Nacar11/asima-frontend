@@ -52,7 +52,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { href: '/employee/timesheet', label: 'Time sheet', icon: Clock, section: 'me' },
   { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
   {
-    href: '/admin/users',
+    href: '/admin/employees',
     label: 'Employees',
     icon: Users,
     section: 'admin',

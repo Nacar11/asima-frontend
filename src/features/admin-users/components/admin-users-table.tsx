@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { formatDateInTz } from '@/lib/format';
+import { formatRoleName } from '@/features/admin-roles/format';
 import { cn } from '@/lib/cn';
 import type { AdminUser } from '@/features/admin-users/schemas';
 
@@ -24,14 +25,6 @@ export function AdminUsersTable({
   const isSysAdmin = user?.system_admin ?? false;
   const canUpdate = hasPermission(permissions, 'USER:Update', isSysAdmin);
   const canDelete = hasPermission(permissions, 'USER:Delete', isSysAdmin);
-
-  if (rows.length === 0) {
-    return (
-      <p className="rounded-lg border border-dashed border-neutral-200 p-8 text-center text-sm text-neutral-500">
-        No employees yet.
-      </p>
-    );
-  }
 
   return (
     <div className="overflow-x-auto rounded-lg border border-neutral-200">
@@ -57,7 +50,7 @@ export function AdminUsersTable({
               <Td className="text-neutral-600">{row.title ?? '—'}</Td>
               <Td>
                 <span className="rounded-md bg-neutral-100 px-2 py-0.5 font-mono text-xs text-neutral-700">
-                  {row.role.name}
+                  {formatRoleName(row.role.name)}
                 </span>
               </Td>
               <Td>

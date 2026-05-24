@@ -9,6 +9,7 @@ import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
+import { formatRoleName } from '@/features/admin-roles/format';
 import {
   CreateAdminUserSchema,
   type CreateAdminUserInput,
@@ -107,7 +108,7 @@ export function CreateUserDialog({
             <option value={0}>{rolesQuery.isLoading ? 'Loading…' : 'Select a role'}</option>
             {rolesQuery.data?.data.map((role) => (
               <option key={role.id} value={role.id}>
-                {role.name}
+                {formatRoleName(role.name)}
               </option>
             ))}
           </select>
