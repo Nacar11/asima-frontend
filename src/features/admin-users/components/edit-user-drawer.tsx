@@ -14,6 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { LabeledCheckbox } from '@/components/labeled-checkbox';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
@@ -127,10 +128,12 @@ export function EditUserDrawer({
               </select>
             </Field>
 
-            <label className="flex items-center gap-2 text-sm text-neutral-800">
-              <input type="checkbox" className="h-4 w-4 rounded border-neutral-300" {...form.register('is_active')} />
-              Active
-            </label>
+            <LabeledCheckbox
+              control={form.control}
+              name="is_active"
+              label="Active"
+              description="Inactive employees can't sign in."
+            />
           </form>
         </SheetBody>
 
