@@ -4,7 +4,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Dialog } from '@/components/dialog';
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import {
@@ -13,7 +21,7 @@ import {
   type ResetUserPasswordInput,
 } from '@/features/admin-users/schemas';
 
-export function ResetPasswordDialog({
+export function ResetPasswordDrawer({
   user,
   open,
   onClose,
@@ -40,39 +48,57 @@ export function ResetPasswordDialog({
     onError: () => toast.error('Could not reset password.'),
   });
 
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      title={`Reset password — ${user?.first_name ?? ''} ${user?.last_name ?? ''}`}
-      description="Admin override — no current password required. Communicate the new password to the user out-of-band."
-    >
-      <form onSubmit={form.handleSubmit((input) => mutation.mutate(input))} className="space-y-4" noValidate>
-        <label className="block space-y-1.5">
-          <span className="block text-sm font-medium text-neutral-800">New password</span>
-          <input
-            type="text"
-            autoComplete="off"
-            className={inputCls}
-            {...form.register('new_password')}
-          />
-          {form.formState.errors.new_password && (
-            <span className="block text-xs text-red-600">
-              {form.formState.errors.new_password.message}
-            </span>
-          )}
-        </label>
+  const title = `Reset password — ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
-        <div className="flex justify-end gap-2 pt-2">
+  return (
+    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
+      <SheetContent side="right" className="sm:max-w-sm">
+        <SheetHeader>
+          <SheetTitle>{title || 'Reset password'}</SheetTitle>
+          <SheetDescription>
+            Admin override — no current password required. Communicate the new password to the user out-of-band.
+          </SheetDescription>
+        </SheetHeader>
+
+        <SheetBody>
+          <form
+            id="reset-password-form"
+            onSubmit={form.handleSubmit((input) => mutation.mutate(input))}
+            className="space-y-4"
+            noValidate
+          >
+            <label className="block space-y-1.5">
+              <span className="block text-sm font-medium text-neutral-800">New password</span>
+              <input
+                type="text"
+                autoComplete="off"
+                className={inputCls}
+                {...form.register('new_password')}
+              />
+              {form.formState.errors.new_password && (
+                <span className="block text-xs text-red-600">
+                  {form.formState.errors.new_password.message}
+                </span>
+              )}
+            </label>
+          </form>
+        </SheetBody>
+
+        <SheetFooter>
           <button type="button" onClick={onClose} className={btnSecondary}>
             Cancel
           </button>
-          <button type="submit" disabled={mutation.isPending} className={btnPrimary}>
+          <button
+            type="submit"
+            form="reset-password-form"
+            disabled={mutation.isPending}
+            className={btnPrimary}
+          >
             {mutation.isPending ? 'Resetting…' : 'Reset password'}
           </button>
-        </div>
-      </form>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 

@@ -2,7 +2,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Dialog } from '@/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import type { AdminUser } from '@/features/admin-users/schemas';
@@ -32,29 +39,34 @@ export function DeleteUserConfirm({
   });
 
   return (
-    <Dialog open={open} onClose={onClose} title="Delete employee?">
-      <p className="text-sm text-neutral-700">
-        Soft-delete{' '}
-        <span className="font-medium text-neutral-950">
-          {user?.first_name} {user?.last_name}
-        </span>{' '}
-        ({user?.email})? They won&apos;t be able to sign in. This can be reversed by an admin
-        with database access.
-      </p>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete employee?</DialogTitle>
+          <DialogDescription>
+            Soft-delete{' '}
+            <span className="font-medium text-neutral-950">
+              {user?.first_name} {user?.last_name}
+            </span>{' '}
+            ({user?.email})? They won&apos;t be able to sign in. This can be
+            reversed by an admin with database access.
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="mt-5 flex justify-end gap-2">
-        <button type="button" onClick={onClose} className={btnSecondary}>
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
-          className={btnDanger}
-        >
-          {mutation.isPending ? 'Deleting…' : 'Delete'}
-        </button>
-      </div>
+        <DialogFooter>
+          <button type="button" onClick={onClose} className={btnSecondary}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+            className={btnDanger}
+          >
+            {mutation.isPending ? 'Deleting…' : 'Delete'}
+          </button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

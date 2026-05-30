@@ -14,9 +14,9 @@ import { ApiError } from '@/lib/api-client';
 import { adminRolesApi } from '@/features/admin-roles/api';
 import { formatRoleName } from '@/features/admin-roles/format';
 import { AdminUsersTable } from '@/features/admin-users/components/admin-users-table';
-import { CreateUserDialog } from '@/features/admin-users/components/create-user-dialog';
-import { EditUserDialog } from '@/features/admin-users/components/edit-user-dialog';
-import { ResetPasswordDialog } from '@/features/admin-users/components/reset-password-dialog';
+import { CreateUserDrawer } from '@/features/admin-users/components/create-user-drawer';
+import { EditUserDrawer } from '@/features/admin-users/components/edit-user-drawer';
+import { ResetPasswordDrawer } from '@/features/admin-users/components/reset-password-drawer';
 import { DeleteUserConfirm } from '@/features/admin-users/components/delete-user-confirm';
 import { cn } from '@/lib/cn';
 import type { AdminUser } from '@/features/admin-users/schemas';
@@ -177,9 +177,9 @@ function AdminEmployeesPageBody() {
         />
       )}
 
-      <CreateUserDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-      <EditUserDialog user={editing} open={editing !== null} onClose={() => setEditing(null)} />
-      <ResetPasswordDialog
+      <CreateUserDrawer open={createOpen} onClose={() => setCreateOpen(false)} />
+      <EditUserDrawer user={editing} open={editing !== null} onClose={() => setEditing(null)} />
+      <ResetPasswordDrawer
         user={resetting}
         open={resetting !== null}
         onClose={() => setResetting(null)}

@@ -4,7 +4,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Dialog } from '@/components/dialog';
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
@@ -15,7 +23,7 @@ import {
   type CreateAdminUserInput,
 } from '@/features/admin-users/schemas';
 
-export function CreateUserDialog({
+export function CreateUserDrawer({
   open,
   onClose,
 }: {
@@ -70,60 +78,70 @@ export function CreateUserDialog({
   });
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      title="Add employee"
-      description="They'll be able to sign in with this email + password."
-      widthClass="max-w-lg"
-    >
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="First name" error={form.formState.errors.first_name?.message}>
-            <input type="text" className={inputCls} {...form.register('first_name')} />
-          </Field>
-          <Field label="Last name" error={form.formState.errors.last_name?.message}>
-            <input type="text" className={inputCls} {...form.register('last_name')} />
-          </Field>
-        </div>
+    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Add employee</SheetTitle>
+          <SheetDescription>
+            They&apos;ll be able to sign in with this email + password.
+          </SheetDescription>
+        </SheetHeader>
 
-        <Field label="Email" error={form.formState.errors.email?.message}>
-          <input type="email" autoComplete="off" className={inputCls} {...form.register('email')} />
-        </Field>
+        <SheetBody>
+          <form id="create-user-form" onSubmit={onSubmit} className="space-y-4" noValidate>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="First name" error={form.formState.errors.first_name?.message}>
+                <input type="text" className={inputCls} {...form.register('first_name')} />
+              </Field>
+              <Field label="Last name" error={form.formState.errors.last_name?.message}>
+                <input type="text" className={inputCls} {...form.register('last_name')} />
+              </Field>
+            </div>
 
-        <Field label="Initial password" error={form.formState.errors.password?.message}>
-          <input type="text" autoComplete="off" className={inputCls} {...form.register('password')} />
-        </Field>
+            <Field label="Email" error={form.formState.errors.email?.message}>
+              <input type="email" autoComplete="off" className={inputCls} {...form.register('email')} />
+            </Field>
 
-        <Field label="Title (optional)" error={form.formState.errors.title?.message}>
-          <input type="text" className={inputCls} {...form.register('title')} />
-        </Field>
+            <Field label="Initial password" error={form.formState.errors.password?.message}>
+              <input type="text" autoComplete="off" className={inputCls} {...form.register('password')} />
+            </Field>
 
-        <Field label="Role" error={form.formState.errors.role_id?.message}>
-          <select
-            className={inputCls}
-            {...form.register('role_id', { valueAsNumber: true })}
-            disabled={rolesQuery.isLoading}
-          >
-            <option value={0}>{rolesQuery.isLoading ? 'Loading…' : 'Select a role'}</option>
-            {rolesQuery.data?.data.map((role) => (
-              <option key={role.id} value={role.id}>
-                {formatRoleName(role.name)}
-              </option>
-            ))}
-          </select>
-        </Field>
+            <Field label="Title (optional)" error={form.formState.errors.title?.message}>
+              <input type="text" className={inputCls} {...form.register('title')} />
+            </Field>
 
-        <div className="flex justify-end gap-2 pt-2">
+            <Field label="Role" error={form.formState.errors.role_id?.message}>
+              <select
+                className={inputCls}
+                {...form.register('role_id', { valueAsNumber: true })}
+                disabled={rolesQuery.isLoading}
+              >
+                <option value={0}>{rolesQuery.isLoading ? 'Loading…' : 'Select a role'}</option>
+                {rolesQuery.data?.data.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {formatRoleName(role.name)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </form>
+        </SheetBody>
+
+        <SheetFooter>
           <button type="button" onClick={onClose} className={btnSecondary}>
             Cancel
           </button>
-          <button type="submit" disabled={mutation.isPending} className={btnPrimary}>
+          <button
+            type="submit"
+            form="create-user-form"
+            disabled={mutation.isPending}
+            className={btnPrimary}
+          >
             {mutation.isPending ? 'Creating…' : 'Create employee'}
           </button>
-        </div>
-      </form>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 

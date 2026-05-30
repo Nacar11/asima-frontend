@@ -5,7 +5,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Dialog } from '@/components/dialog';
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
@@ -16,7 +24,7 @@ import {
   type UpdateAdminUserInput,
 } from '@/features/admin-users/schemas';
 
-export function EditUserDialog({
+export function EditUserDrawer({
   user,
   open,
   onClose,
@@ -78,57 +86,69 @@ export function EditUserDialog({
     mutation.mutate(payload);
   });
 
+  const title = `Edit ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      title={`Edit ${user?.first_name ?? ''} ${user?.last_name ?? ''}`}
-      description="Email changes need a verification flow — not editable here. Use Reset password to set a new password."
-      widthClass="max-w-lg"
-    >
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="First name" error={form.formState.errors.first_name?.message}>
-            <input type="text" className={inputCls} {...form.register('first_name')} />
-          </Field>
-          <Field label="Last name" error={form.formState.errors.last_name?.message}>
-            <input type="text" className={inputCls} {...form.register('last_name')} />
-          </Field>
-        </div>
+    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>{title || 'Edit employee'}</SheetTitle>
+          <SheetDescription>
+            Email changes need a verification flow — not editable here. Use Reset password to set a new password.
+          </SheetDescription>
+        </SheetHeader>
 
-        <Field label="Title" error={form.formState.errors.title?.message}>
-          <input type="text" className={inputCls} {...form.register('title')} />
-        </Field>
+        <SheetBody>
+          <form id="edit-user-form" onSubmit={onSubmit} className="space-y-4" noValidate>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="First name" error={form.formState.errors.first_name?.message}>
+                <input type="text" className={inputCls} {...form.register('first_name')} />
+              </Field>
+              <Field label="Last name" error={form.formState.errors.last_name?.message}>
+                <input type="text" className={inputCls} {...form.register('last_name')} />
+              </Field>
+            </div>
 
-        <Field label="Role" error={form.formState.errors.role_id?.message}>
-          <select
-            className={inputCls}
-            {...form.register('role_id', { valueAsNumber: true })}
-            disabled={rolesQuery.isLoading}
-          >
-            {rolesQuery.data?.data.map((role) => (
-              <option key={role.id} value={role.id}>
-                {formatRoleName(role.name)}
-              </option>
-            ))}
-          </select>
-        </Field>
+            <Field label="Title" error={form.formState.errors.title?.message}>
+              <input type="text" className={inputCls} {...form.register('title')} />
+            </Field>
 
-        <label className="flex items-center gap-2 text-sm text-neutral-800">
-          <input type="checkbox" className="h-4 w-4 rounded border-neutral-300" {...form.register('is_active')} />
-          Active
-        </label>
+            <Field label="Role" error={form.formState.errors.role_id?.message}>
+              <select
+                className={inputCls}
+                {...form.register('role_id', { valueAsNumber: true })}
+                disabled={rolesQuery.isLoading}
+              >
+                {rolesQuery.data?.data.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {formatRoleName(role.name)}
+                  </option>
+                ))}
+              </select>
+            </Field>
 
-        <div className="flex justify-end gap-2 pt-2">
+            <label className="flex items-center gap-2 text-sm text-neutral-800">
+              <input type="checkbox" className="h-4 w-4 rounded border-neutral-300" {...form.register('is_active')} />
+              Active
+            </label>
+          </form>
+        </SheetBody>
+
+        <SheetFooter>
           <button type="button" onClick={onClose} className={btnSecondary}>
             Cancel
           </button>
-          <button type="submit" disabled={mutation.isPending} className={btnPrimary}>
+          <button
+            type="submit"
+            form="edit-user-form"
+            disabled={mutation.isPending}
+            className={btnPrimary}
+          >
             {mutation.isPending ? 'Saving…' : 'Save changes'}
           </button>
-        </div>
-      </form>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 
