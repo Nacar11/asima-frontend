@@ -35,6 +35,28 @@ export const PERMISSION_CODES = [
 
   'APPROVAL:View',
   'APPROVAL:ApproveAny',
+
+  // Leave + Time-Correction + Approval-Chain — landed 2026-05-30, Phase 0
+  // of the leave plan (docs/plans/2026-05-30-leave-correction-and-approval-chains.md).
+  // ViewOwn / ViewAll are split so the code itself encodes scope (Q2).
+  'LEAVE:Create',
+  'LEAVE:ViewOwn',
+  'LEAVE:ViewAll',
+  'LEAVE:Update',
+  'LEAVE:Delete',
+  'LEAVE:Approve',
+  'LEAVE:ApproveAny',
+
+  'TIME_CORRECTION:Create',
+  'TIME_CORRECTION:ViewOwn',
+  'TIME_CORRECTION:ViewAll',
+  'TIME_CORRECTION:Update',
+  'TIME_CORRECTION:Delete',
+  'TIME_CORRECTION:Approve',
+  'TIME_CORRECTION:ApproveAny',
+
+  'APPROVAL_CHAIN:View',
+  'APPROVAL_CHAIN:Update',
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
