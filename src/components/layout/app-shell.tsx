@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Clock,
   Home,
+  Inbox,
   Menu,
   Users,
   X,
@@ -32,7 +33,7 @@ import type { PermissionCode } from '@/features/auth/permission-codes';
  *   - Content: padded for both — `md:pl-64` for the sidebar, `pt-14` for
  *     the topbar.
  */
-type SidebarSection = 'me' | 'admin';
+type SidebarSection = 'me' | 'approvals' | 'admin';
 
 type SidebarItem = {
   href: string;
@@ -52,6 +53,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { href: '/employee/timesheet', label: 'Time sheet', icon: Clock, section: 'me' },
   { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
   {
+    href: '/approvals',
+    label: 'Pending approvals',
+    icon: Inbox,
+    section: 'approvals',
+    requires: 'APPROVAL:View',
+  },
+  {
     href: '/admin/employees',
     label: 'Employees',
     icon: Users,
@@ -60,10 +68,11 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   },
 ];
 
-const SECTION_ORDER: SidebarSection[] = ['me', 'admin'];
+const SECTION_ORDER: SidebarSection[] = ['me', 'approvals', 'admin'];
 
-/** Only the 'admin' section gets a header; 'me' is the default cluster. */
+/** 'me' is the default cluster; 'approvals' and 'admin' get headers. */
 const SECTION_HEADERS: Partial<Record<SidebarSection, string>> = {
+  approvals: 'Approvals',
   admin: 'Administration',
 };
 

@@ -32,6 +32,9 @@ export const PERMISSION_CODES = [
   'SCHEDULE:View',
   'SCHEDULE:Update',
   'SCHEDULE:Delete',
+
+  'APPROVAL:View',
+  'APPROVAL:ApproveAny',
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
