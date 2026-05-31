@@ -12,6 +12,7 @@ import {
   Network,
   Plane,
   PlaneTakeoff,
+  Timer,
   Users,
   X,
   type LucideIcon,
@@ -83,6 +84,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: PlaneTakeoff,
     section: 'admin',
     requires: 'LEAVE:ViewAll',
+  },
+  {
+    href: '/admin/time-corrections',
+    label: 'Time corrections',
+    icon: Timer,
+    section: 'admin',
+    requires: 'TIME_CORRECTION:ViewAll',
   },
 ];
 

@@ -1,4 +1,5 @@
 import { leaveApi } from '@/features/leave/api';
+import { timeCorrectionApi } from '@/features/time-correction/api';
 import type { PendingApprovalKind } from '@/features/approvals/schemas';
 
 /**
@@ -7,8 +8,8 @@ import type { PendingApprovalKind } from '@/features/approvals/schemas';
  * approve/reject lives on each resource's own top-level route
  * (`/leave-requests/:id/approve`, etc.), so we dispatch by kind here.
  *
- * Leave lands in Phase 4; `time_correction` is registered in Phase 6.
- * Kinds absent from this map render no action buttons.
+ * Both leave and time_correction are registered. Kinds absent from this
+ * map render no action buttons.
  */
 export type ApprovalActionHandlers = {
   approve: (id: number) => Promise<unknown>;
@@ -19,5 +20,9 @@ export const APPROVAL_ACTIONS: Partial<Record<PendingApprovalKind, ApprovalActio
   leave: {
     approve: (id) => leaveApi.approve(id),
     reject: (id, note) => leaveApi.reject(id, note),
+  },
+  time_correction: {
+    approve: (id) => timeCorrectionApi.approve(id),
+    reject: (id, note) => timeCorrectionApi.reject(id, note),
   },
 };
