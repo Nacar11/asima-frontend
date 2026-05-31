@@ -31,6 +31,7 @@ const ROW = {
   leave_type: 'vacation',
   start_date: '2026-06-01',
   end_date: '2026-06-05',
+  working_days: 3,
   reason: null,
   status: 'pending_l1',
   submitted_at: '2026-05-30T10:00:00.000Z',
