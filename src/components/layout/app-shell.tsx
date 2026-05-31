@@ -11,6 +11,7 @@ import {
   Menu,
   Network,
   Plane,
+  PlaneTakeoff,
   Users,
   X,
   type LucideIcon,
@@ -75,6 +76,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: Network,
     section: 'admin',
     requires: 'APPROVAL_CHAIN:View',
+  },
+  {
+    href: '/admin/leave-requests',
+    label: 'Leave requests',
+    icon: PlaneTakeoff,
+    section: 'admin',
+    requires: 'LEAVE:ViewAll',
   },
 ];
 
