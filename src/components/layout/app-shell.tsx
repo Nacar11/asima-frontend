@@ -10,6 +10,7 @@ import {
   Inbox,
   Menu,
   Network,
+  Plane,
   Users,
   X,
   type LucideIcon,
@@ -53,6 +54,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { href: '/employee/home', label: 'Home', icon: Home, section: 'me' },
   { href: '/employee/timesheet', label: 'Time sheet', icon: Clock, section: 'me' },
   { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
+  { href: '/employee/leaves', label: 'Leave', icon: Plane, section: 'me' },
   {
     href: '/approvals',
     label: 'Pending approvals',

@@ -1,0 +1,89 @@
+import { ApiClient, apiClient } from '@/lib/api-client';
+import {
+  LeaveRequestListSchema,
+  LeaveRequestSchema,
+  type LeaveQuery,
+  type LeaveRequest,
+  type LeaveRequestList,
+  type SubmitLeaveInput,
+  type UpdateLeaveInput,
+} from './schemas';
+
+/** Flatten a LeaveQuery into api-client params (status[] → comma string). */
+function toParams(query: LeaveQuery): Record<string, string | number | undefined> {
+  const { status, ...rest } = query;
+  return {
+    ...rest,
+    status: status && status.length > 0 ? status.join(',') : undefined,
+  };
+}
+
+/**
+ * Leave-requests client. Three audiences, matching the backend split
+ * (plan §3.4): `me` (self-service, identity from JWT), `admin` (HR
+ * ViewAll/Update/Delete), and the top-level approve/reject the *approver*
+ * calls. The server is the security boundary; route gating here is UX.
+ */
+export const leaveApi = {
+  me: {
+    list(query: LeaveQuery = {}, client: ApiClient = apiClient()): Promise<LeaveRequestList> {
+      return client
+        .get<unknown>('/users/me/leave-requests', { params: toParams(query) })
+        .then((res) => LeaveRequestListSchema.parse(res));
+    },
+    submit(input: SubmitLeaveInput, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+      return client
+        .post<unknown>('/users/me/leave-requests', input)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+    getOne(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+      return client
+        .get<unknown>(`/users/me/leave-requests/${id}`)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+    cancel(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+      return client
+        .post<unknown>(`/users/me/leave-requests/${id}/cancel`)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+  },
+
+  admin: {
+    list(query: LeaveQuery = {}, client: ApiClient = apiClient()): Promise<LeaveRequestList> {
+      return client
+        .get<unknown>('/admin/leave-requests', { params: toParams(query) })
+        .then((res) => LeaveRequestListSchema.parse(res));
+    },
+    getOne(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+      return client
+        .get<unknown>(`/admin/leave-requests/${id}`)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+    update(
+      id: number,
+      input: UpdateLeaveInput,
+      client: ApiClient = apiClient(),
+    ): Promise<LeaveRequest> {
+      return client
+        .patch<unknown>(`/admin/leave-requests/${id}`, input)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+    cancel(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+      return client
+        .delete<unknown>(`/admin/leave-requests/${id}`)
+        .then((res) => LeaveRequestSchema.parse(res));
+    },
+  },
+
+  approve(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+    return client
+      .post<unknown>(`/leave-requests/${id}/approve`)
+      .then((res) => LeaveRequestSchema.parse(res));
+  },
+
+  reject(id: number, note: string, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+    return client
+      .post<unknown>(`/leave-requests/${id}/reject`, { note })
+      .then((res) => LeaveRequestSchema.parse(res));
+  },
+};
