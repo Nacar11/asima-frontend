@@ -27,6 +27,7 @@ vi.mock('@/features/admin-users/api', () => ({
 const ROW = {
   id: 1,
   employee_id: 12,
+  employee_name: 'Ada Lovelace',
   leave_type: 'annual',
   start_date: '2026-06-01',
   end_date: '2026-06-05',

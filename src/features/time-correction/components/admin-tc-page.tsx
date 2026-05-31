@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -46,16 +46,15 @@ export function AdminTimeCorrectionsPage() {
     setPage(1);
   }, [status, employeeId, from, to]);
 
+  // Row display names come joined from the backend list (employee_name).
+  // The users directory is fetched only to populate the employee filter.
   const usersQuery = useQuery({
-    queryKey: ['admin-users', 'name-map'],
+    queryKey: ['admin-users', 'filter-options'],
     queryFn: () => adminUsersApi.list({ limit: 100 }),
     staleTime: 5 * 60 * 1000,
   });
-  const nameOf = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const u of usersQuery.data?.data ?? []) map.set(u.id, `${u.first_name} ${u.last_name}`);
-    return (id: number) => map.get(id) ?? `#${id}`;
-  }, [usersQuery.data]);
+  const displayName = (row: TimeCorrectionRequest) =>
+    row.employee_name ?? `#${row.employee_id}`;
 
   const listQuery = useQuery({
     queryKey: ['time-correction', 'admin', 'list', page, status, employeeId, from, to],
@@ -163,7 +162,7 @@ export function AdminTimeCorrectionsPage() {
                     onClick={() => setSelected(row)}
                     className="cursor-pointer hover:bg-neutral-50"
                   >
-                    <Td className="font-medium text-neutral-900">{nameOf(row.employee_id)}</Td>
+                    <Td className="font-medium text-neutral-900">{displayName(row)}</Td>
                     <Td>{row.work_date}</Td>
                     <Td className="font-mono text-xs">
                       {formatTimeInTz(row.proposed_time_in)} →{' '}
@@ -194,7 +193,7 @@ export function AdminTimeCorrectionsPage() {
 
       <TcDetailDrawer
         request={selected}
-        employeeName={selected ? nameOf(selected.employee_id) : ''}
+        employeeName={selected ? displayName(selected) : ''}
         open={selected !== null}
         onClose={() => setSelected(null)}
         canApproveAny={canApproveAny}

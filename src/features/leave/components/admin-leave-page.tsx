@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CalendarRange } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -46,20 +46,14 @@ export function AdminLeavePage() {
     setPage(1);
   }, [status, employeeId, from, to]);
 
-  // Names aren't joined on the backend list — resolve them from the users
-  // directory (single-tenant, small org; capped at 100).
+  // Row display names come joined from the backend list (employee_name).
+  // The users directory is fetched only to populate the employee filter.
   const usersQuery = useQuery({
-    queryKey: ['admin-users', 'name-map'],
+    queryKey: ['admin-users', 'filter-options'],
     queryFn: () => adminUsersApi.list({ limit: 100 }),
     staleTime: 5 * 60 * 1000,
   });
-  const nameOf = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const u of usersQuery.data?.data ?? []) {
-      map.set(u.id, `${u.first_name} ${u.last_name}`);
-    }
-    return (id: number) => map.get(id) ?? `#${id}`;
-  }, [usersQuery.data]);
+  const displayName = (row: LeaveRequest) => row.employee_name ?? `#${row.employee_id}`;
 
   const listQuery = useQuery({
     queryKey: ['leave', 'admin', 'list', page, status, employeeId, from, to],
@@ -163,7 +157,7 @@ export function AdminLeavePage() {
                     onClick={() => setSelected(row)}
                     className="cursor-pointer hover:bg-neutral-50"
                   >
-                    <Td className="font-medium text-neutral-900">{nameOf(row.employee_id)}</Td>
+                    <Td className="font-medium text-neutral-900">{displayName(row)}</Td>
                     <Td>{LEAVE_TYPE_LABELS[row.leave_type]}</Td>
                     <Td>
                       {row.start_date} → {row.end_date}
@@ -193,7 +187,7 @@ export function AdminLeavePage() {
 
       <LeaveDetailDrawer
         request={selected}
-        employeeName={selected ? nameOf(selected.employee_id) : ''}
+        employeeName={selected ? displayName(selected) : ''}
         open={selected !== null}
         onClose={() => setSelected(null)}
         canApproveAny={canApproveAny}

@@ -26,6 +26,8 @@ export const DecisionPathSchema = z.enum(['chain', 'override']);
 export const LeaveRequestSchema = z.object({
   id: z.number().int(),
   employee_id: z.number().int(),
+  // Present on list responses (joined read-model); absent on single GET.
+  employee_name: z.string().nullable().optional(),
   leave_type: LeaveTypeSchema,
   start_date: z.string(),
   end_date: z.string(),

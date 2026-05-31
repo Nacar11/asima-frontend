@@ -24,6 +24,8 @@ export const TcDecisionPathSchema = z.enum(['chain', 'override']);
 export const TimeCorrectionSchema = z.object({
   id: z.number().int(),
   employee_id: z.number().int(),
+  // Present on list responses (joined read-model); absent on single GET.
+  employee_name: z.string().nullable().optional(),
   target_entry_id: z.number().int().nullable(),
   work_date: z.string(),
   proposed_time_in: z.string(),

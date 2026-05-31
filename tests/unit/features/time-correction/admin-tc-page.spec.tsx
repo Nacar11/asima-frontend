@@ -24,7 +24,7 @@ vi.mock('@/features/admin-users/api', () => ({
 }));
 
 const ROW = {
-  id: 7, employee_id: 12, target_entry_id: 88, work_date: '2026-06-10',
+  id: 7, employee_id: 12, employee_name: 'Ada Lovelace', target_entry_id: 88, work_date: '2026-06-10',
   proposed_time_in: '2026-06-10T09:00:00.000Z', proposed_time_out: '2026-06-10T18:00:00.000Z',
   reason: 'x', status: 'pending_l1', submitted_at: '2026-06-10T19:00:00.000Z',
   decided_at: null, decided_by: null, decision_note: null, decision_path: null,
