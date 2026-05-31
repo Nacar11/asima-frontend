@@ -1,27 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AlertTriangle, CalendarPlus } from 'lucide-react';
-import { Card } from '@/components/layout/app-shell';
+import { AlertTriangle, CalendarPlus, Plus } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_TYPES, SubmitLeaveSchema, type SubmitLeaveInput } from '@/features/leave/schemas';
 import { LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
+import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
+import { ApplyLeaveDrawer } from '@/features/leave/components/apply-leave-drawer';
 
 const PAGE_LIMIT = 20;
 
-/** /employee/leaves — submit a leave request + see my own history. */
+/** /employee/leaves — my balances, my request history, and the apply drawer. */
 export function EmployeeLeavesPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [applyOpen, setApplyOpen] = useState(false);
+
+  const balancesQuery = useQuery({
+    queryKey: ['leave', 'balances'],
+    queryFn: () => leaveApi.me.balances(),
+  });
 
   const listQuery = useQuery({
     queryKey: ['leave', 'me', 'list', page],
@@ -29,80 +33,44 @@ export function EmployeeLeavesPage() {
     placeholderData: (prev) => prev,
   });
 
-  const form = useForm<SubmitLeaveInput>({
-    resolver: zodResolver(SubmitLeaveSchema),
-    defaultValues: { leave_type: 'vacation', start_date: '', end_date: '', reason: '' },
-  });
-
-  const submitMutation = useMutation({
-    mutationFn: (input: SubmitLeaveInput) => leaveApi.me.submit(input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
-      toast.success('Leave request submitted.');
-      form.reset({ leave_type: 'vacation', start_date: '', end_date: '', reason: '' });
-    },
-    onError: (err) => toast.error(submitErrorMessage(err)),
-  });
-
   const cancelMutation = useMutation({
     mutationFn: (id: number) => leaveApi.me.cancel(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
+      void queryClient.invalidateQueries({ queryKey: ['leave', 'balances'] });
       toast.success('Leave request cancelled.');
     },
     onError: () => toast.error('Could not cancel the request.'),
   });
 
-  const onSubmit = form.handleSubmit((input) => {
-    submitMutation.mutate({
-      ...input,
-      reason: input.reason?.trim() ? input.reason.trim() : undefined,
-    });
-  });
-
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Leave</h1>
-        <p className="text-sm text-neutral-500">
-          Request time off and track where each request is in the approval chain.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Leave</h1>
+          <p className="text-sm text-neutral-500">
+            Track your balances and where each request is in the approval chain.
+          </p>
+        </div>
+        <button type="button" onClick={() => setApplyOpen(true)} className={btnPrimary}>
+          <Plus className="h-4 w-4" aria-hidden />
+          Apply for leave
+        </button>
       </header>
 
-      <Card>
-        <h2 className="mb-4 text-sm font-semibold text-neutral-900">New request</h2>
-        <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Leave type" error={form.formState.errors.leave_type?.message}>
-              <select className={inputCls} {...form.register('leave_type')}>
-                {LEAVE_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {LEAVE_TYPE_LABELS[t]}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Start date" error={form.formState.errors.start_date?.message}>
-              <input type="date" className={inputCls} {...form.register('start_date')} />
-            </Field>
-            <Field label="End date" error={form.formState.errors.end_date?.message}>
-              <input type="date" className={inputCls} {...form.register('end_date')} />
-            </Field>
-          </div>
-          <Field label="Reason (optional)" error={form.formState.errors.reason?.message}>
-            <textarea rows={2} className={inputCls} {...form.register('reason')} />
-          </Field>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={submitMutation.isPending}
-              className={btnPrimary}
-            >
-              {submitMutation.isPending ? 'Submitting…' : 'Submit request'}
-            </button>
-          </div>
-        </form>
-      </Card>
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-neutral-900">My balances</h2>
+        {balancesQuery.isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
+        {balancesQuery.error && (
+          <EmptyState
+            tone="error"
+            icon={AlertTriangle}
+            title="Couldn't load your balances"
+            description={describeError(balancesQuery.error)}
+          />
+        )}
+        {balancesQuery.data && <LeaveBalanceSummary balances={balancesQuery.data} />}
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-neutral-900">My requests</h2>
@@ -123,7 +91,7 @@ export function EmployeeLeavesPage() {
             <EmptyState
               icon={CalendarPlus}
               title="No leave requests yet"
-              description="Submit your first request using the form above."
+              description="Use “Apply for leave” to submit your first request."
             />
           ) : (
             <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
@@ -132,6 +100,7 @@ export function EmployeeLeavesPage() {
                   <tr>
                     <Th>Type</Th>
                     <Th>Dates</Th>
+                    <Th className="text-right">Days</Th>
                     <Th>Status</Th>
                     <Th>Submitted</Th>
                     <Th className="text-right">Action</Th>
@@ -144,6 +113,7 @@ export function EmployeeLeavesPage() {
                       <Td>
                         {row.start_date} → {row.end_date}
                       </Td>
+                      <Td className="text-right tabular-nums">{row.working_days}</Td>
                       <Td>
                         <LeaveStatusBadge status={row.status} />
                       </Td>
@@ -183,18 +153,10 @@ export function EmployeeLeavesPage() {
           </div>
         )}
       </section>
+
+      <ApplyLeaveDrawer open={applyOpen} onClose={() => setApplyOpen(false)} />
     </div>
   );
-}
-
-function submitErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-    const firstFieldError = body?.errors ? Object.values(body.errors)[0] : undefined;
-    if (firstFieldError) return firstFieldError;
-    if (typeof body?.message === 'string') return body.message;
-  }
-  return 'Could not submit the request.';
 }
 
 function describeError(err: unknown): string {
@@ -203,11 +165,8 @@ function describeError(err: unknown): string {
   return 'Something went wrong.';
 }
 
-const inputCls =
-  'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950 disabled:bg-neutral-50';
-
 const btnPrimary = cn(
-  'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
+  'inline-flex items-center gap-2 rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
   'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
   'disabled:cursor-not-allowed disabled:opacity-60',
 );
@@ -216,24 +175,6 @@ const btnGhostDanger = cn(
   'rounded-md px-2.5 py-1 text-xs font-medium text-red-600',
   'hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}
 
 function Th({ children, className }: { children: React.ReactNode; className?: string }) {
   return <th scope="col" className={cn('px-4 py-2 text-left font-medium', className)}>{children}</th>;
