@@ -17,6 +17,7 @@ import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '@/features/
 import { LEAVE_STATUS_META, LEAVE_TYPE_LABELS } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveDetailDrawer } from '@/features/leave/components/leave-detail-drawer';
+import { GrantLeaveDrawer } from '@/features/leave/components/grant-leave-drawer';
 
 const PAGE_LIMIT = 20;
 
@@ -34,6 +35,8 @@ export function AdminLeavePage() {
   const canApproveAny = hasPermission(permissions, 'LEAVE:ApproveAny', sysAdmin);
   const canUpdate = hasPermission(permissions, 'LEAVE:Update', sysAdmin);
   const canDelete = hasPermission(permissions, 'LEAVE:Delete', sysAdmin);
+  const canGrant = hasPermission(permissions, 'LEAVE_ALLOCATION:Create', sysAdmin);
+  const [grantOpen, setGrantOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<LeaveStatus | ''>('');
@@ -83,9 +86,16 @@ export function AdminLeavePage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Leave requests</h1>
-        <p className="text-sm text-neutral-500">Every leave request across the organization.</p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Leave requests</h1>
+          <p className="text-sm text-neutral-500">Every leave request across the organization.</p>
+        </div>
+        {canGrant && (
+          <button type="button" onClick={() => setGrantOpen(true)} className={grantBtnCls}>
+            Grant leave
+          </button>
+        )}
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -194,9 +204,25 @@ export function AdminLeavePage() {
         canUpdate={canUpdate}
         canDelete={canDelete}
       />
+
+      {canGrant && (
+        <GrantLeaveDrawer
+          employees={(usersQuery.data?.data ?? []).map((u) => ({
+            id: u.id,
+            name: `${u.first_name} ${u.last_name}`,
+          }))}
+          open={grantOpen}
+          onClose={() => setGrantOpen(false)}
+        />
+      )}
     </div>
   );
 }
+
+const grantBtnCls = cn(
+  'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
+  'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+);
 
 const dateCls = cn(
   'h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 shadow-sm',
