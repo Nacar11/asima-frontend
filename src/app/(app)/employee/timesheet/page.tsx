@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { timeEntriesApi } from '@/features/time-entries/api';
 import { EntriesTable } from '@/features/time-entries/components/entries-table';
+import { RequestCorrectionDrawer } from '@/features/time-correction/components/request-correction-drawer';
 import { scheduleApi } from '@/features/schedule/api';
 import { cn } from '@/lib/cn';
+import type { TimeEntry } from '@/features/time-entries/schemas';
 
 const PAGE_LIMIT = 20;
 
 export default function MyTimeSheetPage() {
   const [page, setPage] = useState(1);
+  const [correcting, setCorrecting] = useState<TimeEntry | null>(null);
 
   const listQuery = useQuery({
     queryKey: ['time-entries', 'me', page],
@@ -39,7 +42,11 @@ export default function MyTimeSheetPage() {
         <p className="text-sm text-red-700">Could not load entries.</p>
       )}
       {listQuery.data && (
-        <EntriesTable rows={listQuery.data.data} schedules={scheduleQuery.data ?? []} />
+        <EntriesTable
+          rows={listQuery.data.data}
+          schedules={scheduleQuery.data ?? []}
+          onRequestCorrection={setCorrecting}
+        />
       )}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
@@ -52,6 +59,12 @@ export default function MyTimeSheetPage() {
           onNext={() => setPage((p) => p + 1)}
         />
       )}
+
+      <RequestCorrectionDrawer
+        entry={correcting}
+        open={correcting !== null}
+        onClose={() => setCorrecting(null)}
+      />
     </div>
   );
 }
@@ -101,5 +114,7 @@ const PagerButton = ({
       'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
     )}
     {...rest}
-  />
+  >
+    {children}
+  </button>
 );

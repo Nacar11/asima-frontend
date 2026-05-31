@@ -1,6 +1,5 @@
 'use client';
 
-import { toast } from 'sonner';
 import { formatDateInTz, formatTimeInTz } from '@/lib/format';
 import {
   durationMinutes,
@@ -26,9 +25,11 @@ import { cn } from '@/lib/cn';
 export function EntriesTable({
   rows,
   schedules,
+  onRequestCorrection,
 }: {
   rows: TimeEntry[];
   schedules: WorkSchedule[];
+  onRequestCorrection?: (entry: TimeEntry) => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -80,7 +81,13 @@ export function EntriesTable({
                   </div>
                 </Td>
                 <Td className="text-right">
-                  <RequestChangeButton entryId={row.id} />
+                  <button
+                    type="button"
+                    onClick={() => onRequestCorrection?.(row)}
+                    className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                  >
+                    Request correction
+                  </button>
                 </Td>
               </tr>
             );
@@ -105,18 +112,6 @@ function MinutesCell({
     <span className={kind === 'late' ? 'text-amber-700' : 'text-rose-700'}>
       {minutes} min
     </span>
-  );
-}
-
-function RequestChangeButton({ entryId }: { entryId: number }) {
-  return (
-    <button
-      type="button"
-      onClick={() => toast.info(`Change request for entry #${entryId} — coming soon.`)}
-      className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-    >
-      Request change
-    </button>
   );
 }
 

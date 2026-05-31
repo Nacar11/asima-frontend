@@ -251,5 +251,7 @@ const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButto
       'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
     )}
     {...rest}
-  />
+  >
+    {children}
+  </button>
 );
