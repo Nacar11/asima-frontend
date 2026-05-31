@@ -1,12 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { usePendingApprovals } from '@/features/approvals/hooks/use-pending-approvals';
+import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
+import { RejectApprovalDialog } from '@/features/approvals/components/reject-approval-dialog';
+import type { PendingApproval } from '@/features/approvals/schemas';
 import { ApprovalsEmptyState } from '@/features/approvals/components/approvals-empty-state';
 import { ApprovalsTable } from '@/features/approvals/components/approvals-table';
 import { ApiError } from '@/lib/api-client';
@@ -35,6 +40,40 @@ export function ApprovalsPage() {
 
   const [page, setPage] = useState(1);
   const query = usePendingApprovals({ page, limit: PAGE_LIMIT });
+
+  const queryClient = useQueryClient();
+  const [rejecting, setRejecting] = useState<PendingApproval | null>(null);
+
+  const approveMutation = useMutation({
+    mutationFn: (row: PendingApproval) => {
+      const handlers = APPROVAL_ACTIONS[row.kind];
+      if (!handlers) throw new Error(`No approve handler for kind ${row.kind}`);
+      return handlers.approve(row.id);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      toast.success('Request approved.');
+    },
+    onError: () => toast.error('Could not approve the request.'),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: ({ row, note }: { row: PendingApproval; note: string }) => {
+      const handlers = APPROVAL_ACTIONS[row.kind];
+      if (!handlers) throw new Error(`No reject handler for kind ${row.kind}`);
+      return handlers.reject(row.id, note);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      toast.success('Request rejected.');
+      setRejecting(null);
+    },
+    onError: () => toast.error('Could not reject the request.'),
+  });
+
+  const pendingId = approveMutation.isPending
+    ? (approveMutation.variables?.id ?? null)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -76,7 +115,12 @@ export function ApprovalsPage() {
         (query.data.data.length === 0 ? (
           <ApprovalsEmptyState canSeeAll={canSeeAll} />
         ) : (
-          <ApprovalsTable rows={query.data.data} />
+          <ApprovalsTable
+            rows={query.data.data}
+            onApprove={(row) => approveMutation.mutate(row)}
+            onReject={(row) => setRejecting(row)}
+            pendingId={pendingId}
+          />
         ))}
 
       {query.data && query.data.total > PAGE_LIMIT && (
@@ -89,6 +133,16 @@ export function ApprovalsPage() {
           onNext={() => setPage((p) => p + 1)}
         />
       )}
+
+      <RejectApprovalDialog
+        open={rejecting !== null}
+        summary={rejecting?.summary ?? ''}
+        pending={rejectMutation.isPending}
+        onClose={() => setRejecting(null)}
+        onConfirm={(note) => {
+          if (rejecting) rejectMutation.mutate({ row: rejecting, note });
+        }}
+      />
     </div>
   );
 }

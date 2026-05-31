@@ -7,7 +7,10 @@ import {
 
 /**
  * Cross-resource approvals inbox. Gated server-side by `APPROVAL:View`.
- * v0 always returns an empty paginated payload — see backend spec.
+ * Returns rows where the caller is the current-step approver (or all
+ * pending, with `APPROVAL:ApproveAny`). Approve/reject are not here —
+ * they live per-resource and are dispatched by kind via
+ * `features/approvals/actions.ts`.
  */
 export const approvalsApi = {
   listPending(
