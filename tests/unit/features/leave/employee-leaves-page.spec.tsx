@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EmployeeLeavesPage } from '@/features/leave/components/employee-leaves-page';
@@ -79,6 +79,25 @@ describe('EmployeeLeavesPage', () => {
           end_date: '2026-07-03',
           reason: 'Trip',
         }),
+      ),
+    );
+  });
+
+  it('submits with a non-default leave type chosen from the select', async () => {
+    renderPage();
+    await screen.findByText('Annual');
+
+    await userEvent.click(screen.getByRole('button', { name: /leave type/i }));
+    const listbox = await screen.findByRole('listbox', { name: /leave type/i });
+    await userEvent.click(within(listbox).getByText('Sick'));
+
+    fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: '2026-07-01' } });
+    fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: '2026-07-03' } });
+    await userEvent.click(screen.getByRole('button', { name: /submit request/i }));
+
+    await waitFor(() =>
+      expect(meSubmitMock).toHaveBeenCalledWith(
+        expect.objectContaining({ leave_type: 'sick' }),
       ),
     );
   });
