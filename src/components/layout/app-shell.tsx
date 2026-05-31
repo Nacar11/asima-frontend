@@ -9,6 +9,7 @@ import {
   Home,
   Inbox,
   Menu,
+  Network,
   Users,
   X,
   type LucideIcon,
@@ -65,6 +66,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: Users,
     section: 'admin',
     requires: 'USER:View',
+  },
+  {
+    href: '/admin/approvers',
+    label: 'Approvers',
+    icon: Network,
+    section: 'admin',
+    requires: 'APPROVAL_CHAIN:View',
   },
 ];
 
