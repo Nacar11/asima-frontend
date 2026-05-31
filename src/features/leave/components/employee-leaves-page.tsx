@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { AlertTriangle, CalendarPlus } from 'lucide-react';
 import { Card } from '@/components/layout/app-shell';
 import { EmptyState } from '@/components/empty-state';
+import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
@@ -74,13 +75,19 @@ export function EmployeeLeavesPage() {
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Leave type" error={form.formState.errors.leave_type?.message}>
-              <select className={inputCls} {...form.register('leave_type')}>
-                {LEAVE_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {LEAVE_TYPE_LABELS[t]}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="leave_type"
+                render={({ field }) => (
+                  <Select<string>
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={LEAVE_TYPES.map((t) => ({ value: t, label: LEAVE_TYPE_LABELS[t] }))}
+                    ariaLabel="Leave type"
+                    className="w-full"
+                  />
+                )}
+              />
             </Field>
             <Field label="Start date" error={form.formState.errors.start_date?.message}>
               <input type="date" className={inputCls} {...form.register('start_date')} />
