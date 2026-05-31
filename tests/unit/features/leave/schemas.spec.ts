@@ -10,7 +10,7 @@ import {
 const ROW = {
   id: 1,
   employee_id: 12,
-  leave_type: 'annual',
+  leave_type: 'vacation',
   start_date: '2026-06-01',
   end_date: '2026-06-05',
   reason: 'Family trip',
@@ -31,7 +31,7 @@ const ROW = {
 describe('leave schemas', () => {
   it('parses a leave request row', () => {
     const row = LeaveRequestSchema.parse(ROW);
-    expect(row.leave_type).toBe('annual');
+    expect(row.leave_type).toBe('vacation');
     expect(row.l2_approver_id).toBe(7);
   });
 
@@ -64,7 +64,7 @@ describe('leave schemas', () => {
   });
 
   it('exposes the five leave types and five statuses', () => {
-    expect(LEAVE_TYPES).toEqual(['annual', 'sick', 'bereavement', 'unpaid', 'other']);
+    expect(LEAVE_TYPES).toEqual(['vacation', 'sick', 'bereavement', 'birthday', 'emergency']);
     expect(LEAVE_STATUSES).toContain('pending_l2');
   });
 

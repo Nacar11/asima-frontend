@@ -1,11 +1,11 @@
 import type { LeaveStatus, LeaveType } from './schemas';
 
 export const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
-  annual: 'Annual',
+  vacation: 'Vacation',
   sick: 'Sick',
   bereavement: 'Bereavement',
-  unpaid: 'Unpaid',
-  other: 'Other',
+  birthday: 'Birthday',
+  emergency: 'Emergency',
 };
 
 /** Badge label + Tailwind classes per status. */

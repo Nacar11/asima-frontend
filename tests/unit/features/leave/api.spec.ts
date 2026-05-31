@@ -14,7 +14,7 @@ function stubClient(payload: unknown) {
 const ROW = {
   id: 1,
   employee_id: 12,
-  leave_type: 'annual',
+  leave_type: 'vacation',
   start_date: '2026-06-01',
   end_date: '2026-06-05',
   reason: null,
@@ -43,11 +43,11 @@ describe('leaveApi', () => {
   it('me.submit POSTs the self-service endpoint', async () => {
     const c = stubClient(ROW);
     await leaveApi.me.submit(
-      { leave_type: 'annual', start_date: '2026-06-01', end_date: '2026-06-05' },
+      { leave_type: 'vacation', start_date: '2026-06-01', end_date: '2026-06-05' },
       c,
     );
     expect(c.post).toHaveBeenCalledWith('/users/me/leave-requests', {
-      leave_type: 'annual',
+      leave_type: 'vacation',
       start_date: '2026-06-01',
       end_date: '2026-06-05',
     });

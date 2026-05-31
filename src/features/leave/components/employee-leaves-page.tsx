@@ -31,7 +31,7 @@ export function EmployeeLeavesPage() {
 
   const form = useForm<SubmitLeaveInput>({
     resolver: zodResolver(SubmitLeaveSchema),
-    defaultValues: { leave_type: 'annual', start_date: '', end_date: '', reason: '' },
+    defaultValues: { leave_type: 'vacation', start_date: '', end_date: '', reason: '' },
   });
 
   const submitMutation = useMutation({
@@ -39,7 +39,7 @@ export function EmployeeLeavesPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
       toast.success('Leave request submitted.');
-      form.reset({ leave_type: 'annual', start_date: '', end_date: '', reason: '' });
+      form.reset({ leave_type: 'vacation', start_date: '', end_date: '', reason: '' });
     },
     onError: (err) => toast.error(submitErrorMessage(err)),
   });

@@ -7,7 +7,7 @@ import { z } from 'zod';
  * which is why there's no self-service update schema here.
  */
 
-export const LEAVE_TYPES = ['annual', 'sick', 'bereavement', 'unpaid', 'other'] as const;
+export const LEAVE_TYPES = ['vacation', 'sick', 'bereavement', 'birthday', 'emergency'] as const;
 export const LeaveTypeSchema = z.enum(LEAVE_TYPES);
 export type LeaveType = z.infer<typeof LeaveTypeSchema>;
 

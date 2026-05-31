@@ -52,7 +52,7 @@ export function LeaveDetailDrawer({
     start_date: string;
     end_date: string;
     reason: string;
-  }>({ leave_type: 'annual', start_date: '', end_date: '', reason: '' });
+  }>({ leave_type: 'vacation', start_date: '', end_date: '', reason: '' });
 
   useEffect(() => {
     setRejecting(false);

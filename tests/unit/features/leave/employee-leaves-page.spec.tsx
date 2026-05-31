@@ -21,7 +21,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 const PENDING_ROW = {
   id: 1,
   employee_id: 12,
-  leave_type: 'annual',
+  leave_type: 'vacation',
   start_date: '2026-06-01',
   end_date: '2026-06-05',
   reason: null,
@@ -61,12 +61,12 @@ describe('EmployeeLeavesPage', () => {
     renderPage();
     // Wait for the list query (not the select option) before asserting.
     expect(await screen.findByText('Pending L1')).toBeInTheDocument();
-    expect(screen.getAllByText('Annual').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Vacation').length).toBeGreaterThan(0);
   });
 
   it('submits a new leave request', async () => {
     renderPage();
-    await screen.findByText('Annual');
+    await screen.findByText('Vacation');
     fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: '2026-07-01' } });
     fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: '2026-07-03' } });
     await userEvent.type(screen.getByLabelText(/reason/i), 'Trip');
@@ -74,7 +74,7 @@ describe('EmployeeLeavesPage', () => {
     await waitFor(() =>
       expect(meSubmitMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          leave_type: 'annual',
+          leave_type: 'vacation',
           start_date: '2026-07-01',
           end_date: '2026-07-03',
           reason: 'Trip',
