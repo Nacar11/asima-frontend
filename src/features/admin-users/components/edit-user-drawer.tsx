@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,15 +15,21 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { LabeledCheckbox } from '@/components/labeled-checkbox';
+import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
+import { adminApproversApi } from '@/features/admin-approvers/api';
 import { formatRoleName } from '@/features/admin-roles/format';
+import type { SetChainInput } from '@/features/admin-approvers/schemas';
 import {
   UpdateAdminUserSchema,
   type AdminUser,
   type UpdateAdminUserInput,
 } from '@/features/admin-users/schemas';
+
+/** Empty string is the "— None —" sentinel for the approver selects. */
+type ApproverValue = number | '';
 
 export function EditUserDrawer({
   user,
@@ -42,6 +48,22 @@ export function EditUserDrawer({
     enabled: open,
   });
 
+  // Candidate approvers — active users, capped. Excludes the employee
+  // being edited (no self-approval) when building options below.
+  const candidatesQuery = useQuery({
+    queryKey: ['admin-users', 'approver-candidates'],
+    queryFn: () => adminUsersApi.list({ is_active: true, limit: 100 }),
+    enabled: open,
+    staleTime: 60 * 1000,
+  });
+
+  // Current chain for this employee, seeds the selects on open.
+  const chainQuery = useQuery({
+    queryKey: ['admin-approvers', 'chain', user?.id],
+    queryFn: () => adminApproversApi.getOne(user!.id),
+    enabled: open && user !== null,
+  });
+
   const form = useForm<UpdateAdminUserInput>({
     resolver: zodResolver(UpdateAdminUserSchema),
     defaultValues: {
@@ -52,6 +74,13 @@ export function EditUserDrawer({
       is_active: true,
     },
   });
+
+  // Approver chain is a separate resource (different endpoint) — tracked
+  // as local state, not part of the profile form.
+  const [l1, setL1] = useState<ApproverValue>('');
+  const [l2, setL2] = useState<ApproverValue>('');
+  const [initialL1, setInitialL1] = useState<ApproverValue>('');
+  const [initialL2, setInitialL2] = useState<ApproverValue>('');
 
   // Re-seed form whenever the selected user changes.
   useEffect(() => {
@@ -66,25 +95,93 @@ export function EditUserDrawer({
     }
   }, [user, form]);
 
-  const mutation = useMutation({
+  // Seed approver selects once the active chain loads.
+  useEffect(() => {
+    const rows = chainQuery.data;
+    if (!rows) return;
+    const seedL1: ApproverValue = rows.l1?.approver_id ?? '';
+    const seedL2: ApproverValue = rows.l2?.approver_id ?? '';
+    setL1(seedL1);
+    setL2(seedL2);
+    setInitialL1(seedL1);
+    setInitialL2(seedL2);
+  }, [chainQuery.data]);
+
+  const approverOptions = useMemo(() => {
+    const users = candidatesQuery.data?.data ?? [];
+    return [
+      { value: '' as const, label: '— None —' },
+      ...users
+        .filter((u) => u.id !== user?.id)
+        .map((u) => ({
+          value: String(u.id),
+          label: `${u.first_name} ${u.last_name}`,
+        })),
+    ];
+  }, [candidatesQuery.data, user?.id]);
+
+  // Clearing L1 forces L2 to clear too (backend rejects L2 without L1).
+  const handleL1Change = (next: ApproverValue) => {
+    setL1(next);
+    if (next === '') setL2('');
+  };
+
+  const chainChanged = l1 !== initialL1 || l2 !== initialL2;
+  const dirty = form.formState.isDirty || chainChanged;
+
+  const profileMutation = useMutation({
     mutationFn: (input: UpdateAdminUserInput) => {
       if (!user) throw new Error('No user selected');
       return adminUsersApi.update(user.id, input);
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success('Employee updated.');
-      onClose();
-    },
-    onError: () => toast.error('Could not update employee.'),
   });
 
-  const onSubmit = form.handleSubmit((input) => {
+  const chainMutation = useMutation({
+    mutationFn: (patch: SetChainInput) => {
+      if (!user) throw new Error('No user selected');
+      return adminApproversApi.setChain(user.id, patch);
+    },
+  });
+
+  const saving = profileMutation.isPending || chainMutation.isPending;
+
+  /** Tri-state diff: only send the steps that actually changed. */
+  function buildChainPatch(): SetChainInput | null {
+    const patch: SetChainInput = {};
+    if (l1 !== initialL1) patch.l1_approver_id = l1 === '' ? null : l1;
+    if (l2 !== initialL2) patch.l2_approver_id = l2 === '' ? null : l2;
+    return Object.keys(patch).length > 0 ? patch : null;
+  }
+
+  const onSubmit = form.handleSubmit(async (input) => {
     const payload: UpdateAdminUserInput = {
       ...input,
       title: input.title?.length ? input.title : null,
     };
-    mutation.mutate(payload);
+
+    try {
+      await profileMutation.mutateAsync(payload);
+    } catch {
+      toast.error('Could not update employee.');
+      return;
+    }
+
+    const patch = buildChainPatch();
+    if (patch) {
+      try {
+        await chainMutation.mutateAsync(patch);
+      } catch {
+        // Profile already committed — don't silently roll it back.
+        void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+        toast.error('Profile saved, approvers update failed — retry.');
+        return;
+      }
+    }
+
+    void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    void queryClient.invalidateQueries({ queryKey: ['admin-approvers'] });
+    toast.success('Employee updated.');
+    onClose();
   });
 
   const title = `Edit ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
@@ -128,6 +225,36 @@ export function EditUserDrawer({
               </select>
             </Field>
 
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ApproverField label="Level 1 approver">
+                <Select<string>
+                  value={l1 === '' ? '' : String(l1)}
+                  onValueChange={(v) => handleL1Change(v === '' ? '' : Number(v))}
+                  options={approverOptions}
+                  ariaLabel="Level 1 approver"
+                  placeholder="— None —"
+                  disabled={candidatesQuery.isLoading}
+                  className="w-full"
+                />
+              </ApproverField>
+              <ApproverField label="Level 2 approver">
+                <Select<string>
+                  value={l2 === '' ? '' : String(l2)}
+                  onValueChange={(v) => setL2(v === '' ? '' : Number(v))}
+                  options={approverOptions}
+                  ariaLabel="Level 2 approver"
+                  placeholder="— None —"
+                  disabled={candidatesQuery.isLoading || l1 === ''}
+                  className="w-full"
+                />
+              </ApproverField>
+            </div>
+            {l1 === '' && (
+              <p className="text-xs text-neutral-500">
+                Assign a Level 1 approver before a Level 2.
+              </p>
+            )}
+
             <LabeledCheckbox
               control={form.control}
               name="is_active"
@@ -144,10 +271,10 @@ export function EditUserDrawer({
           <button
             type="submit"
             form="edit-user-form"
-            disabled={mutation.isPending}
+            disabled={saving || !dirty}
             className={btnPrimary}
           >
-            {mutation.isPending ? 'Saving…' : 'Save changes'}
+            {saving ? 'Saving…' : 'Save changes'}
           </button>
         </SheetFooter>
       </SheetContent>
@@ -184,5 +311,19 @@ function Field({
       {children}
       {error && <span className="block text-xs text-red-600">{error}</span>}
     </label>
+  );
+}
+
+/**
+ * Approver picker uses a custom listbox (not a native <select>), so it
+ * can't live inside a wrapping <label> the way Field does — the label is
+ * a sibling and the control carries its own aria-label.
+ */
+function ApproverField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <span className="block text-sm font-medium text-neutral-800">{label}</span>
+      {children}
+    </div>
   );
 }
