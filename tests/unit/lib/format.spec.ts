@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { formatInTz, formatDateInTz, formatTimeInTz } from '@/lib/format';
+import { formatInTz, formatDateInTz, formatTimeInTz, formatRelative } from '@/lib/format';
 
 describe('formatInTz', () => {
   afterEach(() => {
@@ -43,5 +43,22 @@ describe('formatInTz', () => {
     vi.stubEnv('NODE_ENV', 'production');
     const out = formatTimeInTz('2026-05-23T01:00:00Z');
     expect(out).toBe('09:00');
+  });
+});
+
+describe('formatRelative', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('renders a past timestamp as "N minutes ago"', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-08T12:00:00Z'));
+    expect(formatRelative('2026-06-08T11:58:00Z')).toBe('2 minutes ago');
+  });
+
+  it('adds the suffix for a recent timestamp', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-08T12:00:00Z'));
+    // ~1 hour earlier
+    expect(formatRelative('2026-06-08T11:00:00Z')).toBe('about 1 hour ago');
   });
 });
