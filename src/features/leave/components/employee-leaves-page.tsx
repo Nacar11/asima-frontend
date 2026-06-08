@@ -10,7 +10,7 @@ import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
 import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
-import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
+import { LeaveRequestStatusCell } from '@/features/leave/components/leave-request-status-cell';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
 import { ApplyLeaveDrawer } from '@/features/leave/components/apply-leave-drawer';
 
@@ -120,7 +120,7 @@ export function EmployeeLeavesPage() {
                       </Td>
                       <Td className="text-right tabular-nums">{row.working_days}</Td>
                       <Td>
-                        <LeaveStatusBadge status={row.status} />
+                        <LeaveRequestStatusCell request={row} />
                       </Td>
                       <Td className="text-neutral-500">{formatDateTimeInTz(row.submitted_at)}</Td>
                       <Td className="text-right">
