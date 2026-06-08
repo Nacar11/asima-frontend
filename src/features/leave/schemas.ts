@@ -11,6 +11,23 @@ export const LEAVE_TYPES = ['vacation', 'sick', 'bereavement', 'birthday', 'emer
 export const LeaveTypeSchema = z.enum(LEAVE_TYPES);
 export type LeaveType = z.infer<typeof LeaveTypeSchema>;
 
+export const DAY_PORTIONS = ['full', 'first_half', 'second_half'] as const;
+export const DayPortionSchema = z.enum(DAY_PORTIONS);
+export type DayPortion = z.infer<typeof DayPortionSchema>;
+
+/**
+ * Leave types that may be taken as a half day — mirrors the backend's
+ * HALF_DAY_LEAVE_TYPES. `birthday` is whole-day only, so the portion control
+ * is hidden for it.
+ */
+export const HALF_DAY_LEAVE_TYPES = new Set<LeaveType>([
+  'vacation',
+  'sick',
+  'bereavement',
+  'emergency',
+]);
+export const canHalfDay = (t: LeaveType): boolean => HALF_DAY_LEAVE_TYPES.has(t);
+
 export const LEAVE_STATUSES = [
   'pending_l1',
   'pending_l2',
@@ -31,7 +48,11 @@ export const LeaveRequestSchema = z.object({
   leave_type: LeaveTypeSchema,
   start_date: z.string(),
   end_date: z.string(),
-  working_days: z.number().int(),
+  // numeric(4,1) on the wire — 0.5 for a half day, so NOT .int().
+  working_days: z.number(),
+  day_portion: DayPortionSchema,
+  start_time: z.string().nullable(),
+  end_time: z.string().nullable(),
   reason: z.string().nullable(),
   status: LeaveStatusSchema,
   submitted_at: z.string(),
@@ -65,11 +86,22 @@ export const SubmitLeaveSchema = z
     leave_type: LeaveTypeSchema,
     start_date: z.string().regex(DATE_RE, 'Required'),
     end_date: z.string().regex(DATE_RE, 'Required'),
+    day_portion: DayPortionSchema.default('full'),
     reason: z.string().max(500).optional(),
   })
   .refine((v) => v.end_date >= v.start_date, {
     message: 'End date must be on or after the start date',
     path: ['end_date'],
+  })
+  // A half day is single-day only…
+  .refine((v) => v.day_portion === 'full' || v.start_date === v.end_date, {
+    message: 'A half day must be a single date',
+    path: ['day_portion'],
+  })
+  // …and only for half-day-eligible types (birthday is whole-day only).
+  .refine((v) => v.day_portion === 'full' || canHalfDay(v.leave_type), {
+    message: 'This leave type must be taken as a whole day',
+    path: ['day_portion'],
   });
 export type SubmitLeaveInput = z.infer<typeof SubmitLeaveSchema>;
 
@@ -90,16 +122,21 @@ export type RejectLeaveInput = z.infer<typeof RejectLeaveSchema>;
 /** Per-type balance row — mirrors GET /users/me/leave-balances. */
 export const LeaveBalanceSchema = z.object({
   leave_type: LeaveTypeSchema,
-  allowance: z.number().int(),
-  used: z.number().int(),
-  reserved: z.number().int(),
-  available: z.number().int(),
+  // Decimals once half days exist (e.g. 9.5) — NOT .int().
+  allowance: z.number(),
+  used: z.number(),
+  reserved: z.number(),
+  available: z.number(),
 });
 export type LeaveBalance = z.infer<typeof LeaveBalanceSchema>;
 export const LeaveBalanceListSchema = z.array(LeaveBalanceSchema);
 
 /** Working-day preview — mirrors GET /users/me/leave-requests/day-count. */
-export const DayCountSchema = z.object({ working_days: z.number().int() });
+export const DayCountSchema = z.object({
+  working_days: z.number(), // 0.5 for a half day
+  start_time: z.string().nullable().optional(),
+  end_time: z.string().nullable().optional(),
+});
 export type DayCount = z.infer<typeof DayCountSchema>;
 
 /** One grant in the ledger — mirrors the admin allocation history. */

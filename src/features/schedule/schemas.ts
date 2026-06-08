@@ -8,6 +8,8 @@ export const WorkScheduleSchema = z.object({
   expected_in: z.string(),
   expected_out: z.string(),
   break_minutes: z.number().int().min(0),
+  // Break start (HH:MM:SS), null when break_minutes = 0.
+  break_start: z.string().nullable(),
   effective_from: z.string(),
   effective_to: z.string().nullable(),
   created_by: z.number().int().nullable(),
@@ -42,4 +44,21 @@ export function dayName(dow: number): string {
  */
 export function trimSeconds(timeStr: string): string {
   return timeStr.length >= 5 ? timeStr.slice(0, 5) : timeStr;
+}
+
+/**
+ * Combined break column: `break_start`–`break_end (N min)`, e.g.
+ * `"13:00–14:00 (60 min)"`. The end is derived (`break_start + break_minutes`).
+ * Returns `"—"` when there is no break. 24h to match the START/END columns.
+ */
+export function formatBreak(break_start: string | null, break_minutes: number): string {
+  if (!break_start || break_minutes <= 0) return '—';
+  const parts = break_start.split(':');
+  const h = Number(parts[0] ?? 0);
+  const m = Number(parts[1] ?? 0);
+  const endTotal = h * 60 + m + break_minutes;
+  const endH = Math.floor(endTotal / 60) % 24;
+  const endM = endTotal % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${trimSeconds(break_start)}–${pad(endH)}:${pad(endM)} (${break_minutes} min)`;
 }

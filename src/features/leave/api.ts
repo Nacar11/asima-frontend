@@ -7,12 +7,14 @@ import {
   LeaveRequestListSchema,
   LeaveRequestSchema,
   type DayCount,
+  type DayPortion,
   type GrantAllocationInput,
   type LeaveAllocation,
   type LeaveBalance,
   type LeaveQuery,
   type LeaveRequest,
   type LeaveRequestList,
+  type LeaveType,
   type SubmitLeaveInput,
   type UpdateLeaveInput,
 } from './schemas';
@@ -59,14 +61,22 @@ export const leaveApi = {
         .get<unknown>('/users/me/leave-balances')
         .then((res) => LeaveBalanceListSchema.parse(res));
     },
-    /** Preview chargeable working days; throws ApiError (422) on a D8 violation. */
+    /** Preview chargeable working days (+ half-day window); throws ApiError (422) on a D8 violation. */
     dayCountPreview(
       start_date: string,
       end_date: string,
+      opts: { day_portion?: DayPortion; leave_type?: LeaveType } = {},
       client: ApiClient = apiClient(),
     ): Promise<DayCount> {
       return client
-        .get<unknown>('/users/me/leave-requests/day-count', { params: { start_date, end_date } })
+        .get<unknown>('/users/me/leave-requests/day-count', {
+          params: {
+            start_date,
+            end_date,
+            day_portion: opts.day_portion,
+            leave_type: opts.leave_type,
+          },
+        })
         .then((res) => DayCountSchema.parse(res));
     },
   },

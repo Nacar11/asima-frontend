@@ -19,16 +19,24 @@ import { ApiError } from '@/lib/api-client';
 import { leaveApi } from '@/features/leave/api';
 import { Select } from '@/components/select';
 import {
+  DAY_PORTIONS,
   LEAVE_TYPES,
   SubmitLeaveSchema,
+  canHalfDay,
+  type DayPortion,
   type LeaveType,
   type SubmitLeaveInput,
 } from '@/features/leave/schemas';
-import { LEAVE_TYPE_LABELS } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow } from '@/features/leave/format';
 
 const LEAVE_TYPE_OPTIONS = LEAVE_TYPES.map((t) => ({
   value: t,
   label: LEAVE_TYPE_LABELS[t],
+}));
+
+const DAY_PORTION_OPTIONS = DAY_PORTIONS.map((p) => ({
+  value: p,
+  label: LEAVE_PORTION_LABELS[p],
 }));
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,6 +44,7 @@ const DEFAULTS: SubmitLeaveInput = {
   leave_type: 'vacation',
   start_date: '',
   end_date: '',
+  day_portion: 'full',
   reason: '',
 };
 
@@ -58,17 +67,33 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
 
   const start = form.watch('start_date');
   const end = form.watch('end_date');
+  const leaveType = form.watch('leave_type');
+  const dayPortion = form.watch('day_portion');
   const datesReady = DATE_RE.test(start) && DATE_RE.test(end) && end >= start;
 
+  // The portion control only makes sense for a single day on a half-day-eligible
+  // type (birthday is whole-day only). When it doesn't apply, force 'full'.
+  const showPortion = datesReady && start === end && canHalfDay(leaveType);
+  useEffect(() => {
+    if (!showPortion && dayPortion !== 'full') form.setValue('day_portion', 'full');
+  }, [showPortion, dayPortion, form]);
+
+  const effectivePortion: DayPortion = showPortion ? dayPortion : 'full';
+
   const preview = useQuery({
-    queryKey: ['leave', 'day-count', start, end],
-    queryFn: () => leaveApi.me.dayCountPreview(start, end),
+    queryKey: ['leave', 'day-count', start, end, effectivePortion, leaveType],
+    queryFn: () =>
+      leaveApi.me.dayCountPreview(start, end, {
+        day_portion: effectivePortion,
+        leave_type: leaveType,
+      }),
     enabled: open && datesReady,
     retry: false,
   });
 
   const dayCountError = preview.error instanceof ApiError ? firstFieldError(preview.error) : null;
   const workingDays = preview.data?.working_days ?? null;
+  const windowLabel = formatWindow(preview.data?.start_time ?? null, preview.data?.end_time ?? null);
 
   const submitMutation = useMutation({
     mutationFn: (input: SubmitLeaveInput) => leaveApi.me.submit(input),
@@ -125,7 +150,31 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
               </Field>
             </div>
 
-            <DayCountBanner ready={datesReady} loading={preview.isFetching} workingDays={workingDays} error={dayCountError} />
+            {showPortion && (
+              <Field label="Day portion" error={form.formState.errors.day_portion?.message}>
+                <Controller
+                  control={form.control}
+                  name="day_portion"
+                  render={({ field }) => (
+                    <Select<DayPortion>
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={DAY_PORTION_OPTIONS}
+                      ariaLabel="Day portion"
+                      className="w-full"
+                    />
+                  )}
+                />
+              </Field>
+            )}
+
+            <DayCountBanner
+              ready={datesReady}
+              loading={preview.isFetching}
+              workingDays={workingDays}
+              window={windowLabel}
+              error={dayCountError}
+            />
 
             <Field label="Reason (optional)" error={form.formState.errors.reason?.message}>
               <textarea rows={3} className={inputCls} {...form.register('reason')} />
@@ -146,16 +195,18 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
-/** Live "this request = N working day(s)" banner, or the D8 error. */
+/** Live "this request = N working day(s)" banner (+ the half-day window), or the D8 error. */
 function DayCountBanner({
   ready,
   loading,
   workingDays,
+  window,
   error,
 }: {
   ready: boolean;
   loading: boolean;
   workingDays: number | null;
+  window: string;
   error: string | null;
 }) {
   if (!ready) {
@@ -171,7 +222,8 @@ function DayCountBanner({
     <p className="text-sm text-neutral-700">
       This request is{' '}
       <span className="font-semibold tabular-nums text-neutral-900">{workingDays}</span>{' '}
-      working day{workingDays === 1 ? '' : 's'}.
+      working day{workingDays === 1 ? '' : 's'}
+      {window && <span className="text-neutral-500"> · {window}</span>}.
     </p>
   );
 }

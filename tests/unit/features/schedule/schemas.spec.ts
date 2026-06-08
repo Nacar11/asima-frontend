@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   WorkScheduleSchema,
   dayName,
+  formatBreak,
   trimSeconds,
 } from '@/features/schedule/schemas';
 
@@ -14,6 +15,7 @@ describe('WorkScheduleSchema', () => {
       expected_in: '09:00:00',
       expected_out: '18:00:00',
       break_minutes: 60,
+      break_start: '12:00:00',
       effective_from: '2026-01-01',
       effective_to: null,
       created_by: 1,
@@ -69,5 +71,17 @@ describe('trimSeconds', () => {
   it('returns short strings untouched', () => {
     expect(trimSeconds('09:00')).toBe('09:00');
     expect(trimSeconds('')).toBe('');
+  });
+});
+
+describe('formatBreak', () => {
+  it('combines start, derived end, and duration', () => {
+    expect(formatBreak('12:00:00', 60)).toBe('12:00–13:00 (60 min)');
+    expect(formatBreak('13:30:00', 45)).toBe('13:30–14:15 (45 min)');
+  });
+
+  it('shows a dash when there is no break', () => {
+    expect(formatBreak(null, 0)).toBe('—');
+    expect(formatBreak('12:00:00', 0)).toBe('—');
   });
 });

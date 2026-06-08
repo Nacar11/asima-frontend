@@ -1,6 +1,6 @@
 'use client';
 
-import { DAY_NAMES, trimSeconds, type WorkSchedule } from '@/features/schedule/schemas';
+import { DAY_NAMES, formatBreak, trimSeconds, type WorkSchedule } from '@/features/schedule/schemas';
 
 /*
  * Weekly schedule grid. Backend returns 0..7 active rows (one per active
@@ -38,7 +38,9 @@ export function WeeklySchedule({ rows }: { rows: WorkSchedule[] }) {
                   <>
                     <Td className="font-mono text-xs">{trimSeconds(row.expected_in)}</Td>
                     <Td className="font-mono text-xs">{trimSeconds(row.expected_out)}</Td>
-                    <Td>{row.break_minutes} min</Td>
+                    <Td className="font-mono text-xs">
+                      {formatBreak(row.break_start, row.break_minutes)}
+                    </Td>
                   </>
                 ) : (
                   <>

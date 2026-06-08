@@ -18,6 +18,9 @@ const ROW = {
   start_date: '2026-06-01',
   end_date: '2026-06-05',
   working_days: 3,
+  day_portion: 'full',
+  start_time: null,
+  end_time: null,
   reason: null,
   status: 'pending_l1',
   submitted_at: '2026-05-30T10:00:00.000Z',
@@ -44,13 +47,19 @@ describe('leaveApi', () => {
   it('me.submit POSTs the self-service endpoint', async () => {
     const c = stubClient(ROW);
     await leaveApi.me.submit(
-      { leave_type: 'vacation', start_date: '2026-06-01', end_date: '2026-06-05' },
+      {
+        leave_type: 'vacation',
+        start_date: '2026-06-01',
+        end_date: '2026-06-05',
+        day_portion: 'full',
+      },
       c,
     );
     expect(c.post).toHaveBeenCalledWith('/users/me/leave-requests', {
       leave_type: 'vacation',
       start_date: '2026-06-01',
       end_date: '2026-06-05',
+      day_portion: 'full',
     });
   });
 
@@ -101,13 +110,23 @@ describe('leaveApi', () => {
     expect(res).toHaveLength(5);
   });
 
-  it('me.dayCountPreview GETs day-count with date params', async () => {
-    const c = stubClient({ working_days: 2 });
-    const res = await leaveApi.me.dayCountPreview('2026-06-01', '2026-06-02', c);
+  it('me.dayCountPreview GETs day-count with date + portion params', async () => {
+    const c = stubClient({ working_days: 0.5, start_time: '09:00:00', end_time: '14:00:00' });
+    const res = await leaveApi.me.dayCountPreview(
+      '2026-06-01',
+      '2026-06-01',
+      { day_portion: 'first_half', leave_type: 'vacation' },
+      c,
+    );
     expect(c.get).toHaveBeenCalledWith('/users/me/leave-requests/day-count', {
-      params: { start_date: '2026-06-01', end_date: '2026-06-02' },
+      params: {
+        start_date: '2026-06-01',
+        end_date: '2026-06-01',
+        day_portion: 'first_half',
+        leave_type: 'vacation',
+      },
     });
-    expect(res.working_days).toBe(2);
+    expect(res.working_days).toBe(0.5);
   });
 
   it('admin.grant POSTs the grant to the employee allocation endpoint', async () => {

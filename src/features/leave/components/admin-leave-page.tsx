@@ -14,7 +14,7 @@ import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { leaveApi } from '@/features/leave/api';
 import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '@/features/leave/schemas';
-import { LEAVE_STATUS_META, LEAVE_TYPE_LABELS } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_STATUS_META, LEAVE_TYPE_LABELS } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveDetailDrawer } from '@/features/leave/components/leave-detail-drawer';
 import { GrantLeaveDrawer } from '@/features/leave/components/grant-leave-drawer';
@@ -171,6 +171,11 @@ export function AdminLeavePage() {
                     <Td>{LEAVE_TYPE_LABELS[row.leave_type]}</Td>
                     <Td>
                       {row.start_date} → {row.end_date}
+                      {row.day_portion !== 'full' && (
+                        <span className="ml-1 text-xs text-neutral-500">
+                          · {LEAVE_PORTION_LABELS[row.day_portion]}
+                        </span>
+                      )}
                     </Td>
                     <Td>
                       <LeaveStatusBadge status={row.status} />

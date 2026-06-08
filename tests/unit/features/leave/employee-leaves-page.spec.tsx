@@ -29,6 +29,9 @@ const PENDING_ROW = {
   start_date: '2026-06-01',
   end_date: '2026-06-05',
   working_days: 3,
+  day_portion: 'full',
+  start_time: null,
+  end_time: null,
   reason: null,
   status: 'pending_l1',
   submitted_at: '2026-05-30T10:00:00.000Z',
@@ -98,7 +101,12 @@ describe('EmployeeLeavesPage', () => {
     fireEventChange(await screen.findByLabelText(/end date/i), '2026-07-03');
 
     // live preview resolves → "This request is 3 working days"
-    await waitFor(() => expect(meDayCountMock).toHaveBeenCalledWith('2026-07-01', '2026-07-03'));
+    await waitFor(() =>
+      expect(meDayCountMock).toHaveBeenCalledWith('2026-07-01', '2026-07-03', {
+        day_portion: 'full',
+        leave_type: 'vacation',
+      }),
+    );
     await userEvent.click(screen.getByRole('button', { name: /submit request/i }));
 
     await waitFor(() =>

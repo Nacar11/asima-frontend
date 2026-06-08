@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
 import { ApplyLeaveDrawer } from '@/features/leave/components/apply-leave-drawer';
@@ -112,6 +112,11 @@ export function EmployeeLeavesPage() {
                       <Td>{LEAVE_TYPE_LABELS[row.leave_type]}</Td>
                       <Td>
                         {row.start_date} → {row.end_date}
+                        {row.day_portion !== 'full' && (
+                          <span className="ml-1 text-xs text-neutral-500">
+                            · {LEAVE_PORTION_LABELS[row.day_portion]}
+                          </span>
+                        )}
                       </Td>
                       <Td className="text-right tabular-nums">{row.working_days}</Td>
                       <Td>
