@@ -71,12 +71,22 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
   const dayPortion = form.watch('day_portion');
   const datesReady = DATE_RE.test(start) && DATE_RE.test(end) && end >= start;
 
-  // The portion control only makes sense for a single day on a half-day-eligible
-  // type (birthday is whole-day only). When it doesn't apply, force 'full'.
-  const showPortion = datesReady && start === end && canHalfDay(leaveType);
+  // The portion control is shown for every half-day-eligible type (birthday is
+  // whole-day only). It no longer waits on the dates: choosing a half day is how
+  // you make the request single-day. When the type isn't eligible, force 'full'.
+  const showPortion = canHalfDay(leaveType);
   useEffect(() => {
     if (!showPortion && dayPortion !== 'full') form.setValue('day_portion', 'full');
   }, [showPortion, dayPortion, form]);
+
+  // A half day is single-day only, so once one is selected the end date is
+  // pinned to the start date (and its picker is disabled).
+  const isHalfDay = showPortion && dayPortion !== 'full';
+  useEffect(() => {
+    if (isHalfDay && end !== start) {
+      form.setValue('end_date', start, { shouldValidate: true });
+    }
+  }, [isHalfDay, start, end, form]);
 
   const effectivePortion: DayPortion = showPortion ? dayPortion : 'full';
 
@@ -146,7 +156,12 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
                 <input type="date" className={inputCls} {...form.register('start_date')} />
               </Field>
               <Field label="End date" error={form.formState.errors.end_date?.message}>
-                <input type="date" className={inputCls} {...form.register('end_date')} />
+                <input
+                  type="date"
+                  className={inputCls}
+                  disabled={isHalfDay}
+                  {...form.register('end_date')}
+                />
               </Field>
             </div>
 
