@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EmployeeLeavesPage } from '@/features/leave/components/employee-leaves-page';
@@ -116,6 +116,27 @@ describe('EmployeeLeavesPage', () => {
           start_date: '2026-07-01',
           end_date: '2026-07-03',
         }),
+      ),
+    );
+  });
+
+  it('submits with a non-default leave type chosen from the select', async () => {
+    renderPage();
+    await screen.findByText('Pending L1');
+    await userEvent.click(screen.getByRole('button', { name: /apply for leave/i }));
+
+    // The leave-type Select now lives inside the apply drawer.
+    await userEvent.click(screen.getByRole('button', { name: /leave type/i }));
+    const listbox = await screen.findByRole('listbox', { name: /leave type/i });
+    await userEvent.click(within(listbox).getByText('Sick'));
+
+    fireEventChange(await screen.findByLabelText(/start date/i), '2026-07-01');
+    fireEventChange(await screen.findByLabelText(/end date/i), '2026-07-03');
+    await userEvent.click(screen.getByRole('button', { name: /submit request/i }));
+
+    await waitFor(() =>
+      expect(meSubmitMock).toHaveBeenCalledWith(
+        expect.objectContaining({ leave_type: 'sick' }),
       ),
     );
   });
