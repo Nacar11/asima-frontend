@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -17,8 +17,19 @@ import {
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_TYPES, SubmitLeaveSchema, type SubmitLeaveInput } from '@/features/leave/schemas';
+import { Select } from '@/components/select';
+import {
+  LEAVE_TYPES,
+  SubmitLeaveSchema,
+  type LeaveType,
+  type SubmitLeaveInput,
+} from '@/features/leave/schemas';
 import { LEAVE_TYPE_LABELS } from '@/features/leave/format';
+
+const LEAVE_TYPE_OPTIONS = LEAVE_TYPES.map((t) => ({
+  value: t,
+  label: LEAVE_TYPE_LABELS[t],
+}));
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DEFAULTS: SubmitLeaveInput = {
@@ -90,13 +101,19 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
         <form onSubmit={onSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
           <SheetBody className="space-y-4">
             <Field label="Leave type" error={form.formState.errors.leave_type?.message}>
-              <select className={inputCls} {...form.register('leave_type')}>
-                {LEAVE_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {LEAVE_TYPE_LABELS[t]}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="leave_type"
+                render={({ field }) => (
+                  <Select<LeaveType>
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={LEAVE_TYPE_OPTIONS}
+                    ariaLabel="Leave type"
+                    className="w-full"
+                  />
+                )}
+              />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
