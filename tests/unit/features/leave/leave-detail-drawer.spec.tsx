@@ -96,14 +96,30 @@ describe('LeaveDetailDrawer', () => {
   });
 
   it('cancels the request (HR override)', async () => {
-    renderDrawer();
+    // Cancel now requires the leave not be fully elapsed.
+    renderDrawer({ request: { ...PENDING, end_date: '2099-12-31' } });
     await userEvent.click(screen.getByRole('button', { name: /cancel request/i }));
     await waitFor(() => expect(adminCancelMock).toHaveBeenCalledWith(1));
   });
 
-  it('hides actions on a terminal request', () => {
-    renderDrawer({ request: { ...PENDING, status: 'approved' } });
+  it('hides every action on a terminal (rejected) request', () => {
+    renderDrawer({ request: { ...PENDING, status: 'rejected', end_date: '2099-12-31' } });
     expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cancel request/i })).not.toBeInTheDocument();
+  });
+
+  it('lets an approved, not-yet-elapsed request be cancelled but not re-approved', () => {
+    renderDrawer({ request: { ...PENDING, status: 'approved', end_date: '2099-12-31' } });
+    // Approve / reject / edit are pending-only.
+    expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^reject$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument();
+    // …but cancel is available under the broadened rule.
+    expect(screen.getByRole('button', { name: /cancel request/i })).toBeInTheDocument();
+  });
+
+  it('hides cancel on an approved request that has already elapsed', () => {
+    renderDrawer({ request: { ...PENDING, status: 'approved', end_date: '2026-06-05' } });
     expect(screen.queryByRole('button', { name: /cancel request/i })).not.toBeInTheDocument();
   });
 });

@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
 import { ApplyLeaveDrawer } from '@/features/leave/components/apply-leave-drawer';
@@ -124,7 +124,7 @@ export function EmployeeLeavesPage() {
                       </Td>
                       <Td className="text-neutral-500">{formatDateTimeInTz(row.submitted_at)}</Td>
                       <Td className="text-right">
-                        {isPending(row.status) ? (
+                        {canCancel(row) ? (
                           <button
                             type="button"
                             onClick={() => cancelMutation.mutate(row.id)}
