@@ -10,9 +10,13 @@ import {
 const ROW = {
   id: 1,
   employee_id: 12,
-  leave_type: 'annual',
+  leave_type: 'vacation',
   start_date: '2026-06-01',
   end_date: '2026-06-05',
+  working_days: 3,
+  day_portion: 'full',
+  start_time: null,
+  end_time: null,
   reason: 'Family trip',
   status: 'pending_l1',
   submitted_at: '2026-05-30T10:00:00.000Z',
@@ -31,8 +35,50 @@ const ROW = {
 describe('leave schemas', () => {
   it('parses a leave request row', () => {
     const row = LeaveRequestSchema.parse(ROW);
-    expect(row.leave_type).toBe('annual');
+    expect(row.leave_type).toBe('vacation');
     expect(row.l2_approver_id).toBe(7);
+  });
+
+  it('parses a half-day row with 0.5 working_days and a window', () => {
+    const row = LeaveRequestSchema.parse({
+      ...ROW,
+      working_days: 0.5,
+      day_portion: 'first_half',
+      start_time: '09:00:00',
+      end_time: '14:00:00',
+    });
+    expect(row.working_days).toBe(0.5);
+    expect(row.day_portion).toBe('first_half');
+  });
+
+  it('SubmitLeaveSchema rejects a half day spanning two dates', () => {
+    const r = SubmitLeaveSchema.safeParse({
+      leave_type: 'vacation',
+      start_date: '2026-07-06',
+      end_date: '2026-07-07',
+      day_portion: 'first_half',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('SubmitLeaveSchema rejects a half-day birthday request', () => {
+    const r = SubmitLeaveSchema.safeParse({
+      leave_type: 'birthday',
+      start_date: '2026-07-06',
+      end_date: '2026-07-06',
+      day_portion: 'first_half',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('SubmitLeaveSchema accepts a valid single-day half request', () => {
+    const r = SubmitLeaveSchema.safeParse({
+      leave_type: 'vacation',
+      start_date: '2026-07-06',
+      end_date: '2026-07-06',
+      day_portion: 'second_half',
+    });
+    expect(r.success).toBe(true);
   });
 
   it('accepts a single-step chain (null l2) and terminal decision fields', () => {
@@ -64,7 +110,7 @@ describe('leave schemas', () => {
   });
 
   it('exposes the five leave types and five statuses', () => {
-    expect(LEAVE_TYPES).toEqual(['annual', 'sick', 'bereavement', 'unpaid', 'other']);
+    expect(LEAVE_TYPES).toEqual(['vacation', 'sick', 'bereavement', 'birthday', 'emergency']);
     expect(LEAVE_STATUSES).toContain('pending_l2');
   });
 

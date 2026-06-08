@@ -1,10 +1,20 @@
 import { ApiClient, apiClient } from '@/lib/api-client';
 import {
+  DayCountSchema,
+  LeaveAllocationListSchema,
+  LeaveAllocationSchema,
+  LeaveBalanceListSchema,
   LeaveRequestListSchema,
   LeaveRequestSchema,
+  type DayCount,
+  type DayPortion,
+  type GrantAllocationInput,
+  type LeaveAllocation,
+  type LeaveBalance,
   type LeaveQuery,
   type LeaveRequest,
   type LeaveRequestList,
+  type LeaveType,
   type SubmitLeaveInput,
   type UpdateLeaveInput,
 } from './schemas';
@@ -46,6 +56,29 @@ export const leaveApi = {
         .post<unknown>(`/users/me/leave-requests/${id}/cancel`)
         .then((res) => LeaveRequestSchema.parse(res));
     },
+    balances(client: ApiClient = apiClient()): Promise<LeaveBalance[]> {
+      return client
+        .get<unknown>('/users/me/leave-balances')
+        .then((res) => LeaveBalanceListSchema.parse(res));
+    },
+    /** Preview chargeable working days (+ half-day window); throws ApiError (422) on a D8 violation. */
+    dayCountPreview(
+      start_date: string,
+      end_date: string,
+      opts: { day_portion?: DayPortion; leave_type?: LeaveType } = {},
+      client: ApiClient = apiClient(),
+    ): Promise<DayCount> {
+      return client
+        .get<unknown>('/users/me/leave-requests/day-count', {
+          params: {
+            start_date,
+            end_date,
+            day_portion: opts.day_portion,
+            leave_type: opts.leave_type,
+          },
+        })
+        .then((res) => DayCountSchema.parse(res));
+    },
   },
 
   admin: {
@@ -72,6 +105,25 @@ export const leaveApi = {
       return client
         .delete<unknown>(`/admin/leave-requests/${id}`)
         .then((res) => LeaveRequestSchema.parse(res));
+    },
+    balances(employeeId: number, client: ApiClient = apiClient()): Promise<LeaveBalance[]> {
+      return client
+        .get<unknown>(`/admin/users/${employeeId}/leave-balances`)
+        .then((res) => LeaveBalanceListSchema.parse(res));
+    },
+    allocations(employeeId: number, client: ApiClient = apiClient()): Promise<LeaveAllocation[]> {
+      return client
+        .get<unknown>(`/admin/users/${employeeId}/leave-allocations`)
+        .then((res) => LeaveAllocationListSchema.parse(res));
+    },
+    grant(
+      employeeId: number,
+      input: GrantAllocationInput,
+      client: ApiClient = apiClient(),
+    ): Promise<LeaveAllocation> {
+      return client
+        .post<unknown>(`/admin/users/${employeeId}/leave-allocations`, input)
+        .then((res) => LeaveAllocationSchema.parse(res));
     },
   },
 

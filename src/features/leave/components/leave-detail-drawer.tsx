@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_TYPE_LABELS, isPending } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow, isPending } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '@/features/leave/schemas';
 
@@ -52,7 +52,7 @@ export function LeaveDetailDrawer({
     start_date: string;
     end_date: string;
     reason: string;
-  }>({ leave_type: 'annual', start_date: '', end_date: '', reason: '' });
+  }>({ leave_type: 'vacation', start_date: '', end_date: '', reason: '' });
 
   useEffect(() => {
     setRejecting(false);
@@ -204,6 +204,14 @@ export function LeaveDetailDrawer({
               <Detail label="Type">{LEAVE_TYPE_LABELS[request.leave_type]}</Detail>
               <Detail label="Dates">
                 {request.start_date} → {request.end_date}
+              </Detail>
+              <Detail label="Duration">
+                {request.day_portion === 'full'
+                  ? `${request.working_days} working day${request.working_days === 1 ? '' : 's'}`
+                  : `${LEAVE_PORTION_LABELS[request.day_portion]} · ${request.working_days} day` +
+                    (formatWindow(request.start_time, request.end_time)
+                      ? ` · ${formatWindow(request.start_time, request.end_time)}`
+                      : '')}
               </Detail>
               <Detail label="Reason">{request.reason ?? '—'}</Detail>
             </>

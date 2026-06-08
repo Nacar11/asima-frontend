@@ -57,6 +57,9 @@ export const PERMISSION_CODES = [
 
   'APPROVAL_CHAIN:View',
   'APPROVAL_CHAIN:Update',
+
+  'LEAVE_ALLOCATION:Create',
+  'LEAVE_ALLOCATION:View',
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
