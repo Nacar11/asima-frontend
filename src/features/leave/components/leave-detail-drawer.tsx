@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow, isPending } from '@/features/leave/format';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel, formatWindow, isPending } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '@/features/leave/schemas';
 
@@ -121,6 +121,9 @@ export function LeaveDetailDrawer({
 
   if (!request) return null;
   const pending = isPending(request.status);
+  // Edit / approve / reject stay pending-only; cancel follows the broader rule
+  // (active + not fully elapsed), matching the backend cancel guard.
+  const cancellable = canCancel(request);
   const busy =
     approveMutation.isPending ||
     rejectMutation.isPending ||
@@ -254,14 +257,14 @@ export function LeaveDetailDrawer({
           )}
         </SheetBody>
 
-        {pending && !rejecting && !editing && (
+        {(pending || cancellable) && !rejecting && !editing && (
           <SheetFooter className="flex-wrap gap-2">
-            {canUpdate && (
+            {pending && canUpdate && (
               <button type="button" onClick={() => setEditing(true)} className={btnSecondary}>
                 Edit
               </button>
             )}
-            {canDelete && (
+            {cancellable && canDelete && (
               <button
                 type="button"
                 onClick={() => cancelMutation.mutate()}
@@ -271,7 +274,7 @@ export function LeaveDetailDrawer({
                 Cancel request
               </button>
             )}
-            {canApproveAny && (
+            {pending && canApproveAny && (
               <button
                 type="button"
                 onClick={() => setRejecting(true)}
@@ -280,7 +283,7 @@ export function LeaveDetailDrawer({
                 Reject
               </button>
             )}
-            {canApproveAny && (
+            {pending && canApproveAny && (
               <button
                 type="button"
                 onClick={() => approveMutation.mutate()}

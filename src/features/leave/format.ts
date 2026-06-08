@@ -1,4 +1,5 @@
-import type { DayPortion, LeaveStatus, LeaveType } from './schemas';
+import { formatDateInTz } from '@/lib/format';
+import type { DayPortion, LeaveRequest, LeaveStatus, LeaveType } from './schemas';
 
 export const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
   vacation: 'Vacation',
@@ -42,4 +43,22 @@ export const LEAVE_STATUS_META: Record<LeaveStatus, { label: string; className: 
 /** The states a request can still be cancelled / acted on from. */
 export function isPending(status: LeaveStatus): boolean {
   return status === 'pending_l1' || status === 'pending_l2';
+}
+
+/**
+ * Whether a request can still be cancelled — mirrors the backend rule
+ * (`LeaveRequestsService.cancel`): active (pending or approved) AND the leave
+ * has not fully elapsed (`end_date >= today`). A leave in progress is still
+ * cancellable; only a wholly-past one locks. This gates the button only — the
+ * server is the source of truth and re-checks on cancel.
+ *
+ * `today` defaults to the current date in the display tz; it's a parameter so
+ * tests stay deterministic.
+ */
+export function canCancel(
+  row: Pick<LeaveRequest, 'status' | 'end_date'>,
+  today: string = formatDateInTz(new Date()),
+): boolean {
+  const active = isPending(row.status) || row.status === 'approved';
+  return active && row.end_date >= today;
 }

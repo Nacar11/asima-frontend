@@ -141,7 +141,13 @@ describe('EmployeeLeavesPage', () => {
     );
   });
 
-  it('cancels a pending request', async () => {
+  it('cancels a request whose leave has not yet elapsed', async () => {
+    // canCancel now also checks the leave isn't fully in the past, so the row
+    // must end on/after today for the Cancel button to render.
+    meListMock.mockResolvedValue({
+      data: [{ ...PENDING_ROW, end_date: '2099-12-31' }],
+      total: 1, page: 1, limit: 20, has_more: false,
+    });
     renderPage();
     const cancelBtn = await screen.findByRole('button', { name: /^cancel$/i });
     await userEvent.click(cancelBtn);
