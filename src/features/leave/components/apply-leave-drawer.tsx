@@ -71,20 +71,33 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
   const dayPortion = form.watch('day_portion');
   const datesReady = DATE_RE.test(start) && DATE_RE.test(end) && end >= start;
 
-  // The portion control only makes sense for a single day on a half-day-eligible
-  // type (birthday is whole-day only). When it doesn't apply, force 'full'.
-  const showPortion = datesReady && start === end && canHalfDay(leaveType);
-  useEffect(() => {
-    if (!showPortion && dayPortion !== 'full') form.setValue('day_portion', 'full');
-  }, [showPortion, dayPortion, form]);
+  const isHalfDay = dayPortion === 'first_half' || dayPortion === 'second_half';
 
-  const effectivePortion: DayPortion = showPortion ? dayPortion : 'full';
+  // Birthday is whole-day only — offer just "Full day" for it.
+  const portionOptions = canHalfDay(leaveType)
+    ? DAY_PORTION_OPTIONS
+    : DAY_PORTION_OPTIONS.filter((option) => option.value === 'full');
+
+  // Switching to a whole-day-only type clears any half-day selection.
+  useEffect(() => {
+    if (!canHalfDay(leaveType) && dayPortion !== 'full') {
+      form.setValue('day_portion', 'full');
+    }
+  }, [leaveType, dayPortion, form]);
+
+  // A half day is a single date: pin the end date to the start date (both stay
+  // empty until a start is picked). The end input is disabled while this holds.
+  useEffect(() => {
+    if (isHalfDay && end !== start) {
+      form.setValue('end_date', start, { shouldValidate: true });
+    }
+  }, [isHalfDay, start, end, form]);
 
   const preview = useQuery({
-    queryKey: ['leave', 'day-count', start, end, effectivePortion, leaveType],
+    queryKey: ['leave', 'day-count', start, end, dayPortion, leaveType],
     queryFn: () =>
       leaveApi.me.dayCountPreview(start, end, {
-        day_portion: effectivePortion,
+        day_portion: dayPortion,
         leave_type: leaveType,
       }),
     enabled: open && datesReady,
@@ -146,27 +159,30 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
                 <input type="date" className={inputCls} {...form.register('start_date')} />
               </Field>
               <Field label="End date" error={form.formState.errors.end_date?.message}>
-                <input type="date" className={inputCls} {...form.register('end_date')} />
+                <input
+                  type="date"
+                  className={inputCls}
+                  disabled={isHalfDay}
+                  {...form.register('end_date')}
+                />
               </Field>
             </div>
 
-            {showPortion && (
-              <Field label="Day portion" error={form.formState.errors.day_portion?.message}>
-                <Controller
-                  control={form.control}
-                  name="day_portion"
-                  render={({ field }) => (
-                    <Select<DayPortion>
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={DAY_PORTION_OPTIONS}
-                      ariaLabel="Day portion"
-                      className="w-full"
-                    />
-                  )}
-                />
-              </Field>
-            )}
+            <Field label="Day portion" error={form.formState.errors.day_portion?.message}>
+              <Controller
+                control={form.control}
+                name="day_portion"
+                render={({ field }) => (
+                  <Select<DayPortion>
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={portionOptions}
+                    ariaLabel="Day portion"
+                    className="w-full"
+                  />
+                )}
+              />
+            </Field>
 
             <DayCountBanner
               ready={datesReady}

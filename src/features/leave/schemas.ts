@@ -45,6 +45,11 @@ export const LeaveRequestSchema = z.object({
   employee_id: z.number().int(),
   // Present on list responses (joined read-model); absent on single GET.
   employee_name: z.string().nullable().optional(),
+  // Approver/decider display names — same list-only joined read-model as
+  // employee_name. Null when there's no L2 / not yet decided / user deactivated.
+  l1_approver_name: z.string().nullable().optional(),
+  l2_approver_name: z.string().nullable().optional(),
+  decided_by_name: z.string().nullable().optional(),
   leave_type: LeaveTypeSchema,
   start_date: z.string(),
   end_date: z.string(),

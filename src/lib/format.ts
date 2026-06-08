@@ -1,3 +1,4 @@
+import { formatDistanceToNow } from 'date-fns';
 import { resolveDisplayTz } from '@/lib/tz';
 
 /**
@@ -48,4 +49,15 @@ export function formatDateTimeInTz(value: Date | string): string {
     minute: '2-digit',
     hour12: false,
   });
+}
+
+/**
+ * "2 minutes ago" — relative distance from now. Timezone-agnostic (a
+ * duration, not a wall-clock time), so it doesn't go through `resolveDisplayTz`
+ * — but it lives here so callers never import `date-fns` directly (one date
+ * library, one render path).
+ */
+export function formatRelative(value: Date | string): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return formatDistanceToNow(date, { addSuffix: true });
 }
