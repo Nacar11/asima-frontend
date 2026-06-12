@@ -22,12 +22,18 @@ type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 export type RequestOptions = {
   /** Query-string params; encoded with URLSearchParams. */
   params?: Record<string, string | number | boolean | undefined>;
-  /** Request body. Stringified to JSON automatically. */
+  /**
+   * Request body. A `FormData` is sent as multipart/form-data (the browser
+   * sets the boundary — we must NOT force a Content-Type). Anything else is
+   * stringified to JSON.
+   */
   body?: unknown;
   /** Bypass the refresh-on-401 retry — used by the refresh call itself. */
   skipRefresh?: boolean;
   /** AbortController signal pass-through. */
   signal?: AbortSignal;
+  /** `blob` returns the raw response body (binary downloads); default JSON. */
+  responseType?: 'json' | 'blob';
 };
 
 /**
@@ -73,6 +79,16 @@ export class ApiClient {
     return this.request<T>('POST', path, { ...opts, body });
   }
 
+  /** POST multipart/form-data (e.g. a file upload). */
+  postForm<T = unknown>(path: string, form: FormData, opts?: RequestOptions): Promise<T> {
+    return this.request<T>('POST', path, { ...opts, body: form });
+  }
+
+  /** GET a binary body as a Blob (e.g. an attachment download). */
+  getBlob(path: string, opts?: RequestOptions): Promise<Blob> {
+    return this.request<Blob>('GET', path, { ...opts, responseType: 'blob' });
+  }
+
   patch<T = unknown>(path: string, body?: unknown, opts?: RequestOptions): Promise<T> {
     return this.request<T>('PATCH', path, { ...opts, body });
   }
@@ -83,7 +99,8 @@ export class ApiClient {
 
   async request<T = unknown>(method: Method, path: string, opts: RequestOptions = {}): Promise<T> {
     const url = this.buildUrl(path, opts.params);
-    const headers = this.buildHeaders();
+    const isForm = typeof FormData !== 'undefined' && opts.body instanceof FormData;
+    const headers = this.buildHeaders(undefined, isForm);
 
     const init: RequestInit = {
       method,
@@ -92,7 +109,8 @@ export class ApiClient {
     };
 
     if (opts.body !== undefined && method !== 'GET') {
-      init.body = JSON.stringify(opts.body);
+      // FormData rides as-is so the browser sets the multipart boundary.
+      init.body = isForm ? (opts.body as FormData) : JSON.stringify(opts.body);
     }
 
     let response = await fetch(url, init);
@@ -103,7 +121,7 @@ export class ApiClient {
         // Rebuild headers with the new token; original Headers object is
         // immutable in some runtimes (we use Headers directly so .set is fine,
         // but we rebuild anyway for clarity).
-        const retryHeaders = this.buildHeaders(newToken);
+        const retryHeaders = this.buildHeaders(newToken, isForm);
         response = await fetch(url, { ...init, headers: retryHeaders });
       } catch {
         // Refresh failed — surface as 401, AuthProvider's effect picks it up
@@ -112,7 +130,7 @@ export class ApiClient {
       }
     }
 
-    return this.handleResponse<T>(response);
+    return this.handleResponse<T>(response, opts.responseType);
   }
 
   /**
@@ -134,10 +152,12 @@ export class ApiClient {
     return this.refreshInFlight;
   }
 
-  private buildHeaders(tokenOverride?: string): Headers {
+  private buildHeaders(tokenOverride?: string, isForm = false): Headers {
     const h = new Headers();
     h.set('Accept', 'application/json');
-    h.set('Content-Type', 'application/json');
+    // Never set Content-Type for FormData — the browser must add the
+    // multipart boundary itself, or the server can't parse the parts.
+    if (!isForm) h.set('Content-Type', 'application/json');
     h.set('X-Request-ID', generateRequestId());
     const token = tokenOverride ?? this.accessToken;
     if (token) h.set('Authorization', `Bearer ${token}`);
@@ -159,8 +179,14 @@ export class ApiClient {
     return tail ? `${base}?${tail}` : base;
   }
 
-  private async handleResponse<T>(response: Response): Promise<T> {
+  private async handleResponse<T>(response: Response, responseType: 'json' | 'blob' = 'json'): Promise<T> {
     if (response.status === 204) return undefined as T;
+
+    // Binary downloads: return the blob on success, but still surface a
+    // structured ApiError on failure (read the error body as text/JSON).
+    if (responseType === 'blob' && response.ok) {
+      return (await response.blob()) as T;
+    }
 
     // Prefer JSON; fall back to text if the body isn't parseable. The
     // backend sends application/json on every route, but tests and

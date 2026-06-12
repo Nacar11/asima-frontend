@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,10 +19,12 @@ import { ApiError } from '@/lib/api-client';
 import { leaveApi } from '@/features/leave/api';
 import { Select } from '@/components/select';
 import {
+  ACCEPTED_ATTACHMENT_ACCEPT,
   DAY_PORTIONS,
   LEAVE_TYPES,
   SubmitLeaveSchema,
   canHalfDay,
+  requiresAttachment,
   type DayPortion,
   type LeaveType,
   type SubmitLeaveInput,
@@ -56,19 +58,31 @@ const DEFAULTS: SubmitLeaveInput = {
  */
 export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
   const form = useForm<SubmitLeaveInput>({
     resolver: zodResolver(SubmitLeaveSchema),
     defaultValues: DEFAULTS,
   });
 
   useEffect(() => {
-    if (open) form.reset(DEFAULTS);
+    if (open) {
+      form.reset(DEFAULTS);
+      setFile(null);
+    }
   }, [open, form]);
 
   const start = form.watch('start_date');
   const end = form.watch('end_date');
   const leaveType = form.watch('leave_type');
   const dayPortion = form.watch('day_portion');
+
+  // sick / bereavement require exactly one supporting file (mirrors the
+  // backend rule). Clear a stale file when switching to a type that rejects one.
+  const needsAttachment = requiresAttachment(leaveType);
+  useEffect(() => {
+    if (!needsAttachment && file) setFile(null);
+  }, [needsAttachment, file]);
+  const attachmentMissing = needsAttachment && !file;
   const datesReady = DATE_RE.test(start) && DATE_RE.test(end) && end >= start;
 
   // The portion control is shown for every half-day-eligible type (birthday is
@@ -106,7 +120,8 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
   const windowLabel = formatWindow(preview.data?.start_time ?? null, preview.data?.end_time ?? null);
 
   const submitMutation = useMutation({
-    mutationFn: (input: SubmitLeaveInput) => leaveApi.me.submit(input),
+    mutationFn: (vars: { input: SubmitLeaveInput; file: File | null }) =>
+      leaveApi.me.submit(vars.input, vars.file),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
       void queryClient.invalidateQueries({ queryKey: ['leave', 'balances'] });
@@ -116,14 +131,16 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
     onError: (err) => toast.error(submitErrorMessage(err)),
   });
 
-  const onSubmit = form.handleSubmit((input) =>
+  const onSubmit = form.handleSubmit((input) => {
+    if (requiresAttachment(input.leave_type) && !file) return; // guarded by the disabled button too
     submitMutation.mutate({
-      ...input,
-      reason: input.reason?.trim() ? input.reason.trim() : undefined,
-    }),
-  );
+      input: { ...input, reason: input.reason?.trim() ? input.reason.trim() : undefined },
+      file: requiresAttachment(input.leave_type) ? file : null,
+    });
+  });
 
-  const blocked = submitMutation.isPending || !datesReady || !!dayCountError;
+  const blocked =
+    submitMutation.isPending || !datesReady || !!dayCountError || attachmentMissing;
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -190,6 +207,24 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
               window={windowLabel}
               error={dayCountError}
             />
+
+            {needsAttachment && (
+              <Field
+                label="Attachment (required)"
+                error={attachmentMissing ? 'A supporting file is required for this leave type.' : undefined}
+              >
+                <input
+                  type="file"
+                  accept={ACCEPTED_ATTACHMENT_ACCEPT}
+                  aria-label="Attachment"
+                  className={fileInputCls}
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="mt-1 block text-xs text-neutral-500">
+                  Image (JPEG, PNG, WebP) or PDF. {file ? file.name : 'No file selected.'}
+                </span>
+              </Field>
+            )}
 
             <Field label="Reason (optional)" error={form.formState.errors.reason?.message}>
               <textarea rows={3} className={inputCls} {...form.register('reason')} />
@@ -261,6 +296,9 @@ function submitErrorMessage(err: unknown): string {
 
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950 disabled:bg-neutral-50';
+
+const fileInputCls =
+  'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm file:mr-3 file:rounded file:border-0 file:bg-neutral-100 file:px-3 file:py-1 file:text-sm file:font-medium hover:file:bg-neutral-200 focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950';
 
 const btnPrimary = cn(
   'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',

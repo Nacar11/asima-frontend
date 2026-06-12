@@ -6,8 +6,10 @@ function stubClient(payload: unknown) {
   return {
     get: vi.fn().mockResolvedValue(payload),
     post: vi.fn().mockResolvedValue(payload),
+    postForm: vi.fn().mockResolvedValue(payload),
     patch: vi.fn().mockResolvedValue(payload),
     delete: vi.fn().mockResolvedValue(payload),
+    getBlob: vi.fn().mockResolvedValue(new Blob(['x'])),
   } as unknown as ApiClient & Record<string, ReturnType<typeof vi.fn>>;
 }
 
@@ -44,7 +46,7 @@ describe('leaveApi', () => {
     expect(c.get).toHaveBeenCalledWith('/users/me/leave-requests', { params: { page: 1 } });
   });
 
-  it('me.submit POSTs the self-service endpoint', async () => {
+  it('me.submit POSTs JSON when there is no file', async () => {
     const c = stubClient(ROW);
     await leaveApi.me.submit(
       {
@@ -53,6 +55,7 @@ describe('leaveApi', () => {
         end_date: '2026-06-05',
         day_portion: 'full',
       },
+      undefined,
       c,
     );
     expect(c.post).toHaveBeenCalledWith('/users/me/leave-requests', {
@@ -60,6 +63,48 @@ describe('leaveApi', () => {
       start_date: '2026-06-01',
       end_date: '2026-06-05',
       day_portion: 'full',
+    });
+    expect(c.postForm).not.toHaveBeenCalled();
+  });
+
+  it('me.submit POSTs multipart form-data when a file is attached', async () => {
+    const c = stubClient(ROW);
+    const file = new File(['bytes'], 'cert.png', { type: 'image/png' });
+    await leaveApi.me.submit(
+      {
+        leave_type: 'sick',
+        start_date: '2026-06-01',
+        end_date: '2026-06-01',
+        day_portion: 'full',
+        reason: 'flu',
+      },
+      file,
+      c,
+    );
+    expect(c.post).not.toHaveBeenCalled();
+    expect(c.postForm).toHaveBeenCalledTimes(1);
+    const postFormMock = c.postForm as unknown as ReturnType<typeof vi.fn>;
+    const [path, form] = postFormMock.mock.calls[0] as [string, FormData];
+    expect(path).toBe('/users/me/leave-requests');
+    expect(form).toBeInstanceOf(FormData);
+    expect((form as FormData).get('leave_type')).toBe('sick');
+    expect((form as FormData).get('reason')).toBe('flu');
+    expect((form as FormData).get('file')).toBe(file);
+  });
+
+  it('downloadAttachment GETs the attachment route as a blob with the version param', async () => {
+    const c = stubClient(null);
+    await leaveApi.downloadAttachment(7, 'thumbnail', c);
+    expect(c.getBlob).toHaveBeenCalledWith('/leave-requests/7/attachment', {
+      params: { version: 'thumbnail' },
+    });
+  });
+
+  it('downloadAttachment defaults to the original version', async () => {
+    const c = stubClient(null);
+    await leaveApi.downloadAttachment(7, undefined, c);
+    expect(c.getBlob).toHaveBeenCalledWith('/leave-requests/7/attachment', {
+      params: { version: 'original' },
     });
   });
 
