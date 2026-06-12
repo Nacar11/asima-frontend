@@ -2,10 +2,14 @@ import { ApiClient, apiClient } from '@/lib/api-client';
 import {
   ActiveChainRowsSchema,
   ActiveChainSchema,
+  ApproverIdsSchema,
+  BulkAssignResultSchema,
   BulkReassignResultSchema,
   EmployeeChainListSchema,
   type ActiveChain,
   type ActiveChainRows,
+  type BulkAssignInput,
+  type BulkAssignResult,
   type BulkReassignInput,
   type BulkReassignResult,
   type EmployeeChainList,
@@ -55,5 +59,29 @@ export const adminApproversApi = {
     return client
       .post<unknown>('/admin/approvers/bulk-reassign', input)
       .then((res) => BulkReassignResultSchema.parse(res));
+  },
+
+  bulkAssign(
+    input: BulkAssignInput,
+    client: ApiClient = apiClient(),
+  ): Promise<BulkAssignResult> {
+    return client
+      .post<unknown>('/admin/approvers/bulk-assign', input)
+      .then((res) => BulkAssignResultSchema.parse(res));
+  },
+
+  /**
+   * Every employee id matching the given filters, in one call — backs the
+   * "select all unassigned" action. Uses the lean server endpoint (no
+   * approver joins, no pagination), so there is no client-side paging loop
+   * and the result spans the whole filtered set, not just one page.
+   */
+  allMatchingIds(
+    params: EmployeeChainQuery = {},
+    client: ApiClient = apiClient(),
+  ): Promise<number[]> {
+    return client
+      .get<unknown>('/admin/approvers/ids', { params })
+      .then((res) => ApproverIdsSchema.parse(res).employee_ids);
   },
 };

@@ -5,6 +5,9 @@ import {
   ActiveChainRowsSchema,
   ActiveChainSchema,
   BulkReassignResultSchema,
+  BulkAssignSchema,
+  BulkAssignResultSchema,
+  ApproverIdsSchema,
   SetChainSchema,
 } from '@/features/admin-approvers/schemas';
 
@@ -84,5 +87,27 @@ describe('admin-approvers schemas', () => {
     expect(SetChainSchema.parse({ l1_approver_id: 5 }).l1_approver_id).toBe(5);
     expect(SetChainSchema.parse({ l1_approver_id: null }).l1_approver_id).toBeNull();
     expect(SetChainSchema.parse({})).toEqual({});
+  });
+
+  it('BulkAssignSchema requires L1 and at least one employee; L2 optional', () => {
+    const ok = BulkAssignSchema.parse({ employee_ids: [12, 13], l1_approver_id: 5 });
+    expect(ok.employee_ids).toEqual([12, 13]);
+    expect(ok.l2_approver_id).toBeUndefined();
+    expect(() => BulkAssignSchema.parse({ employee_ids: [], l1_approver_id: 5 })).toThrow();
+    expect(() => BulkAssignSchema.parse({ employee_ids: [12] })).toThrow();
+  });
+
+  it('BulkAssignResultSchema parses assigned + skipped reasons', () => {
+    const result = BulkAssignResultSchema.parse({
+      assigned: 2,
+      skipped: [{ employee_id: 5, reason: 'self_approval' }],
+    });
+    expect(result.assigned).toBe(2);
+    expect(result.skipped[0]?.reason).toBe('self_approval');
+  });
+
+  it('ApproverIdsSchema parses the lean id envelope', () => {
+    const res = ApproverIdsSchema.parse({ employee_ids: [1, 2, 3] });
+    expect(res.employee_ids).toEqual([1, 2, 3]);
   });
 });

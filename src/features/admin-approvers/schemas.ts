@@ -85,8 +85,36 @@ export const BulkReassignSchema = z.object({
 });
 export type BulkReassignInput = z.infer<typeof BulkReassignSchema>;
 
+/**
+ * `POST /admin/approvers/bulk-assign` payload. Assign an L1 (required) and
+ * optional L2 to an explicit list of employees. Mirrors the backend
+ * `BulkAssignDto`: assigning a step OVERWRITES any existing approver there;
+ * self-approval rows are skipped server-side, not rejected.
+ */
+export const BulkAssignSchema = z.object({
+  employee_ids: z.array(z.number().int().positive()).min(1),
+  l1_approver_id: z.number().int().positive(),
+  l2_approver_id: z.number().int().positive().optional(),
+});
+export type BulkAssignInput = z.infer<typeof BulkAssignSchema>;
+
+export const BulkAssignResultSchema = z.object({
+  assigned: z.number().int().nonnegative(),
+  skipped: z.array(
+    z.object({ employee_id: z.number().int(), reason: z.string() }),
+  ),
+});
+export type BulkAssignResult = z.infer<typeof BulkAssignResultSchema>;
+
+/** `GET /admin/approvers/ids` — lean id envelope backing "select all". */
+export const ApproverIdsSchema = z.object({
+  employee_ids: z.array(z.number().int()),
+});
+export type ApproverIds = z.infer<typeof ApproverIdsSchema>;
+
 export type EmployeeChainQuery = {
   page?: number;
   limit?: number;
   search?: string;
+  unassigned?: boolean;
 };

@@ -75,4 +75,30 @@ describe('adminApproversApi', () => {
     });
     expect(res.reassigned).toBe(3);
   });
+
+  it('bulkAssign() POSTs the payload and parses assigned + skipped', async () => {
+    const client = stubClient({
+      post: { assigned: 2, skipped: [{ employee_id: 5, reason: 'self_approval' }] },
+    });
+    const res = await adminApproversApi.bulkAssign(
+      { employee_ids: [12, 13], l1_approver_id: 5, l2_approver_id: 7 },
+      client,
+    );
+    expect(client.post).toHaveBeenCalledWith('/admin/approvers/bulk-assign', {
+      employee_ids: [12, 13],
+      l1_approver_id: 5,
+      l2_approver_id: 7,
+    });
+    expect(res.assigned).toBe(2);
+    expect(res.skipped).toHaveLength(1);
+  });
+
+  it('allMatchingIds() GETs the lean ids endpoint and returns the id array', async () => {
+    const client = stubClient({ get: { employee_ids: [1, 2, 3] } });
+    const ids = await adminApproversApi.allMatchingIds({ unassigned: true, search: 'a' }, client);
+    expect(client.get).toHaveBeenCalledWith('/admin/approvers/ids', {
+      params: { unassigned: true, search: 'a' },
+    });
+    expect(ids).toEqual([1, 2, 3]);
+  });
 });

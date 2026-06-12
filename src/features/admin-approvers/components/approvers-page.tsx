@@ -9,10 +9,12 @@ import { ApiError } from '@/lib/api-client';
 import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
+import { toast } from 'sonner';
 import { adminApproversApi } from '@/features/admin-approvers/api';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { ApproversTable, type ApproverCandidate } from './approvers-table';
 import { BulkReassignDialog } from './bulk-reassign-dialog';
+import { BulkAssignDialog } from './bulk-assign-dialog';
 
 const PAGE_LIMIT = 20;
 
@@ -44,7 +46,10 @@ export function ApproversPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [unassignedOnly, setUnassignedOnly] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
@@ -53,9 +58,15 @@ export function ApproversPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, unassignedOnly]);
 
-  const listQueryKey = ['admin-approvers', 'list', page, debouncedSearch] as const;
+  const listQueryKey = [
+    'admin-approvers',
+    'list',
+    page,
+    debouncedSearch,
+    unassignedOnly,
+  ] as const;
 
   const listQuery = useQuery({
     queryKey: listQueryKey,
@@ -64,9 +75,42 @@ export function ApproversPage() {
         page,
         limit: PAGE_LIMIT,
         search: debouncedSearch || undefined,
+        unassigned: unassignedOnly || undefined,
       }),
     placeholderData: (prev) => prev,
   });
+
+  // Selection is a Set of employee ids owned here, so it survives paging and
+  // filter changes (we hold ids, not row snapshots).
+  const toggleOne = (id: number) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const togglePage = (ids: number[], select: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (select) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+
+  const selectAllUnassigned = async () => {
+    try {
+      const ids = await adminApproversApi.allMatchingIds({
+        unassigned: true,
+        search: debouncedSearch || undefined,
+      });
+      setSelected((prev) => new Set([...prev, ...ids]));
+    } catch {
+      toast.error('Could not load the unassigned employees.');
+    }
+  };
 
   // Candidate approvers for the inline selects + bulk dialog. Only
   // fetched when the caller can actually edit.
@@ -109,18 +153,77 @@ export function ApproversPage() {
           />
         </div>
         {canUpdate && (
-          <button
-            type="button"
-            onClick={() => setBulkOpen(true)}
-            className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 shadow-sm',
-              'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
-            )}
-          >
-            Bulk reassign…
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setUnassignedOnly((v) => !v)}
+              aria-pressed={unassignedOnly}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium shadow-sm',
+                'focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+                unassignedOnly
+                  ? 'border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800'
+                  : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50',
+              )}
+            >
+              Only unassigned
+            </button>
+            <button
+              type="button"
+              onClick={() => setBulkOpen(true)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 shadow-sm',
+                'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+              )}
+            >
+              Bulk reassign…
+            </button>
+          </div>
         )}
       </div>
+
+      {canUpdate && (selected.size > 0 || unassignedOnly) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-neutral-200 bg-neutral-50 px-4 py-2.5">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-700">
+            <span className="font-medium">
+              {selected.size} selected
+            </span>
+            {unassignedOnly && listQuery.data && listQuery.data.total > 0 && (
+              <button
+                type="button"
+                onClick={selectAllUnassigned}
+                className="text-sm font-medium text-neutral-900 underline underline-offset-2 hover:text-neutral-600"
+              >
+                Select all {listQuery.data.total} unassigned
+              </button>
+            )}
+          </div>
+          {selected.size > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelected(new Set())}
+                className={cn(
+                  'rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700',
+                  'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
+                )}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => setAssignOpen(true)}
+                className={cn(
+                  'rounded-md bg-neutral-950 px-3 py-1.5 text-sm font-medium text-white shadow-sm',
+                  'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+                )}
+              >
+                Assign approver…
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {listQuery.isLoading && (
         <div className="space-y-2" aria-hidden>
@@ -168,6 +271,9 @@ export function ApproversPage() {
             candidates={candidates}
             listQueryKey={listQueryKey}
             canUpdate={canUpdate}
+            selectedIds={selected}
+            onToggleOne={toggleOne}
+            onTogglePage={togglePage}
           />
         ))}
 
@@ -196,6 +302,16 @@ export function ApproversPage() {
           open={bulkOpen}
           onClose={() => setBulkOpen(false)}
           candidates={candidates}
+        />
+      )}
+
+      {canUpdate && (
+        <BulkAssignDialog
+          open={assignOpen}
+          onClose={() => setAssignOpen(false)}
+          candidates={candidates}
+          employeeIds={[...selected]}
+          onAssigned={() => setSelected(new Set())}
         />
       )}
     </div>
