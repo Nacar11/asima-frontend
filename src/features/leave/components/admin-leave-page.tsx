@@ -86,17 +86,13 @@ export function AdminLeavePage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Leave requests</h1>
-          <p className="text-sm text-neutral-500">Every leave request across the organization.</p>
-        </div>
-        {canGrant && (
+      {canGrant && (
+        <header className="flex flex-wrap items-start justify-end gap-3">
           <button type="button" onClick={() => setGrantOpen(true)} className={grantBtnCls}>
             Grant leave
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Select<string>
