@@ -204,7 +204,7 @@ function ApproverCell({ correction }: { correction?: TimeCorrectionRequest }) {
 }
 
 const STATE_MARK: Record<ApproverLevelState, string> = {
-  pending: '⏳ pending',
+  pending: 'pending',
   approved: '✓ approved',
   rejected: '✕ rejected',
   na: 'n/a',
