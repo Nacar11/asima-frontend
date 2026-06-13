@@ -1,5 +1,6 @@
 import { formatTimeInTz } from '@/lib/format';
 import type { WorkSchedule } from '@/features/schedule/schemas';
+import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
 import type { TimeEntry } from './schemas';
 
 /* "09:00" or "09:00:00" → minutes since midnight. */
@@ -66,4 +67,63 @@ export function scheduledRegularHours(schedule: WorkSchedule | undefined): numbe
   if (!schedule) return null;
   const span = timeStrToMinutes(schedule.expected_out) - timeStrToMinutes(schedule.expected_in);
   return Math.max(0, (span - schedule.break_minutes) / 60);
+}
+
+export type TimesheetStatus = 'ongoing' | 'applied' | 'approved' | 'logged';
+
+/**
+ * Derived row status for the timesheet. "Ongoing" = still clocked in;
+ * "Applied"/"Approved" reflect a matching correction's lifecycle; otherwise a
+ * normal confirmed punch is "Logged". Corrections that were rejected/cancelled
+ * aren't fetched for this view, so those rows correctly fall back to "Logged".
+ */
+export function timesheetStatus(
+  entry: TimeEntry,
+  correction: TimeCorrectionRequest | undefined,
+): TimesheetStatus {
+  if (!entry.time_out) return 'ongoing';
+  if (correction) {
+    if (correction.status === 'pending_l1' || correction.status === 'pending_l2') return 'applied';
+    if (correction.status === 'approved') return 'approved';
+  }
+  return 'logged';
+}
+
+/**
+ * Total scheduled-time deficit in decimal hours: tardiness (late in) plus
+ * undertime (early out), each already floored at 0. Null for open entries or
+ * days with no schedule row (same "don't fabricate a baseline" rule as the
+ * minute metrics).
+ */
+export function deficitHours(entry: TimeEntry, schedule: WorkSchedule | undefined): number | null {
+  const late = tardinessMinutes(entry, schedule);
+  const under = undertimeMinutes(entry, schedule);
+  if (late === null || under === null) return null;
+  return (late + under) / 60;
+}
+
+export type ApproverLevelState = 'pending' | 'approved' | 'rejected' | 'na';
+
+/**
+ * Per-level approval state derived from the single correction status enum.
+ * `na` = no such level (single-level chain) or a terminal state where the
+ * level never acted.
+ */
+export function approverStates(correction: TimeCorrectionRequest): {
+  l1: ApproverLevelState;
+  l2: ApproverLevelState;
+} {
+  const hasL2 = correction.l2_approver_id !== null;
+  switch (correction.status) {
+    case 'pending_l1':
+      return { l1: 'pending', l2: hasL2 ? 'pending' : 'na' };
+    case 'pending_l2':
+      return { l1: 'approved', l2: 'pending' };
+    case 'approved':
+      return { l1: 'approved', l2: hasL2 ? 'approved' : 'na' };
+    case 'rejected':
+      return { l1: 'rejected', l2: 'na' };
+    default: // cancelled
+      return { l1: 'na', l2: 'na' };
+  }
 }
