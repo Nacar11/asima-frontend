@@ -28,8 +28,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Static checks first (cheapest, fail fastest). lint:ci/format:check
+      # are non-mutating (no --fix/--write) so CI verifies rather than rewrites.
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
+
+      - name: Format check
+        run: npm run format:check
 
       - name: Typecheck
         run: npm run typecheck
@@ -39,3 +44,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Informational only: prints known-vulnerable deps each run, but does NOT
+      # fail the build — the current critical/high are transitive build-time
+      # findings (postcss via Next's toolchain) with no clean forward fix.
+      # Tighten to blocking after a dependency-upgrade pass.
+      - name: Security audit (informational)
+        continue-on-error: true
+        run: npm audit --audit-level=high

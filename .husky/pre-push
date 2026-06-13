@@ -1,0 +1,9 @@
+# Runs before `git push`. Mirrors the CI quality gates so problems are caught
+# locally BEFORE they land on main (we commit straight to main, so this is the
+# real pre-merge gate). `set -e` aborts the push on the first failing check.
+set -e
+
+npm run lint:ci
+npm run format:check
+npm run typecheck
+npm test
