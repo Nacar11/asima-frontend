@@ -77,6 +77,17 @@ describe('TimeCorrectionApprovalDetailDrawer', () => {
     expect(screen.getByText('2026-06-10')).toBeInTheDocument();
   });
 
+  it('labels a request with a target entry as a "Correction"', async () => {
+    renderDrawer();
+    expect(await screen.findByText('Correction')).toBeInTheDocument();
+  });
+
+  it('labels a null-target request as a "New log"', async () => {
+    getOneMock.mockResolvedValue({ ...REQUEST, target_entry_id: null });
+    renderDrawer();
+    expect(await screen.findByText('New log')).toBeInTheDocument();
+  });
+
   it('approves a pending correction through the inbox callback', async () => {
     const onApprove = vi.fn();
     renderDrawer({ onApprove });

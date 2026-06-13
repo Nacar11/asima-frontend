@@ -18,75 +18,66 @@ import {
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { timeCorrectionApi } from '@/features/time-correction/api';
-import { isoToTimeInput, replaceTimeOnIso } from '@/features/time-correction/datetime';
-import type { TimeEntry } from '@/features/time-entries/schemas';
+import { localDateTimeToIso } from '@/features/time-correction/datetime';
+
+/** Browser-local YYYY-MM-DD for "today" (the latest date a log may be added for). */
+function localToday(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 const FormSchema = z
   .object({
+    work_date: z.string().min(1, 'Required'),
     proposed_time_in: z.string().min(1, 'Required'),
-    proposed_time_out: z.string().optional(),
+    proposed_time_out: z.string().min(1, 'Time out is required'),
     reason: z.string().min(1, 'A reason is required').max(500),
   })
-  .refine((v) => !v.proposed_time_out || v.proposed_time_out > v.proposed_time_in, {
+  .refine((v) => v.proposed_time_out > v.proposed_time_in, {
     message: 'Time out must be after time in',
     path: ['proposed_time_out'],
+  })
+  .refine((v) => v.work_date <= localToday(), {
+    message: 'Cannot add a log for a future date',
+    path: ['work_date'],
   });
 type FormValues = z.infer<typeof FormSchema>;
 
 /**
- * "Request correction" drawer launched from a timesheet row. Pre-fills
- * the entry's current in/out; the employee adjusts them and adds a
- * reason. Submits a TIME_CORRECTION request pointing at the entry
- * (`target_entry_id`) — on final approval the backend rewrites that
- * time_entries row with source='correction'.
+ * "Add Logs" drawer (timesheet header). Manually adds a timelog for a past/
+ * today date that has no existing entry. Submitted as a correction request
+ * with `target_entry_id = null` — it goes through the normal approval chain,
+ * and on approval the backend creates a new confirmed time_entries row.
+ * Future dates and days that already have an entry are rejected server-side;
+ * the checks here are UX.
  */
-export function RequestCorrectionDrawer({
-  entry,
-  open,
-  onClose,
-}: {
-  entry: TimeEntry | null;
-  open: boolean;
-  onClose: () => void;
-}) {
+export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    defaultValues: { proposed_time_in: '', proposed_time_out: '', reason: '' },
+    defaultValues: { work_date: '', proposed_time_in: '', proposed_time_out: '', reason: '' },
   });
 
   useEffect(() => {
-    if (entry) {
-      form.reset({
-        proposed_time_in: isoToTimeInput(entry.time_in),
-        proposed_time_out: entry.time_out ? isoToTimeInput(entry.time_out) : '',
-        reason: '',
-      });
-    }
-  }, [entry, form]);
+    if (open)
+      form.reset({ work_date: '', proposed_time_in: '', proposed_time_out: '', reason: '' });
+  }, [open, form]);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => {
-      if (!entry) throw new Error('No entry selected');
-      // The date is locked to the entry: only the time-of-day changes. Recombine
-      // against the original instant's date so an unchanged field round-trips.
-      // time_out uses the in-instant's date when the entry had no prior out, so
-      // out stays on the same day (same-day rule).
-      return timeCorrectionApi.me.submit({
-        target_entry_id: entry.id,
-        work_date: entry.work_date,
-        proposed_time_in: replaceTimeOnIso(entry.time_in, values.proposed_time_in),
-        proposed_time_out: values.proposed_time_out
-          ? replaceTimeOnIso(entry.time_out ?? entry.time_in, values.proposed_time_out)
-          : null,
+    mutationFn: (values: FormValues) =>
+      timeCorrectionApi.me.submit({
+        target_entry_id: null,
+        work_date: values.work_date,
+        proposed_time_in: localDateTimeToIso(values.work_date, values.proposed_time_in),
+        proposed_time_out: localDateTimeToIso(values.work_date, values.proposed_time_out),
         reason: values.reason.trim(),
-      });
-    },
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['time-correction'] });
       void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-      toast.success('Correction request submitted.');
+      toast.success('Log submitted for approval.');
       onClose();
     },
     onError: (err) => toast.error(errorMessage(err)),
@@ -98,21 +89,27 @@ export function RequestCorrectionDrawer({
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>Request correction</SheetTitle>
+          <SheetTitle>Add log</SheetTitle>
           <SheetDescription>
-            {entry ? `Work date ${entry.work_date}` : ''} — adjust the times and tell us why.
+            Manually add a timelog for a past day. It needs your approver&apos;s sign-off before it
+            appears on your timesheet.
           </SheetDescription>
         </SheetHeader>
 
         <SheetBody>
-          <form id="correction-form" onSubmit={onSubmit} className="space-y-4" noValidate>
+          <form id="add-log-form" onSubmit={onSubmit} className="space-y-4" noValidate>
+            <Field label="Date" error={form.formState.errors.work_date?.message}>
+              <input
+                type="date"
+                max={localToday()}
+                className={inputCls}
+                {...form.register('work_date')}
+              />
+            </Field>
             <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
               <input type="time" className={inputCls} {...form.register('proposed_time_in')} />
             </Field>
-            <Field
-              label="Time out (optional)"
-              error={form.formState.errors.proposed_time_out?.message}
-            >
+            <Field label="Time out" error={form.formState.errors.proposed_time_out?.message}>
               <input type="time" className={inputCls} {...form.register('proposed_time_out')} />
             </Field>
             <Field label="Reason" error={form.formState.errors.reason?.message}>
@@ -127,11 +124,11 @@ export function RequestCorrectionDrawer({
           </button>
           <button
             type="submit"
-            form="correction-form"
+            form="add-log-form"
             disabled={mutation.isPending}
             className={btnPrimary}
           >
-            {mutation.isPending ? 'Submitting…' : 'Submit correction'}
+            {mutation.isPending ? 'Submitting…' : 'Add log'}
           </button>
         </SheetFooter>
       </SheetContent>
@@ -146,7 +143,7 @@ function errorMessage(err: unknown): string {
     if (first) return first;
     if (typeof body?.message === 'string') return body.message;
   }
-  return 'Could not submit the correction.';
+  return 'Could not add the log.';
 }
 
 const inputCls =

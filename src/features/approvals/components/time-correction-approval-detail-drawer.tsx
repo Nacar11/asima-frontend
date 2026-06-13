@@ -71,6 +71,9 @@ export function TimeCorrectionApprovalDetailDrawer({
               <Detail label="Status">
                 <TcStatusBadge status={request.status} />
               </Detail>
+              <Detail label="Type">
+                {request.target_entry_id == null ? 'New log' : 'Correction'}
+              </Detail>
               <Detail label="Work date">{request.work_date}</Detail>
               <Detail label="Proposed in">{formatDateTimeInTz(request.proposed_time_in)}</Detail>
               <Detail label="Proposed out">
@@ -80,7 +83,7 @@ export function TimeCorrectionApprovalDetailDrawer({
               <Detail label="Target entry">
                 {request.target_entry_id
                   ? `#${request.target_entry_id}`
-                  : 'Missed punch (new entry)'}
+                  : 'New manual log (creates a new entry)'}
               </Detail>
               <Detail label="Submitted">{formatDateTimeInTz(request.submitted_at)}</Detail>
               {request.decided_at && (

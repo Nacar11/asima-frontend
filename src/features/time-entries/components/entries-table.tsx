@@ -22,10 +22,17 @@ export function EntriesTable({
   rows,
   schedules,
   onRequestCorrection,
+  correctedDates,
 }: {
   rows: TimeEntry[];
   schedules: WorkSchedule[];
   onRequestCorrection?: (entry: TimeEntry) => void;
+  /**
+   * Set of `work_date`s that already have an active (pending/approved)
+   * correction. Rows in this set disable "Request correction" — the server
+   * blocks a second one per day, so this just surfaces that rule in the UI.
+   */
+  correctedDates?: Set<string>;
 }) {
   if (rows.length === 0) {
     return (
@@ -77,13 +84,24 @@ export function EntriesTable({
                   </div>
                 </Td>
                 <Td className="text-right">
-                  <button
-                    type="button"
-                    onClick={() => onRequestCorrection?.(row)}
-                    className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                  >
-                    Request correction
-                  </button>
+                  {(() => {
+                    const guarded = correctedDates?.has(row.work_date) ?? false;
+                    return (
+                      <div className="flex flex-col items-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onRequestCorrection?.(row)}
+                          disabled={guarded}
+                          className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Request correction
+                        </button>
+                        {guarded && (
+                          <span className="text-xs text-neutral-500">Correction requested</span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </Td>
               </tr>
             );

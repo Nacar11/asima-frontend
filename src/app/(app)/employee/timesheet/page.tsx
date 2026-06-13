@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { timeEntriesApi } from '@/features/time-entries/api';
 import { EntriesTable } from '@/features/time-entries/components/entries-table';
 import { RequestCorrectionDrawer } from '@/features/time-correction/components/request-correction-drawer';
+import { AddLogDrawer } from '@/features/time-correction/components/add-log-drawer';
+import { useMyActiveCorrections } from '@/features/time-correction/hooks/use-my-active-corrections';
 import { scheduleApi } from '@/features/schedule/api';
 import { cn } from '@/lib/cn';
 import type { TimeEntry } from '@/features/time-entries/schemas';
@@ -14,6 +16,7 @@ const PAGE_LIMIT = 20;
 export default function MyTimeSheetPage() {
   const [page, setPage] = useState(1);
   const [correcting, setCorrecting] = useState<TimeEntry | null>(null);
+  const [addingLog, setAddingLog] = useState(false);
 
   const listQuery = useQuery({
     queryKey: ['time-entries', 'me', page],
@@ -26,13 +29,27 @@ export default function MyTimeSheetPage() {
     queryFn: () => scheduleApi.mySchedule(),
   });
 
+  const correctedDates = useMyActiveCorrections(listQuery.data?.data ?? []);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">Time sheet</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Daily attendance and hours worked. Punch in/out from Home.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">Time sheet</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Daily attendance and hours worked. Punch in/out from Home.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setAddingLog(true)}
+          className={cn(
+            'shrink-0 rounded-md bg-neutral-950 px-3 py-2 text-sm font-medium text-white shadow-sm',
+            'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+          )}
+        >
+          Add Logs
+        </button>
       </div>
 
       {listQuery.isLoading && <p className="text-sm text-neutral-500">Loading entries…</p>}
@@ -42,6 +59,7 @@ export default function MyTimeSheetPage() {
           rows={listQuery.data.data}
           schedules={scheduleQuery.data ?? []}
           onRequestCorrection={setCorrecting}
+          correctedDates={correctedDates}
         />
       )}
 
@@ -61,6 +79,8 @@ export default function MyTimeSheetPage() {
         open={correcting !== null}
         onClose={() => setCorrecting(null)}
       />
+
+      <AddLogDrawer open={addingLog} onClose={() => setAddingLog(false)} />
     </div>
   );
 }
