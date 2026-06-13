@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ApprovalsPage } from '@/features/approvals/components/approvals-page';
+import { LeaveApprovalsPage } from '@/features/approvals/components/leave-approvals-page';
 
 vi.mock('@/features/auth/use-auth', () => ({
   useAuth: () => ({ user: { id: 5, system_admin: false } }),
@@ -22,6 +22,8 @@ vi.mock('@/features/leave/api', () => ({
   leaveApi: {
     approve: (...a: unknown[]) => approveMock(...a),
     reject: (...a: unknown[]) => rejectMock(...a),
+    getOne: vi.fn(),
+    downloadAttachment: vi.fn(),
   },
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -41,12 +43,12 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <ApprovalsPage />
+      <LeaveApprovalsPage />
     </QueryClientProvider>,
   );
 }
 
-describe('ApprovalsPage actions', () => {
+describe('LeaveApprovalsPage actions', () => {
   beforeEach(() => {
     listPendingMock.mockReset().mockResolvedValue({
       data: [LEAVE_ROW], total: 1, page: 1, limit: 20, has_more: false,
@@ -55,7 +57,7 @@ describe('ApprovalsPage actions', () => {
     rejectMock.mockReset().mockResolvedValue({});
   });
 
-  it('approves a leave row', async () => {
+  it('approves a leave row through the registry', async () => {
     renderPage();
     await screen.findByText('Ada Lovelace');
     await userEvent.click(screen.getByRole('button', { name: /approve/i }));

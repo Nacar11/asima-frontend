@@ -30,6 +30,8 @@ export const PendingApprovalListSchema = z.object({
 export type PendingApprovalList = z.infer<typeof PendingApprovalListSchema>;
 
 export type PendingApprovalsQuery = {
+  /** Scope the inbox to one request kind. Omit for all kinds. */
+  type?: PendingApprovalKind;
   page?: number;
   limit?: number;
 };

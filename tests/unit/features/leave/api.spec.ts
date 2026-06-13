@@ -92,6 +92,12 @@ describe('leaveApi', () => {
     expect((form as FormData).get('file')).toBe(file);
   });
 
+  it('getOne GETs the top-level (approver-facing) leave-requests/:id route', async () => {
+    const c = stubClient(ROW);
+    await leaveApi.getOne(7, c);
+    expect(c.get).toHaveBeenCalledWith('/leave-requests/7');
+  });
+
   it('downloadAttachment GETs the attachment route as a blob with the version param', async () => {
     const c = stubClient(null);
     await leaveApi.downloadAttachment(7, 'thumbnail', c);

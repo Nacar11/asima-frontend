@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ApprovalsPage } from '@/features/approvals/components/approvals-page';
+import { TimeCorrectionApprovalsPage } from '@/features/approvals/components/time-correction-approvals-page';
 
 vi.mock('@/features/auth/use-auth', () => ({
   useAuth: () => ({ user: { id: 5, system_admin: false } }),
@@ -21,10 +21,11 @@ vi.mock('@/features/time-correction/api', () => ({
   timeCorrectionApi: {
     approve: (...a: unknown[]) => tcApproveMock(...a),
     reject: vi.fn(),
+    getOne: vi.fn(),
   },
 }));
 vi.mock('@/features/leave/api', () => ({
-  leaveApi: { approve: vi.fn(), reject: vi.fn() },
+  leaveApi: { approve: vi.fn(), reject: vi.fn(), getOne: vi.fn(), downloadAttachment: vi.fn() },
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
@@ -43,12 +44,12 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <ApprovalsPage />
+      <TimeCorrectionApprovalsPage />
     </QueryClientProvider>,
   );
 }
 
-describe('ApprovalsPage — time-correction actions', () => {
+describe('TimeCorrectionApprovalsPage — time-correction actions', () => {
   beforeEach(() => {
     listPendingMock.mockReset().mockResolvedValue({
       data: [TC_ROW], total: 1, page: 1, limit: 20, has_more: false,

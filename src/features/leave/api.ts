@@ -149,6 +149,19 @@ export const leaveApi = {
     },
   },
 
+  /**
+   * Fetch a single request via the top-level (approver-facing) route. The
+   * server's `findByIdForViewer` authorizes the requester, the snapshotted
+   * L1/L2 approver, or LEAVE:ViewAll/system_admin — so the chain approver in
+   * the pending-approvals inbox can load full details for a row they see.
+   * Distinct from `me.getOne` (own requests) and `admin.getOne` (HR).
+   */
+  getOne(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+    return client
+      .get<unknown>(`/leave-requests/${id}`)
+      .then((res) => LeaveRequestSchema.parse(res));
+  },
+
   approve(id: number, client: ApiClient = apiClient()): Promise<LeaveRequest> {
     return client
       .post<unknown>(`/leave-requests/${id}/approve`)

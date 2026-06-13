@@ -50,6 +50,12 @@ describe('timeCorrectionApi', () => {
     });
   });
 
+  it('getOne GETs the top-level (approver-facing) time-correction-requests/:id route', async () => {
+    const c = stubClient(ROW);
+    await timeCorrectionApi.getOne(7, c);
+    expect(c.get).toHaveBeenCalledWith('/time-correction-requests/7');
+  });
+
   it('approve POSTs the top-level route', async () => {
     const c = stubClient(ROW);
     await timeCorrectionApi.approve(1, c);

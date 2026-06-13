@@ -72,6 +72,19 @@ export const timeCorrectionApi = {
     },
   },
 
+  /**
+   * Fetch a single correction via the top-level (approver-facing) route. The
+   * server's `findByIdForViewer` authorizes the requester, the snapshotted
+   * L1/L2 approver, or TIME_CORRECTION:ViewAll/system_admin — so the chain
+   * approver in the pending-approvals inbox can load full details. This is the
+   * only `getOne` on the TC client (there is no `me`/`admin` equivalent).
+   */
+  getOne(id: number, client: ApiClient = apiClient()): Promise<TimeCorrectionRequest> {
+    return client
+      .get<unknown>(`/time-correction-requests/${id}`)
+      .then((res) => TimeCorrectionSchema.parse(res));
+  },
+
   approve(id: number, client: ApiClient = apiClient()): Promise<TimeCorrectionRequest> {
     return client
       .post<unknown>(`/time-correction-requests/${id}/approve`)

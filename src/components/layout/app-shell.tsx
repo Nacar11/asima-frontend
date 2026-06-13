@@ -58,9 +58,16 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { href: '/employee/schedule', label: 'Schedule', icon: CalendarDays, section: 'me' },
   { href: '/employee/leaves', label: 'Leave', icon: Plane, section: 'me' },
   {
-    href: '/approvals',
-    label: 'Pending approvals',
+    href: '/leave-approvals',
+    label: 'Pending Approvals (Leaves)',
     icon: Inbox,
+    section: 'approvals',
+    requires: 'APPROVAL:View',
+  },
+  {
+    href: '/time-correction-approvals',
+    label: 'Pending Approvals (Time Corrections)',
+    icon: Timer,
     section: 'approvals',
     requires: 'APPROVAL:View',
   },
