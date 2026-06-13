@@ -116,11 +116,13 @@ describe('EmployeeLeavesPage', () => {
           start_date: '2026-07-01',
           end_date: '2026-07-03',
         }),
+        // vacation carries no attachment.
+        null,
       ),
     );
   });
 
-  it('submits with a non-default leave type chosen from the select', async () => {
+  it('submits a sick request with a required attachment chosen from the select', async () => {
     renderPage();
     await screen.findByText('Pending L1');
     await userEvent.click(screen.getByRole('button', { name: /apply for leave/i }));
@@ -131,12 +133,19 @@ describe('EmployeeLeavesPage', () => {
     await userEvent.click(within(listbox).getByText('Sick'));
 
     fireEventChange(await screen.findByLabelText(/start date/i), '2026-07-01');
-    fireEventChange(await screen.findByLabelText(/end date/i), '2026-07-03');
+    fireEventChange(await screen.findByLabelText(/end date/i), '2026-07-01');
+
+    // sick requires a file — submit stays disabled until one is attached.
+    expect(screen.getByRole('button', { name: /submit request/i })).toBeDisabled();
+    const file = new File(['bytes'], 'cert.png', { type: 'image/png' });
+    await userEvent.upload(screen.getByLabelText(/attachment/i), file);
+
     await userEvent.click(screen.getByRole('button', { name: /submit request/i }));
 
     await waitFor(() =>
       expect(meSubmitMock).toHaveBeenCalledWith(
         expect.objectContaining({ leave_type: 'sick' }),
+        file,
       ),
     );
   });

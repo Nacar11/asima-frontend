@@ -102,4 +102,32 @@ describe('ApiClient', () => {
     const headers = fetchMock.mock.calls[0]![1].headers as Headers;
     expect(headers.get('X-Request-ID')).toMatch(/^[0-9a-f-]{8,}$/i);
   });
+
+  it('postForm sends FormData as-is WITHOUT a Content-Type header (browser sets the boundary)', async () => {
+    fetchMock.mockResolvedValue(new Response('{}', { status: 200 }));
+    const form = new FormData();
+    form.set('leave_type', 'sick');
+    form.set('file', new File(['x'], 'a.png', { type: 'image/png' }));
+
+    await client.postForm('/users/me/leave-requests', form);
+
+    const [, init] = fetchMock.mock.calls[0]!;
+    expect(init.body).toBe(form);
+    expect((init.headers as Headers).get('Content-Type')).toBeNull();
+  });
+
+  it('getBlob returns the response body as a Blob on success', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(new Blob(['bytes'], { type: 'image/png' }), { status: 200 }),
+    );
+    const blob = await client.getBlob('/leave-requests/1/attachment', {
+      params: { version: 'original' },
+    });
+    expect(blob).toBeInstanceOf(Blob);
+  });
+
+  it('getBlob still throws ApiError on a non-2xx (e.g. 403)', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'no' }), { status: 403 }));
+    await expect(client.getBlob('/leave-requests/1/attachment')).rejects.toBeInstanceOf(ApiError);
+  });
 });

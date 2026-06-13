@@ -28,6 +28,28 @@ export const HALF_DAY_LEAVE_TYPES = new Set<LeaveType>([
 ]);
 export const canHalfDay = (t: LeaveType): boolean => HALF_DAY_LEAVE_TYPES.has(t);
 
+/**
+ * Leave types that require exactly one supporting attachment on submit —
+ * mirrors the backend's ATTACHMENT_REQUIRED_LEAVE_TYPES. The client guard
+ * blocks submit without a file for these; the server is the real boundary.
+ */
+export const ATTACHMENT_REQUIRED_LEAVE_TYPES = new Set<LeaveType>(['sick', 'bereavement']);
+export const requiresAttachment = (t: LeaveType): boolean =>
+  ATTACHMENT_REQUIRED_LEAVE_TYPES.has(t);
+
+/** Accepted attachment MIME types + extensions (mirrors file-validation). */
+export const ACCEPTED_ATTACHMENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+] as const;
+export const ACCEPTED_ATTACHMENT_ACCEPT = ACCEPTED_ATTACHMENT_TYPES.join(',');
+
+/** Rendition selector for the attachment download endpoint. */
+export const FILE_VERSIONS = ['original', 'preview', 'thumbnail'] as const;
+export type FileVersion = (typeof FILE_VERSIONS)[number];
+
 export const LEAVE_STATUSES = [
   'pending_l1',
   'pending_l2',
@@ -69,6 +91,9 @@ export const LeaveRequestSchema = z.object({
   cancelled_by: z.number().int().nullable(),
   l1_approver_id: z.number().int(),
   l2_approver_id: z.number().int().nullable(),
+  // FK attachments.id — set for sick/bereavement, null otherwise. Optional
+  // for resilience against fixtures/older payloads that omit it.
+  attachment_id: z.number().int().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

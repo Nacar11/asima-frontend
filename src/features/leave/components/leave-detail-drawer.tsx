@@ -17,6 +17,7 @@ import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
 import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel, formatWindow, isPending } from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
+import { LeaveAttachment } from '@/features/leave/components/leave-attachment';
 import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '@/features/leave/schemas';
 
 /**
@@ -217,6 +218,11 @@ export function LeaveDetailDrawer({
                       : '')}
               </Detail>
               <Detail label="Reason">{request.reason ?? '—'}</Detail>
+              {request.attachment_id != null && (
+                <Detail label="Attachment">
+                  <LeaveAttachment requestId={request.id} />
+                </Detail>
+              )}
             </>
           )}
 

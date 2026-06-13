@@ -9,10 +9,12 @@ const approveMock = vi.fn();
 const rejectMock = vi.fn();
 const adminCancelMock = vi.fn();
 const adminUpdateMock = vi.fn();
+const downloadMock = vi.fn();
 vi.mock('@/features/leave/api', () => ({
   leaveApi: {
     approve: (...a: unknown[]) => approveMock(...a),
     reject: (...a: unknown[]) => rejectMock(...a),
+    downloadAttachment: (...a: unknown[]) => downloadMock(...a),
     admin: {
       cancel: (...a: unknown[]) => adminCancelMock(...a),
       update: (...a: unknown[]) => adminUpdateMock(...a),
@@ -70,6 +72,33 @@ describe('LeaveDetailDrawer', () => {
     rejectMock.mockReset().mockResolvedValue(PENDING);
     adminCancelMock.mockReset().mockResolvedValue(PENDING);
     adminUpdateMock.mockReset().mockResolvedValue(PENDING);
+    downloadMock.mockReset().mockResolvedValue(new Blob(['x']));
+    // jsdom doesn't implement object URLs.
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock');
+    globalThis.URL.revokeObjectURL = vi.fn();
+  });
+
+  it('renders no attachment section when the request has none', () => {
+    renderDrawer();
+    expect(screen.queryByText('Attachment')).not.toBeInTheDocument();
+  });
+
+  it('shows an image thumbnail for a request with an image attachment', async () => {
+    renderDrawer({ request: { ...PENDING, leave_type: 'sick', attachment_id: 9 } });
+    expect(screen.getByText('Attachment')).toBeInTheDocument();
+    // Thumbnail rendition loads → "View full image" affordance.
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /view attachment/i })).toBeInTheDocument(),
+    );
+    expect(downloadMock).toHaveBeenCalledWith(1, 'thumbnail');
+  });
+
+  it('falls back to a download link when the thumbnail 404s (PDF)', async () => {
+    downloadMock.mockRejectedValueOnce(new Error('404')); // thumbnail rendition missing
+    renderDrawer({ request: { ...PENDING, leave_type: 'sick', attachment_id: 9 } });
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /download attachment/i })).toBeInTheDocument(),
+    );
   });
 
   it('shows the request details', () => {

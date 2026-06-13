@@ -8,6 +8,7 @@ import {
   LeaveRequestSchema,
   type DayCount,
   type DayPortion,
+  type FileVersion,
   type GrantAllocationInput,
   type LeaveAllocation,
   type LeaveBalance,
@@ -41,7 +42,28 @@ export const leaveApi = {
         .get<unknown>('/users/me/leave-requests', { params: toParams(query) })
         .then((res) => LeaveRequestListSchema.parse(res));
     },
-    submit(input: SubmitLeaveInput, client: ApiClient = apiClient()): Promise<LeaveRequest> {
+    /**
+     * Submit a leave request. sick/bereavement carry a mandatory `file`,
+     * sent as multipart/form-data; every other type posts JSON. The server
+     * enforces the rule either way (this is UX, not the boundary).
+     */
+    submit(
+      input: SubmitLeaveInput,
+      file?: File | null,
+      client: ApiClient = apiClient(),
+    ): Promise<LeaveRequest> {
+      if (file) {
+        const form = new FormData();
+        form.set('leave_type', input.leave_type);
+        form.set('start_date', input.start_date);
+        form.set('end_date', input.end_date);
+        if (input.day_portion) form.set('day_portion', input.day_portion);
+        if (input.reason) form.set('reason', input.reason);
+        form.set('file', file);
+        return client
+          .postForm<unknown>('/users/me/leave-requests', form)
+          .then((res) => LeaveRequestSchema.parse(res));
+      }
       return client
         .post<unknown>('/users/me/leave-requests', input)
         .then((res) => LeaveRequestSchema.parse(res));
@@ -137,5 +159,18 @@ export const leaveApi = {
     return client
       .post<unknown>(`/leave-requests/${id}/reject`, { note })
       .then((res) => LeaveRequestSchema.parse(res));
+  },
+
+  /**
+   * Download a request's attachment as a Blob (streamed + permission-checked
+   * server-side). `original` for the source file; `preview` / `thumbnail` are
+   * image-only renditions (404 for a PDF).
+   */
+  downloadAttachment(
+    id: number,
+    version: FileVersion = 'original',
+    client: ApiClient = apiClient(),
+  ): Promise<Blob> {
+    return client.getBlob(`/leave-requests/${id}/attachment`, { params: { version } });
   },
 };
