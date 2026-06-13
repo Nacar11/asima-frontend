@@ -115,13 +115,25 @@ describe('ApiClient', () => {
   });
 
   it('getBlob returns the response body as a Blob on success', async () => {
+    // Use a string body (not a jsdom Blob): the global Response is undici's,
+    // which doesn't accept a jsdom Blob as BodyInit and would stringify it to
+    // "[object Blob]". A string body + Content-Type header is realm-neutral.
     fetchMock.mockResolvedValue(
-      new Response(new Blob(['bytes'], { type: 'image/png' }), { status: 200 }),
+      new Response('bytes', { status: 200, headers: { 'Content-Type': 'image/png' } }),
     );
     const blob = await client.getBlob('/leave-requests/1/attachment', {
       params: { version: 'original' },
     });
-    expect(blob).toBeInstanceOf(Blob);
+    // Assert the Blob contract structurally, not by constructor identity or
+    // by calling realm-specific methods. Response.blob() yields a Blob whose
+    // class differs by realm: undici's (Node 20) vs jsdom's (Node 24) — the
+    // latter even lacks .text()/.arrayBuffer(). constructor.name + type +
+    // size are present in both, and size === 5 ('bytes') proves the body
+    // round-tripped intact (the old jsdom-Blob mock corrupted it to the
+    // 13-char "[object Blob]").
+    expect(blob.constructor.name).toBe('Blob');
+    expect(blob.type).toBe('image/png');
+    expect(blob.size).toBe(5);
   });
 
   it('getBlob still throws ApiError on a non-2xx (e.g. 403)', async () => {
