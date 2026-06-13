@@ -172,5 +172,26 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
     const row = within(rowFor('2026-06-13'));
     expect(row.getByText(/Jane Cruz/)).toBeInTheDocument();
     expect(row.getByText(/Bob Lim/)).toBeInTheDocument();
+    expect(row.getByText('L1:')).toBeInTheDocument();
+    expect(row.getByText('L2:')).toBeInTheDocument();
+  });
+
+  it('shows just the lone approver name (no L1/L2 labels) for a single-level chain', () => {
+    const corrections = new Map([
+      ['2026-06-13', correction('2026-06-13', { l2_approver_id: null, l2_approver_name: null })],
+    ]);
+    render(
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByDate={corrections}
+      />,
+    );
+
+    const row = within(rowFor('2026-06-13'));
+    expect(row.getByText(/Jane Cruz/)).toBeInTheDocument();
+    expect(row.queryByText('L1:')).not.toBeInTheDocument();
+    expect(row.queryByText('L2:')).not.toBeInTheDocument();
+    expect(row.queryByText(/n\/a/)).not.toBeInTheDocument();
   });
 });

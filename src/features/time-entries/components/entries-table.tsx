@@ -195,6 +195,15 @@ function StatusBadge({ status }: { status: TimesheetStatus }) {
 function ApproverCell({ correction }: { correction?: TimeCorrectionRequest }) {
   if (!correction) return <span className="text-neutral-400">—</span>;
   const { l1, l2 } = approverStates(correction);
+  // Single-level chain (no L2): show just the lone approver's name + state,
+  // without the L1/L2 scaffolding (no "L2: n/a" line).
+  if (correction.l2_approver_id === null) {
+    return (
+      <div className="text-xs">
+        <ApproverLine name={correction.l1_approver_name ?? null} state={l1} />
+      </div>
+    );
+  }
   return (
     <div className="space-y-0.5 text-xs">
       <ApproverLine level="L1" name={correction.l1_approver_name ?? null} state={l1} />
@@ -221,13 +230,13 @@ function ApproverLine({
   name,
   state,
 }: {
-  level: string;
+  level?: string;
   name: string | null;
   state: ApproverLevelState;
 }) {
   return (
     <div>
-      <span className="font-medium text-neutral-700">{level}:</span>{' '}
+      {level && <span className="font-medium text-neutral-700">{level}: </span>}
       {state === 'na' ? (
         <span className="text-neutral-400">n/a</span>
       ) : (
