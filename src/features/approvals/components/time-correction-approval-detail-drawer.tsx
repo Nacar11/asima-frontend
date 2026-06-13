@@ -15,6 +15,7 @@ import { formatDateTimeInTz } from '@/lib/format';
 import { timeCorrectionApi } from '@/features/time-correction/api';
 import { isTcPending } from '@/features/time-correction/format';
 import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
+import { TimeDiff } from '@/features/time-correction/components/time-in-out-diff';
 import type { PendingApproval } from '@/features/approvals/schemas';
 
 /**
@@ -50,11 +51,19 @@ export function TimeCorrectionApprovalDetailDrawer({
   const request = query.data ?? null;
   const pending = request != null && isTcPending(request.status);
 
+  // The header reflects whether this adds a brand-new log or updates an
+  // existing entry. Prefer the loaded request; fall back to the inbox row's
+  // payload so the title is correct before the detail fetch resolves.
+  const isNewLog = request
+    ? request.target_entry_id == null
+    : (row?.time_correction?.is_new_log ?? false);
+  const title = isNewLog ? 'Add Time Log' : 'Update Time Log';
+
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>Correction{row ? ` #${row.id}` : ''}</SheetTitle>
+          <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{row?.employee_name}</SheetDescription>
         </SheetHeader>
 
@@ -71,20 +80,17 @@ export function TimeCorrectionApprovalDetailDrawer({
               <Detail label="Status">
                 <TcStatusBadge status={request.status} />
               </Detail>
-              <Detail label="Type">
-                {request.target_entry_id == null ? 'New log' : 'Correction'}
+              <Detail label="Work Date">{request.work_date}</Detail>
+              <Detail label="Proposed In">
+                <TimeDiff original={request.original_time_in} proposed={request.proposed_time_in} />
               </Detail>
-              <Detail label="Work date">{request.work_date}</Detail>
-              <Detail label="Proposed in">{formatDateTimeInTz(request.proposed_time_in)}</Detail>
-              <Detail label="Proposed out">
-                {request.proposed_time_out ? formatDateTimeInTz(request.proposed_time_out) : '—'}
+              <Detail label="Proposed Out">
+                <TimeDiff
+                  original={request.original_time_out}
+                  proposed={request.proposed_time_out}
+                />
               </Detail>
               <Detail label="Reason">{request.reason}</Detail>
-              <Detail label="Target entry">
-                {request.target_entry_id
-                  ? `#${request.target_entry_id}`
-                  : 'New manual log (creates a new entry)'}
-              </Detail>
               <Detail label="Submitted">{formatDateTimeInTz(request.submitted_at)}</Detail>
               {request.decided_at && (
                 <Detail label="Decided">
@@ -124,9 +130,9 @@ export function TimeCorrectionApprovalDetailDrawer({
 
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-xs font-medium uppercase tracking-wide text-neutral-500">{label}</span>
-      <span className="text-sm text-neutral-900">{children}</span>
+    <div className="flex flex-wrap items-baseline gap-x-2 text-sm">
+      <span className="font-medium text-neutral-900">{label}:</span>
+      <span className="text-neutral-700">{children}</span>
     </div>
   );
 }

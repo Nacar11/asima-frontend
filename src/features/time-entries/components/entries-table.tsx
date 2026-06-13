@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateInTz, formatTimeInTz } from '@/lib/format';
+import { formatDateInTz } from '@/lib/format';
 import { durationMinutes, formatDuration, type TimeEntry } from '@/features/time-entries/schemas';
 import {
   findScheduleForDate,
@@ -15,6 +15,7 @@ import {
 } from '@/features/time-entries/metrics';
 import type { WorkSchedule } from '@/features/schedule/schemas';
 import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
+import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
 import { cn } from '@/lib/cn';
 
 /**
@@ -146,23 +147,13 @@ function TimeInOutCell({
   entry: TimeEntry;
   correction?: TimeCorrectionRequest;
 }) {
-  const inOrig = formatTimeInTz(entry.time_in);
-  const outOrig = entry.time_out ? formatTimeInTz(entry.time_out) : '—';
-  const inProposed = correction ? formatTimeInTz(correction.proposed_time_in) : null;
-  const outProposed = correction?.proposed_time_out
-    ? formatTimeInTz(correction.proposed_time_out)
-    : null;
   return (
-    <div className="font-mono text-xs leading-5">
-      <div>
-        in:&nbsp;{inOrig}
-        {inProposed && <span className="text-neutral-500"> → {inProposed}</span>}
-      </div>
-      <div>
-        out:&nbsp;{outOrig}
-        {outProposed && <span className="text-neutral-500"> → {outProposed}</span>}
-      </div>
-    </div>
+    <TimeInOutDiff
+      inOriginal={entry.time_in}
+      inProposed={correction?.proposed_time_in ?? null}
+      outOriginal={entry.time_out}
+      outProposed={correction?.proposed_time_out ?? null}
+    />
   );
 }
 

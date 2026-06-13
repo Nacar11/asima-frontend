@@ -22,12 +22,21 @@ const ROW: PendingApproval = {
   current_step: 1,
   current_approver_id: 5,
   summary: 'correction for 2026-06-10',
+  time_correction: {
+    original_time_in: '2026-06-10T02:00:00.000Z',
+    original_time_out: null,
+    proposed_time_in: '2026-06-10T01:00:00.000Z',
+    proposed_time_out: null,
+    is_new_log: false,
+  },
 };
 
 const REQUEST: TimeCorrectionRequest = {
   id: 14,
   employee_id: 12,
   target_entry_id: 88,
+  original_time_in: '2026-06-10T02:00:00.000Z',
+  original_time_out: null,
   work_date: '2026-06-10',
   proposed_time_in: '2026-06-10T01:00:00.000Z',
   proposed_time_out: null,
@@ -77,15 +86,31 @@ describe('TimeCorrectionApprovalDetailDrawer', () => {
     expect(screen.getByText('2026-06-10')).toBeInTheDocument();
   });
 
-  it('labels a request with a target entry as a "Correction"', async () => {
+  it('titles a request that targets an entry "Update Time Log"', async () => {
     renderDrawer();
-    expect(await screen.findByText('Correction')).toBeInTheDocument();
+    expect(await screen.findByText('Update Time Log')).toBeInTheDocument();
   });
 
-  it('labels a null-target request as a "New log"', async () => {
+  it('titles a null-target request "Add Time Log"', async () => {
     getOneMock.mockResolvedValue({ ...REQUEST, target_entry_id: null });
+    renderDrawer({
+      row: { ...ROW, time_correction: { ...ROW.time_correction!, is_new_log: true } },
+    });
+    expect(await screen.findByText('Add Time Log')).toBeInTheDocument();
+  });
+
+  it('does not show a Target Entry field', async () => {
     renderDrawer();
-    expect(await screen.findByText('New log')).toBeInTheDocument();
+    await screen.findByText('Forgot to punch in');
+    expect(screen.queryByText(/target entry/i)).toBeNull();
+  });
+
+  it('renders Proposed In as an original→proposed diff', async () => {
+    renderDrawer();
+    const label = await screen.findByText('Proposed In:');
+    // The value sits in the sibling span; both original and proposed render
+    // with an arrow between them.
+    expect(label.parentElement?.textContent).toMatch(/→/);
   });
 
   it('approves a pending correction through the inbox callback', async () => {

@@ -27,6 +27,10 @@ export const TimeCorrectionSchema = z.object({
   // Present on list responses (joined read-model); absent on single GET.
   employee_name: z.string().nullable().optional(),
   target_entry_id: z.number().int().nullable(),
+  // Target entry's current times (resolved by join on the approver read paths);
+  // null for a new-log correction or when not loaded. Drive the in/out diff.
+  original_time_in: z.string().nullable().optional(),
+  original_time_out: z.string().nullable().optional(),
   work_date: z.string(),
   proposed_time_in: z.string(),
   proposed_time_out: z.string().nullable(),

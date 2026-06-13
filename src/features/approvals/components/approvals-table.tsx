@@ -3,6 +3,7 @@
 import { cn } from '@/lib/cn';
 import { formatDateInTz } from '@/lib/format';
 import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
+import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
 import type { PendingApproval } from '@/features/approvals/schemas';
 
 /**
@@ -50,7 +51,18 @@ export function ApprovalsTable({
             return (
               <tr key={`${row.kind}-${row.id}`}>
                 <Td>{row.employee_name}</Td>
-                <Td className="max-w-md truncate">{row.summary}</Td>
+                <Td className="max-w-md">
+                  {row.time_correction ? (
+                    <TimeInOutDiff
+                      inOriginal={row.time_correction.original_time_in}
+                      inProposed={row.time_correction.proposed_time_in}
+                      outOriginal={row.time_correction.original_time_out}
+                      outProposed={row.time_correction.proposed_time_out}
+                    />
+                  ) : (
+                    <span className="truncate">{row.summary}</span>
+                  )}
+                </Td>
                 <Td>{formatDateInTz(row.requested_at)}</Td>
                 <Td>{row.current_step}</Td>
                 {hasActionsColumn && (

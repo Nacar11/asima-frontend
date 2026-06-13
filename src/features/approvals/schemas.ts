@@ -8,6 +8,20 @@ import { z } from 'zod';
 export const PendingApprovalKindSchema = z.enum(['leave', 'time_correction']);
 export type PendingApprovalKind = z.infer<typeof PendingApprovalKindSchema>;
 
+/**
+ * Time-correction payload on a pending-approval row (present only for
+ * `kind === 'time_correction'`). Raw ISO times so the inbox renders the
+ * original→proposed in/out diff in the display timezone.
+ */
+export const PendingApprovalTimeCorrectionSchema = z.object({
+  original_time_in: z.string().nullable(),
+  original_time_out: z.string().nullable(),
+  proposed_time_in: z.string(),
+  proposed_time_out: z.string().nullable(),
+  is_new_log: z.boolean(),
+});
+export type PendingApprovalTimeCorrection = z.infer<typeof PendingApprovalTimeCorrectionSchema>;
+
 export const PendingApprovalSchema = z.object({
   id: z.number().int().positive(),
   kind: PendingApprovalKindSchema,
@@ -17,6 +31,7 @@ export const PendingApprovalSchema = z.object({
   current_step: z.number().int().nonnegative(),
   current_approver_id: z.number().int().positive(),
   summary: z.string(),
+  time_correction: PendingApprovalTimeCorrectionSchema.nullable().optional(),
 });
 export type PendingApproval = z.infer<typeof PendingApprovalSchema>;
 
