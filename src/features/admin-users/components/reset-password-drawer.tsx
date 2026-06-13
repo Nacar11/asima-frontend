@@ -56,7 +56,8 @@ export function ResetPasswordDrawer({
         <SheetHeader>
           <SheetTitle>{title || 'Reset password'}</SheetTitle>
           <SheetDescription>
-            Admin override — no current password required. Communicate the new password to the user out-of-band.
+            Admin override — no current password required. Communicate the new password to the user
+            out-of-band.
           </SheetDescription>
         </SheetHeader>
 

@@ -51,7 +51,11 @@ function renderPage() {
 describe('LeaveApprovalsPage actions', () => {
   beforeEach(() => {
     listPendingMock.mockReset().mockResolvedValue({
-      data: [LEAVE_ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [LEAVE_ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     approveMock.mockReset().mockResolvedValue({});
     rejectMock.mockReset().mockResolvedValue({});

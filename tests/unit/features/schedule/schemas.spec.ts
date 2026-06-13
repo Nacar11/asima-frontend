@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  WorkScheduleSchema,
-  dayName,
-  formatBreak,
-  trimSeconds,
-} from '@/features/schedule/schemas';
+import { WorkScheduleSchema, dayName, formatBreak, trimSeconds } from '@/features/schedule/schemas';
 
 describe('WorkScheduleSchema', () => {
   it('parses a typical Mon..Fri 9–6 row', () => {

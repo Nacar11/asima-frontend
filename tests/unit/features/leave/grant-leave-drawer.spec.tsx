@@ -30,11 +30,7 @@ function renderDrawer() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <GrantLeaveDrawer
-        employees={[{ id: 12, name: 'Emma Thompson' }]}
-        open
-        onClose={() => {}}
-      />
+      <GrantLeaveDrawer employees={[{ id: 12, name: 'Emma Thompson' }]} open onClose={() => {}} />
     </QueryClientProvider>,
   );
 }

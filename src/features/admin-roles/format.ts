@@ -16,9 +16,7 @@ const OVERRIDES: Record<string, string> = {
   TECHNICAL_DIRECTOR: 'Technical Director',
 };
 
-const ACRONYMS = new Set([
-  'HR', 'IT', 'QA', 'PR', 'CEO', 'CTO', 'CFO', 'COO', 'API', 'UI', 'UX',
-]);
+const ACRONYMS = new Set(['HR', 'IT', 'QA', 'PR', 'CEO', 'CTO', 'CFO', 'COO', 'API', 'UI', 'UX']);
 
 export function formatRoleName(code: string): string {
   const override = OVERRIDES[code];
@@ -27,9 +25,7 @@ export function formatRoleName(code: string): string {
     .split('_')
     .filter(Boolean)
     .map((tok) =>
-      ACRONYMS.has(tok)
-        ? tok
-        : tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase(),
+      ACRONYMS.has(tok) ? tok : tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase(),
     )
     .join(' ');
 }

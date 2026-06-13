@@ -22,9 +22,7 @@ export default function MySchedulePage() {
 
       <Card className="p-0">
         {isLoading && <p className="p-6 text-sm text-neutral-500">Loading schedule…</p>}
-        {error && (
-          <p className="p-6 text-sm text-red-700">Could not load schedule.</p>
-        )}
+        {error && <p className="p-6 text-sm text-red-700">Could not load schedule.</p>}
         {data && data.length === 0 && (
           <p className="p-6 text-sm text-neutral-500">No active schedule on file.</p>
         )}

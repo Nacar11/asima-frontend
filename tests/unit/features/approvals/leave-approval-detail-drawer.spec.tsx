@@ -52,9 +52,7 @@ const REQUEST: LeaveRequest = {
   updated_at: '2026-06-13T08:00:00.000Z',
 };
 
-function renderDrawer(
-  props: Partial<React.ComponentProps<typeof LeaveApprovalDetailDrawer>> = {},
-) {
+function renderDrawer(props: Partial<React.ComponentProps<typeof LeaveApprovalDetailDrawer>> = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>

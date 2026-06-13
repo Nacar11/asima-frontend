@@ -67,7 +67,11 @@ function renderPage() {
 describe('EmployeeLeavesPage', () => {
   beforeEach(() => {
     meListMock.mockReset().mockResolvedValue({
-      data: [PENDING_ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [PENDING_ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     meSubmitMock.mockReset().mockResolvedValue(PENDING_ROW);
     meCancelMock.mockReset().mockResolvedValue({ ...PENDING_ROW, status: 'cancelled' });
@@ -155,7 +159,10 @@ describe('EmployeeLeavesPage', () => {
     // must end on/after today for the Cancel button to render.
     meListMock.mockResolvedValue({
       data: [{ ...PENDING_ROW, end_date: '2099-12-31' }],
-      total: 1, page: 1, limit: 20, has_more: false,
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     renderPage();
     const cancelBtn = await screen.findByRole('button', { name: /^cancel$/i });

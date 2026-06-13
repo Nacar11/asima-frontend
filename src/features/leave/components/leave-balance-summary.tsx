@@ -27,10 +27,10 @@ export function LeaveBalanceSummary({ balances }: { balances: LeaveBalance[] }) 
           <p className="text-xs text-neutral-500">available</p>
           <div className="mt-2 flex gap-3 text-xs text-neutral-500">
             <span aria-label="approved days">
-              <span className="font-medium text-neutral-700 tabular-nums">{b.used}</span> used
+              <span className="font-medium tabular-nums text-neutral-700">{b.used}</span> used
             </span>
             <span aria-label="pending days">
-              <span className="font-medium text-amber-700 tabular-nums">{b.reserved}</span> pending
+              <span className="font-medium tabular-nums text-amber-700">{b.reserved}</span> pending
             </span>
           </div>
         </div>

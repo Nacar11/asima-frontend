@@ -18,7 +18,11 @@ import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { GrantAllocationSchema, LEAVE_TYPES, type GrantAllocationInput } from '@/features/leave/schemas';
+import {
+  GrantAllocationSchema,
+  LEAVE_TYPES,
+  type GrantAllocationInput,
+} from '@/features/leave/schemas';
 import { LEAVE_TYPE_LABELS } from '@/features/leave/format';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
 
@@ -86,7 +90,9 @@ export function GrantLeaveDrawer({
       <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>Grant leave</SheetTitle>
-          <SheetDescription>Add leave days to an employee&apos;s balance (append-only).</SheetDescription>
+          <SheetDescription>
+            Add leave days to an employee&apos;s balance (append-only).
+          </SheetDescription>
         </SheetHeader>
 
         <SheetBody className="space-y-5">
@@ -153,7 +159,10 @@ export function GrantLeaveDrawer({
                   </p>
                   <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
                     {historyQuery.data.map((a) => (
-                      <li key={a.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                      <li
+                        key={a.id}
+                        className="flex items-center justify-between px-3 py-2 text-sm"
+                      >
                         <span>
                           <span className="font-medium tabular-nums">+{a.amount}</span>{' '}
                           {LEAVE_TYPE_LABELS[a.leave_type]}

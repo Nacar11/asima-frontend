@@ -47,7 +47,11 @@ describe('time-correction schemas', () => {
 
   it('parses the paginated envelope', () => {
     const list = TimeCorrectionListSchema.parse({
-      data: [ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     expect(list.total).toBe(1);
   });

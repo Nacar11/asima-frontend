@@ -11,7 +11,7 @@ export const TimeEntrySchema = z.object({
   id: z.number().int(),
   employee_id: z.number().int(),
   work_date: z.string(), // YYYY-MM-DD
-  time_in: z.string(),   // ISO 8601 datetime
+  time_in: z.string(), // ISO 8601 datetime
   time_out: z.string().nullable(),
   source: TimeEntrySourceSchema,
   status: TimeEntryStatusSchema,

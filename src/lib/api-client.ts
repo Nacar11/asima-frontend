@@ -179,7 +179,10 @@ export class ApiClient {
     return tail ? `${base}?${tail}` : base;
   }
 
-  private async handleResponse<T>(response: Response, responseType: 'json' | 'blob' = 'json'): Promise<T> {
+  private async handleResponse<T>(
+    response: Response,
+    responseType: 'json' | 'blob' = 'json',
+  ): Promise<T> {
     if (response.status === 204) return undefined as T;
 
     // Binary downloads: return the blob on success, but still surface a
@@ -220,8 +223,7 @@ let singleton: ApiClient | null = null;
 export function apiClient(): ApiClient {
   if (singleton) return singleton;
   // Avoid importing env() statically — keeps `lib/env` purely test-driven.
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
   singleton = new ApiClient({ baseUrl });
   return singleton;
 }

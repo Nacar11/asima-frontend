@@ -15,9 +15,7 @@ export default function LoginPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-neutral-950">Sign in</h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          Enter your work email and password.
-        </p>
+        <p className="mt-1 text-sm text-neutral-500">Enter your work email and password.</p>
       </div>
       <Suspense fallback={<p className="text-sm text-neutral-500">Loading…</p>}>
         <LoginForm />

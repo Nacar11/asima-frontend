@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  PendingApprovalListSchema,
-  PendingApprovalSchema,
-} from '@/features/approvals/schemas';
+import { PendingApprovalListSchema, PendingApprovalSchema } from '@/features/approvals/schemas';
 
 describe('PendingApprovalSchema', () => {
   it('parses a well-formed row', () => {

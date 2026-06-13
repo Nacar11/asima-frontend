@@ -188,7 +188,9 @@ export function TcDetailDrawer({
               </Detail>
               <Detail label="Reason">{request.reason}</Detail>
               <Detail label="Target entry">
-                {request.target_entry_id ? `#${request.target_entry_id}` : 'Missed punch (new entry)'}
+                {request.target_entry_id
+                  ? `#${request.target_entry_id}`
+                  : 'Missed punch (new entry)'}
               </Detail>
             </>
           )}
@@ -292,7 +294,12 @@ function LabeledInput({
   return (
     <label className="block space-y-1 text-sm">
       <span className="font-medium text-neutral-800">{label}</span>
-      <input type={type} className={inputCls} value={value} onChange={(e) => onChange(e.target.value)} />
+      <input
+        type={type}
+        className={inputCls}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </label>
   );
 }

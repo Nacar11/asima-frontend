@@ -75,11 +75,7 @@ function renderInbox() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <ApprovalsInbox
-        type="leave"
-        title="Pending Approvals (Leaves)"
-        DetailDrawer={StubDrawer}
-      />
+      <ApprovalsInbox type="leave" title="Pending Approvals (Leaves)" DetailDrawer={StubDrawer} />
     </QueryClientProvider>,
   );
 }
@@ -112,9 +108,7 @@ describe('ApprovalsInbox', () => {
   it('renders its title and the chain-scoped subtitle for a non-override approver', async () => {
     renderInbox();
     expect(screen.getByText('Pending Approvals (Leaves)')).toBeInTheDocument();
-    expect(
-      screen.getByText('Requests where you are the current approver.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Requests where you are the current approver.')).toBeInTheDocument();
   });
 
   it('opens the detail drawer for the clicked row', async () => {

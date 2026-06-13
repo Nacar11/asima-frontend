@@ -12,12 +12,25 @@ function stubClient(payload: unknown) {
 }
 
 const ROW = {
-  id: 1, employee_id: 12, target_entry_id: 88, work_date: '2026-06-10',
-  proposed_time_in: '2026-06-10T09:00:00.000Z', proposed_time_out: null,
-  reason: 'x', status: 'pending_l1', submitted_at: '2026-06-10T19:00:00.000Z',
-  decided_at: null, decided_by: null, decision_note: null, decision_path: null,
-  cancelled_at: null, cancelled_by: null, l1_approver_id: 5, l2_approver_id: null,
-  created_at: '2026-06-10T19:00:00.000Z', updated_at: '2026-06-10T19:00:00.000Z',
+  id: 1,
+  employee_id: 12,
+  target_entry_id: 88,
+  work_date: '2026-06-10',
+  proposed_time_in: '2026-06-10T09:00:00.000Z',
+  proposed_time_out: null,
+  reason: 'x',
+  status: 'pending_l1',
+  submitted_at: '2026-06-10T19:00:00.000Z',
+  decided_at: null,
+  decided_by: null,
+  decision_note: null,
+  decision_path: null,
+  cancelled_at: null,
+  cancelled_by: null,
+  l1_approver_id: 5,
+  l2_approver_id: null,
+  created_at: '2026-06-10T19:00:00.000Z',
+  updated_at: '2026-06-10T19:00:00.000Z',
 };
 const LIST = { data: [ROW], total: 1, page: 1, limit: 20, has_more: false };
 
@@ -25,7 +38,12 @@ describe('timeCorrectionApi', () => {
   it('me.submit POSTs the self-service endpoint', async () => {
     const c = stubClient(ROW);
     await timeCorrectionApi.me.submit(
-      { target_entry_id: 88, work_date: '2026-06-10', proposed_time_in: '2026-06-10T09:00:00.000Z', reason: 'x' },
+      {
+        target_entry_id: 88,
+        work_date: '2026-06-10',
+        proposed_time_in: '2026-06-10T09:00:00.000Z',
+        reason: 'x',
+      },
       c,
     );
     expect(c.post).toHaveBeenCalledWith('/users/me/time-correction-requests', {

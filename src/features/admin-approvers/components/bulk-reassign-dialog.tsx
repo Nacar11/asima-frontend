@@ -56,8 +56,7 @@ export function BulkReassignDialog({
       }),
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ['admin-approvers'] });
-      const skipped =
-        result.skipped.length > 0 ? ` (${result.skipped.length} skipped)` : '';
+      const skipped = result.skipped.length > 0 ? ` (${result.skipped.length} skipped)` : '';
       toast.success(`Reassigned ${result.reassigned} rows.${skipped}`);
       onClose();
     },
@@ -72,17 +71,14 @@ export function BulkReassignDialog({
         <DialogHeader>
           <DialogTitle>Bulk reassign approvers</DialogTitle>
           <DialogDescription>
-            Replace one approver with another across every employee they
-            currently approve for. Employees who would become their own
-            approver are skipped automatically.
+            Replace one approver with another across every employee they currently approve for.
+            Employees who would become their own approver are skipped automatically.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="block text-sm font-medium text-neutral-800">
-              Replace approver
-            </span>
+            <span className="block text-sm font-medium text-neutral-800">Replace approver</span>
             <Select<string>
               value={from === '' ? '' : String(from)}
               onValueChange={(v) => setFrom(v === '' ? '' : Number(v))}
@@ -92,9 +88,7 @@ export function BulkReassignDialog({
             />
           </label>
           <label className="block space-y-1.5">
-            <span className="block text-sm font-medium text-neutral-800">
-              With approver
-            </span>
+            <span className="block text-sm font-medium text-neutral-800">With approver</span>
             <Select<string>
               value={to === '' ? '' : String(to)}
               onValueChange={(v) => setTo(v === '' ? '' : Number(v))}

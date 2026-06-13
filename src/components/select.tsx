@@ -88,9 +88,7 @@ export function Select<T extends string | number>({
   // Scroll active option into view
   useEffect(() => {
     if (!open || activeIndex < 0) return;
-    const el = listRef.current?.querySelector<HTMLLIElement>(
-      `[data-index="${activeIndex}"]`,
-    );
+    const el = listRef.current?.querySelector<HTMLLIElement>(`[data-index="${activeIndex}"]`);
     el?.scrollIntoView({ block: 'nearest' });
   }, [activeIndex, open]);
 
@@ -111,12 +109,7 @@ export function Select<T extends string | number>({
     if (disabled) return;
 
     if (!open) {
-      if (
-        e.key === 'ArrowDown' ||
-        e.key === 'ArrowUp' ||
-        e.key === 'Enter' ||
-        e.key === ' '
-      ) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         setOpen(true);
       }
@@ -186,9 +179,7 @@ export function Select<T extends string | number>({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
-        aria-activedescendant={
-          open && activeIndex >= 0 ? optionId(activeIndex) : undefined
-        }
+        aria-activedescendant={open && activeIndex >= 0 ? optionId(activeIndex) : undefined}
         aria-label={ariaLabel}
         onClick={() => !disabled && setOpen((o) => !o)}
         onKeyDown={handleKeyDown}
@@ -264,17 +255,10 @@ export function Select<T extends string | number>({
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate">{opt.label}</span>
                   {opt.description && (
-                    <span className="truncate text-xs text-neutral-500">
-                      {opt.description}
-                    </span>
+                    <span className="truncate text-xs text-neutral-500">{opt.description}</span>
                   )}
                 </span>
-                {isSelected && (
-                  <Check
-                    className="h-4 w-4 shrink-0 text-neutral-950"
-                    aria-hidden
-                  />
-                )}
+                {isSelected && <Check className="h-4 w-4 shrink-0 text-neutral-950" aria-hidden />}
               </li>
             );
           })}

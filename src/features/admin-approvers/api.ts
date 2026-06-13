@@ -61,10 +61,7 @@ export const adminApproversApi = {
       .then((res) => BulkReassignResultSchema.parse(res));
   },
 
-  bulkAssign(
-    input: BulkAssignInput,
-    client: ApiClient = apiClient(),
-  ): Promise<BulkAssignResult> {
+  bulkAssign(input: BulkAssignInput, client: ApiClient = apiClient()): Promise<BulkAssignResult> {
     return client
       .post<unknown>('/admin/approvers/bulk-assign', input)
       .then((res) => BulkAssignResultSchema.parse(res));

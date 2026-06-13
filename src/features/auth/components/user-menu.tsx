@@ -45,8 +45,7 @@ export function UserMenu() {
 
   if (!user) return null;
 
-  const initials =
-    `${user.first_name?.[0] ?? ''}${user.last_name?.[0] ?? ''}`.toUpperCase() || '?';
+  const initials = `${user.first_name?.[0] ?? ''}${user.last_name?.[0] ?? ''}`.toUpperCase() || '?';
   const fullName = `${user.first_name} ${user.last_name}`.trim();
 
   async function handleLogout() {
@@ -77,15 +76,10 @@ export function UserMenu() {
         >
           {initials}
         </span>
-        <span className="hidden max-w-[10rem] truncate font-medium sm:inline">
-          {fullName}
-        </span>
+        <span className="hidden max-w-[10rem] truncate font-medium sm:inline">{fullName}</span>
         <ChevronDown
           aria-hidden
-          className={cn(
-            'h-4 w-4 text-neutral-500 transition-transform',
-            open && 'rotate-180',
-          )}
+          className={cn('h-4 w-4 text-neutral-500 transition-transform', open && 'rotate-180')}
         />
       </button>
 
@@ -97,9 +91,7 @@ export function UserMenu() {
         >
           <div className="border-b border-neutral-100 px-3 py-2.5">
             <p className="text-xs text-neutral-500">Signed in as</p>
-            <p className="truncate text-sm font-medium text-neutral-900">
-              {fullName}
-            </p>
+            <p className="truncate text-sm font-medium text-neutral-900">{fullName}</p>
           </div>
           <Link
             ref={firstItemRef}

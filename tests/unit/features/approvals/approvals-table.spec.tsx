@@ -31,12 +31,7 @@ describe('ApprovalsTable', () => {
 
   it('still renders Approve / Reject when action handlers are provided', () => {
     render(
-      <ApprovalsTable
-        rows={[ROW]}
-        onApprove={vi.fn()}
-        onReject={vi.fn()}
-        onDetails={vi.fn()}
-      />,
+      <ApprovalsTable rows={[ROW]} onApprove={vi.fn()} onReject={vi.fn()} onDetails={vi.fn()} />,
     );
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();

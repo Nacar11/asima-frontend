@@ -39,15 +39,13 @@ describe('hasPermission', () => {
 
   describe('array required codes (AND-semantics)', () => {
     it('returns true when ALL required codes are present', () => {
-      expect(
-        hasPermission(['USER:View', 'USER:Update'], ['USER:View', 'USER:Update'], false),
-      ).toBe(true);
+      expect(hasPermission(['USER:View', 'USER:Update'], ['USER:View', 'USER:Update'], false)).toBe(
+        true,
+      );
     });
 
     it('returns false when ANY required code is missing', () => {
-      expect(
-        hasPermission(['USER:View'], ['USER:View', 'USER:Update'], false),
-      ).toBe(false);
+      expect(hasPermission(['USER:View'], ['USER:View', 'USER:Update'], false)).toBe(false);
     });
 
     it('returns true with a single-element array', () => {

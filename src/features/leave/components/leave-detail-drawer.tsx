@@ -15,7 +15,13 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel, formatWindow, isPending } from '@/features/leave/format';
+import {
+  LEAVE_PORTION_LABELS,
+  LEAVE_TYPE_LABELS,
+  canCancel,
+  formatWindow,
+  isPending,
+} from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveAttachment } from '@/features/leave/components/leave-attachment';
 import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '@/features/leave/schemas';
@@ -151,7 +157,9 @@ export function LeaveDetailDrawer({
                 <select
                   className={inputCls}
                   value={edit.leave_type}
-                  onChange={(e) => setEdit((s) => ({ ...s, leave_type: e.target.value as LeaveType }))}
+                  onChange={(e) =>
+                    setEdit((s) => ({ ...s, leave_type: e.target.value as LeaveType }))
+                  }
                 >
                   {LEAVE_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -281,11 +289,7 @@ export function LeaveDetailDrawer({
               </button>
             )}
             {pending && canApproveAny && (
-              <button
-                type="button"
-                onClick={() => setRejecting(true)}
-                className={btnDanger}
-              >
+              <button type="button" onClick={() => setRejecting(true)} className={btnDanger}>
                 Reject
               </button>
             )}

@@ -35,12 +35,8 @@ export default function MyTimeSheetPage() {
         </p>
       </div>
 
-      {listQuery.isLoading && (
-        <p className="text-sm text-neutral-500">Loading entries…</p>
-      )}
-      {listQuery.error && (
-        <p className="text-sm text-red-700">Could not load entries.</p>
-      )}
+      {listQuery.isLoading && <p className="text-sm text-neutral-500">Loading entries…</p>}
+      {listQuery.error && <p className="text-sm text-red-700">Could not load entries.</p>}
       {listQuery.data && (
         <EntriesTable
           rows={listQuery.data.data}
@@ -103,10 +99,7 @@ function Paginator({
   );
 }
 
-const PagerButton = ({
-  children,
-  ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     type="button"
     className={cn(

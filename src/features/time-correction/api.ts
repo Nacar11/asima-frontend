@@ -91,7 +91,11 @@ export const timeCorrectionApi = {
       .then((res) => TimeCorrectionSchema.parse(res));
   },
 
-  reject(id: number, note: string, client: ApiClient = apiClient()): Promise<TimeCorrectionRequest> {
+  reject(
+    id: number,
+    note: string,
+    client: ApiClient = apiClient(),
+  ): Promise<TimeCorrectionRequest> {
     return client
       .post<unknown>(`/time-correction-requests/${id}/reject`, { note })
       .then((res) => TimeCorrectionSchema.parse(res));

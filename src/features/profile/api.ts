@@ -27,8 +27,6 @@ export const profileApi = {
    * token alone cannot change the password.
    */
   changePassword(input: ChangeMyPasswordRequest, client: ApiClient = apiClient()): Promise<void> {
-    return client
-      .patch<void>('/users/me/password', input)
-      .then(() => undefined);
+    return client.patch<void>('/users/me/password', input).then(() => undefined);
   },
 };

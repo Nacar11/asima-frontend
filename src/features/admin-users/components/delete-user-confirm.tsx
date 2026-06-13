@@ -48,8 +48,8 @@ export function DeleteUserConfirm({
             <span className="font-medium text-neutral-950">
               {user?.first_name} {user?.last_name}
             </span>{' '}
-            ({user?.email})? They won&apos;t be able to sign in. This can be
-            reversed by an admin with database access.
+            ({user?.email})? They won&apos;t be able to sign in. This can be reversed by an admin
+            with database access.
           </DialogDescription>
         </DialogHeader>
 

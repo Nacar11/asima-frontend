@@ -59,15 +59,34 @@ function renderPage() {
 describe('AdminLeavePage', () => {
   beforeEach(() => {
     adminListMock.mockReset().mockResolvedValue({
-      data: [ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     usersListMock.mockReset().mockResolvedValue({
       data: [
-        { id: 12, first_name: 'Ada', last_name: 'Lovelace', email: 'ada@asima.test',
-          title: null, role_id: 1, role: { id: 1, name: 'EMPLOYEE' }, system_admin: false,
-          is_active: true, last_login_at: null, created_at: '', updated_at: '', deleted_at: null },
+        {
+          id: 12,
+          first_name: 'Ada',
+          last_name: 'Lovelace',
+          email: 'ada@asima.test',
+          title: null,
+          role_id: 1,
+          role: { id: 1, name: 'EMPLOYEE' },
+          system_admin: false,
+          is_active: true,
+          last_login_at: null,
+          created_at: '',
+          updated_at: '',
+          deleted_at: null,
+        },
       ],
-      total: 1, page: 1, limit: 100, has_more: false,
+      total: 1,
+      page: 1,
+      limit: 100,
+      has_more: false,
     });
   });
 

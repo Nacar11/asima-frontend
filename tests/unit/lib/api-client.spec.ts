@@ -32,9 +32,7 @@ describe('ApiClient', () => {
   });
 
   it('throws ApiError on non-2xx without refreshing if no handler is set', async () => {
-    fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ message: 'Bad' }), { status: 400 }),
-    );
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'Bad' }), { status: 400 }));
     await expect(client.request('GET', '/x')).rejects.toBeInstanceOf(ApiError);
   });
 

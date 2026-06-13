@@ -13,7 +13,12 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow, isPending } from '@/features/leave/format';
+import {
+  LEAVE_PORTION_LABELS,
+  LEAVE_TYPE_LABELS,
+  formatWindow,
+  isPending,
+} from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveAttachment } from '@/features/leave/components/leave-attachment';
 import type { PendingApproval } from '@/features/approvals/schemas';
@@ -65,7 +70,9 @@ export function LeaveApprovalDetailDrawer({
         <SheetBody className="space-y-4">
           {query.isLoading && <p className="text-sm text-neutral-500">Loading details…</p>}
           {query.isError && (
-            <p className="text-sm text-red-600">Couldn&apos;t load this request. It may have already been decided.</p>
+            <p className="text-sm text-red-600">
+              Couldn&apos;t load this request. It may have already been decided.
+            </p>
           )}
 
           {request && (
@@ -105,10 +112,20 @@ export function LeaveApprovalDetailDrawer({
 
         {pending && row && onApprove && onReject && (
           <SheetFooter className="flex-wrap gap-2">
-            <button type="button" onClick={() => onReject(row)} disabled={busy} className={btnDanger}>
+            <button
+              type="button"
+              onClick={() => onReject(row)}
+              disabled={busy}
+              className={btnDanger}
+            >
               Reject
             </button>
-            <button type="button" onClick={() => onApprove(row)} disabled={busy} className={btnPrimary}>
+            <button
+              type="button"
+              onClick={() => onApprove(row)}
+              disabled={busy}
+              className={btnPrimary}
+            >
               {busy ? 'Working…' : 'Approve'}
             </button>
           </SheetFooter>

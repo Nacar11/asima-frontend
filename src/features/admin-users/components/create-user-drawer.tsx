@@ -18,18 +18,9 @@ import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
 import { formatRoleName } from '@/features/admin-roles/format';
-import {
-  CreateAdminUserSchema,
-  type CreateAdminUserInput,
-} from '@/features/admin-users/schemas';
+import { CreateAdminUserSchema, type CreateAdminUserInput } from '@/features/admin-users/schemas';
 
-export function CreateUserDrawer({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
 
   const rolesQuery = useQuery({
@@ -99,11 +90,21 @@ export function CreateUserDrawer({
             </div>
 
             <Field label="Email" error={form.formState.errors.email?.message}>
-              <input type="email" autoComplete="off" className={inputCls} {...form.register('email')} />
+              <input
+                type="email"
+                autoComplete="off"
+                className={inputCls}
+                {...form.register('email')}
+              />
             </Field>
 
             <Field label="Initial password" error={form.formState.errors.password?.message}>
-              <input type="text" autoComplete="off" className={inputCls} {...form.register('password')} />
+              <input
+                type="text"
+                autoComplete="off"
+                className={inputCls}
+                {...form.register('password')}
+              />
             </Field>
 
             <Field label="Title (optional)" error={form.formState.errors.title?.message}>

@@ -72,7 +72,11 @@ describe('ApproversPage', () => {
     usePermissionsMock.mockReset();
     listMock.mockReset();
     listUsersMock.mockReset().mockResolvedValue({
-      data: [], total: 0, page: 1, limit: 100, has_more: false,
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 100,
+      has_more: false,
     });
   });
 
@@ -88,9 +92,7 @@ describe('ApproversPage', () => {
     usePermissionsMock.mockReturnValue({ permissions: ['APPROVAL_CHAIN:View'], isLoading: false });
     listMock.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20, has_more: false });
     renderPage();
-    expect(
-      await screen.findByRole('heading', { name: /no employees yet/i }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /no employees yet/i })).toBeInTheDocument();
   });
 
   it('hides the bulk-reassign button without APPROVAL_CHAIN:Update', async () => {
@@ -116,22 +118,28 @@ describe('ApproversPage', () => {
   it('toggling "Only unassigned" passes the filter to the list query', async () => {
     withUpdate();
     listMock.mockResolvedValue({
-      data: [UNASSIGNED_ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [UNASSIGNED_ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     renderPage();
     await screen.findByText('Nora Unset');
     await userEvent.click(screen.getByRole('button', { name: /only unassigned/i }));
     await waitFor(() =>
-      expect(listMock).toHaveBeenCalledWith(
-        expect.objectContaining({ unassigned: true }),
-      ),
+      expect(listMock).toHaveBeenCalledWith(expect.objectContaining({ unassigned: true })),
     );
   });
 
   it('selecting a row reveals the action bar and opens the assign dialog', async () => {
     withUpdate();
     listMock.mockResolvedValue({
-      data: [UNASSIGNED_ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [UNASSIGNED_ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     renderPage();
     await screen.findByText('Nora Unset');

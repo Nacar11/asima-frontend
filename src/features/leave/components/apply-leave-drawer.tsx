@@ -117,7 +117,10 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
 
   const dayCountError = preview.error instanceof ApiError ? firstFieldError(preview.error) : null;
   const workingDays = preview.data?.working_days ?? null;
-  const windowLabel = formatWindow(preview.data?.start_time ?? null, preview.data?.end_time ?? null);
+  const windowLabel = formatWindow(
+    preview.data?.start_time ?? null,
+    preview.data?.end_time ?? null,
+  );
 
   const submitMutation = useMutation({
     mutationFn: (vars: { input: SubmitLeaveInput; file: File | null }) =>
@@ -139,15 +142,16 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
     });
   });
 
-  const blocked =
-    submitMutation.isPending || !datesReady || !!dayCountError || attachmentMissing;
+  const blocked = submitMutation.isPending || !datesReady || !!dayCountError || attachmentMissing;
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
       <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>Apply for leave</SheetTitle>
-          <SheetDescription>Request time off against your balance and work schedule.</SheetDescription>
+          <SheetDescription>
+            Request time off against your balance and work schedule.
+          </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={onSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
@@ -211,7 +215,11 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
             {needsAttachment && (
               <Field
                 label="Attachment (required)"
-                error={attachmentMissing ? 'A supporting file is required for this leave type.' : undefined}
+                error={
+                  attachmentMissing
+                    ? 'A supporting file is required for this leave type.'
+                    : undefined
+                }
               >
                 <input
                   type="file"
@@ -260,7 +268,9 @@ function DayCountBanner({
   error: string | null;
 }) {
   if (!ready) {
-    return <p className="text-sm text-neutral-500">Pick start and end dates to see the day count.</p>;
+    return (
+      <p className="text-sm text-neutral-500">Pick start and end dates to see the day count.</p>
+    );
   }
   if (error) {
     return <p className="text-sm font-medium text-red-600">{error}</p>;
@@ -271,8 +281,8 @@ function DayCountBanner({
   return (
     <p className="text-sm text-neutral-700">
       This request is{' '}
-      <span className="font-semibold tabular-nums text-neutral-900">{workingDays}</span>{' '}
-      working day{workingDays === 1 ? '' : 's'}
+      <span className="font-semibold tabular-nums text-neutral-900">{workingDays}</span> working day
+      {workingDays === 1 ? '' : 's'}
       {window && <span className="text-neutral-500"> · {window}</span>}.
     </p>
   );

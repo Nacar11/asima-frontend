@@ -69,10 +69,10 @@ export const SubmitCorrectionSchema = z
     proposed_time_out: z.string().optional(),
     reason: z.string().min(1, 'A reason is required').max(500),
   })
-  .refine(
-    (v) => !v.proposed_time_out || v.proposed_time_out > v.proposed_time_in,
-    { message: 'Time out must be after time in', path: ['proposed_time_out'] },
-  );
+  .refine((v) => !v.proposed_time_out || v.proposed_time_out > v.proposed_time_in, {
+    message: 'Time out must be after time in',
+    path: ['proposed_time_out'],
+  });
 export type SubmitCorrectionInput = z.infer<typeof SubmitCorrectionSchema>;
 
 export const UpdateCorrectionSchema = z.object({

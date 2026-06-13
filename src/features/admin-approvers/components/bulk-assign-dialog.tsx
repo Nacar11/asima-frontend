@@ -86,19 +86,16 @@ export function BulkAssignDialog({
         <DialogHeader>
           <DialogTitle>Bulk assign approver</DialogTitle>
           <DialogDescription>
-            Assign a Level 1 approver (and optionally Level 2) to the{' '}
-            {employeeIds.length} selected{' '}
-            {employeeIds.length === 1 ? 'employee' : 'employees'}. This overwrites
-            any approver already set at that level. Employees who would become
-            their own approver are skipped automatically.
+            Assign a Level 1 approver (and optionally Level 2) to the {employeeIds.length} selected{' '}
+            {employeeIds.length === 1 ? 'employee' : 'employees'}. This overwrites any approver
+            already set at that level. Employees who would become their own approver are skipped
+            automatically.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="block text-sm font-medium text-neutral-800">
-              Level 1 approver
-            </span>
+            <span className="block text-sm font-medium text-neutral-800">Level 1 approver</span>
             <Select<string>
               value={l1 === '' ? '' : String(l1)}
               onValueChange={(v) => setL1(v === '' ? '' : Number(v))}
@@ -109,8 +106,7 @@ export function BulkAssignDialog({
           </label>
           <label className="block space-y-1.5">
             <span className="block text-sm font-medium text-neutral-800">
-              Level 2 approver{' '}
-              <span className="font-normal text-neutral-400">(optional)</span>
+              Level 2 approver <span className="font-normal text-neutral-400">(optional)</span>
             </span>
             <Select<string>
               value={l2 === '' ? '' : String(l2)}

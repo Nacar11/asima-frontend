@@ -14,7 +14,11 @@ import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { leaveApi } from '@/features/leave/api';
 import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '@/features/leave/schemas';
-import { LEAVE_PORTION_LABELS, LEAVE_STATUS_META, LEAVE_TYPE_LABELS } from '@/features/leave/format';
+import {
+  LEAVE_PORTION_LABELS,
+  LEAVE_STATUS_META,
+  LEAVE_TYPE_LABELS,
+} from '@/features/leave/format';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import { LeaveDetailDrawer } from '@/features/leave/components/leave-detail-drawer';
 import { GrantLeaveDrawer } from '@/features/leave/components/grant-leave-drawer';
@@ -231,7 +235,11 @@ const dateCls = cn(
 );
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th scope="col" className="px-4 py-2 text-left font-medium">{children}</th>;
+  return (
+    <th scope="col" className="px-4 py-2 text-left font-medium">
+      {children}
+    </th>
+  );
 }
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
   return <td className={cn('px-4 py-2.5 text-neutral-900', className)}>{children}</td>;

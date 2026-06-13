@@ -30,15 +30,11 @@ describe('TimeEntrySchema', () => {
   });
 
   it('rejects an unknown source', () => {
-    expect(() =>
-      TimeEntrySchema.parse({ ...openEntry, source: 'gps' }),
-    ).toThrow();
+    expect(() => TimeEntrySchema.parse({ ...openEntry, source: 'gps' })).toThrow();
   });
 
   it('rejects an unknown status', () => {
-    expect(() =>
-      TimeEntrySchema.parse({ ...openEntry, status: 'pending' }),
-    ).toThrow();
+    expect(() => TimeEntrySchema.parse({ ...openEntry, status: 'pending' })).toThrow();
   });
 });
 

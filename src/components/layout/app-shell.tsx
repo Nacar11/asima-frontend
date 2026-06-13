@@ -127,8 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     section,
     items: SIDEBAR_ITEMS.filter(
       (item) =>
-        item.section === section &&
-        hasPermission(permissions, item.requires, isSystemAdmin),
+        item.section === section && hasPermission(permissions, item.requires, isSystemAdmin),
     ),
   })).filter((s) => s.items.length > 0);
 
@@ -264,10 +263,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
  * lands we may regenerate via `npx shadcn add card`, at which point this
  * file becomes a thin re-export.
  */
-export function Card({
-  className,
-  ...rest
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function Card({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn('rounded-lg border border-neutral-200 bg-white p-6 shadow-sm', className)}

@@ -13,7 +13,11 @@ import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { timeCorrectionApi } from '@/features/time-correction/api';
-import { TC_STATUSES, type TcStatus, type TimeCorrectionRequest } from '@/features/time-correction/schemas';
+import {
+  TC_STATUSES,
+  type TcStatus,
+  type TimeCorrectionRequest,
+} from '@/features/time-correction/schemas';
 import { TC_STATUS_META } from '@/features/time-correction/format';
 import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
 import { TcDetailDrawer } from '@/features/time-correction/components/tc-detail-drawer';
@@ -53,8 +57,7 @@ export function AdminTimeCorrectionsPage() {
     queryFn: () => adminUsersApi.list({ limit: 100 }),
     staleTime: 5 * 60 * 1000,
   });
-  const displayName = (row: TimeCorrectionRequest) =>
-    row.employee_name ?? `#${row.employee_id}`;
+  const displayName = (row: TimeCorrectionRequest) => row.employee_name ?? `#${row.employee_id}`;
 
   const listQuery = useQuery({
     queryKey: ['time-correction', 'admin', 'list', page, status, employeeId, from, to],
@@ -85,9 +88,7 @@ export function AdminTimeCorrectionsPage() {
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-          Time corrections
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Time corrections</h1>
         <p className="text-sm text-neutral-500">
           Every time-correction request across the organization.
         </p>
@@ -210,7 +211,11 @@ const dateCls = cn(
 );
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th scope="col" className="px-4 py-2 text-left font-medium">{children}</th>;
+  return (
+    <th scope="col" className="px-4 py-2 text-left font-medium">
+      {children}
+    </th>
+  );
 }
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
   return <td className={cn('px-4 py-2.5 text-neutral-900', className)}>{children}</td>;

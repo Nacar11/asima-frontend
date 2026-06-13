@@ -62,11 +62,8 @@ export function undertimeMinutes(
 }
 
 /** Paid hours from the schedule: (out − in − break) / 60. */
-export function scheduledRegularHours(
-  schedule: WorkSchedule | undefined,
-): number | null {
+export function scheduledRegularHours(schedule: WorkSchedule | undefined): number | null {
   if (!schedule) return null;
-  const span =
-    timeStrToMinutes(schedule.expected_out) - timeStrToMinutes(schedule.expected_in);
+  const span = timeStrToMinutes(schedule.expected_out) - timeStrToMinutes(schedule.expected_in);
   return Math.max(0, (span - schedule.break_minutes) / 60);
 }

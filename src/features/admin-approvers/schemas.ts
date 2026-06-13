@@ -100,9 +100,7 @@ export type BulkAssignInput = z.infer<typeof BulkAssignSchema>;
 
 export const BulkAssignResultSchema = z.object({
   assigned: z.number().int().nonnegative(),
-  skipped: z.array(
-    z.object({ employee_id: z.number().int(), reason: z.string() }),
-  ),
+  skipped: z.array(z.object({ employee_id: z.number().int(), reason: z.string() })),
 });
 export type BulkAssignResult = z.infer<typeof BulkAssignResultSchema>;
 

@@ -44,7 +44,12 @@ export function LeaveAttachment({ requestId }: { requestId: number }) {
 
   if (thumb.data) {
     return (
-      <button type="button" onClick={openOriginal} className={thumbBtn} aria-label="View attachment">
+      <button
+        type="button"
+        onClick={openOriginal}
+        className={thumbBtn}
+        aria-label="View attachment"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element -- blob: object URL, not a remote asset */}
         <img src={thumb.data} alt="Attachment preview" className="h-20 w-20 rounded object-cover" />
         <span className="text-xs font-medium text-neutral-600">View full image</span>

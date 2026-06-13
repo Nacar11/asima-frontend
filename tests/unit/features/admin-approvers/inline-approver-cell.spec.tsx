@@ -48,9 +48,7 @@ describe('InlineApproverCell', () => {
     await userEvent.click(screen.getByRole('button'));
     const listbox = await screen.findByRole('listbox');
     await userEvent.click(within(listbox).getByText('Alan Turing'));
-    await waitFor(() =>
-      expect(setChainMock).toHaveBeenCalledWith(12, { l1_approver_id: 7 }),
-    );
+    await waitFor(() => expect(setChainMock).toHaveBeenCalledWith(12, { l1_approver_id: 7 }));
   });
 
   it('commits a step-2 change as l2_approver_id', async () => {
@@ -58,9 +56,7 @@ describe('InlineApproverCell', () => {
     await userEvent.click(screen.getByRole('button'));
     const listbox = await screen.findByRole('listbox');
     await userEvent.click(within(listbox).getByText('Alan Turing'));
-    await waitFor(() =>
-      expect(setChainMock).toHaveBeenCalledWith(12, { l2_approver_id: 7 }),
-    );
+    await waitFor(() => expect(setChainMock).toHaveBeenCalledWith(12, { l2_approver_id: 7 }));
   });
 
   it('clearing to None sends null', async () => {
@@ -68,8 +64,6 @@ describe('InlineApproverCell', () => {
     await userEvent.click(screen.getByRole('button'));
     const listbox = await screen.findByRole('listbox');
     await userEvent.click(within(listbox).getByText('— None —'));
-    await waitFor(() =>
-      expect(setChainMock).toHaveBeenCalledWith(12, { l1_approver_id: null }),
-    );
+    await waitFor(() => expect(setChainMock).toHaveBeenCalledWith(12, { l1_approver_id: null }));
   });
 });

@@ -192,7 +192,8 @@ export function EditUserDrawer({
         <SheetHeader>
           <SheetTitle>{title || 'Edit employee'}</SheetTitle>
           <SheetDescription>
-            Email changes need a verification flow — not editable here. Use Reset password to set a new password.
+            Email changes need a verification flow — not editable here. Use Reset password to set a
+            new password.
           </SheetDescription>
         </SheetHeader>
 

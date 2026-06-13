@@ -9,8 +9,7 @@ import { z } from 'zod';
  * Policy: at least one lowercase, one uppercase, one digit, one symbol.
  * Length: 8..128 enforced via Zod constraints below.
  */
-export const PASSWORD_COMPLEXITY_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
+export const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 
 export const PASSWORD_COMPLEXITY_MESSAGE =
   'Password must contain at least one lowercase letter, one uppercase letter, one digit, and one symbol.';

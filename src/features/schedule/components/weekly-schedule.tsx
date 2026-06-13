@@ -1,6 +1,11 @@
 'use client';
 
-import { DAY_NAMES, formatBreak, trimSeconds, type WorkSchedule } from '@/features/schedule/schemas';
+import {
+  DAY_NAMES,
+  formatBreak,
+  trimSeconds,
+  type WorkSchedule,
+} from '@/features/schedule/schemas';
 
 /*
  * Weekly schedule grid. Backend returns 0..7 active rows (one per active
@@ -67,10 +72,6 @@ const Th = ({ children }: { children: React.ReactNode }) => (
   </th>
 );
 
-const Td = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => <td className={`px-4 py-2.5 text-sm text-neutral-800 ${className ?? ''}`}>{children}</td>;
+const Td = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <td className={`px-4 py-2.5 text-sm text-neutral-800 ${className ?? ''}`}>{children}</td>
+);

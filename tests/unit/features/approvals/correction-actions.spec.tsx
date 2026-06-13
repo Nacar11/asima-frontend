@@ -52,7 +52,11 @@ function renderPage() {
 describe('TimeCorrectionApprovalsPage — time-correction actions', () => {
   beforeEach(() => {
     listPendingMock.mockReset().mockResolvedValue({
-      data: [TC_ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [TC_ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     tcApproveMock.mockReset().mockResolvedValue({});
   });

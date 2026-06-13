@@ -60,13 +60,7 @@ export function ApproversPage() {
     setPage(1);
   }, [debouncedSearch, unassignedOnly]);
 
-  const listQueryKey = [
-    'admin-approvers',
-    'list',
-    page,
-    debouncedSearch,
-    unassignedOnly,
-  ] as const;
+  const listQueryKey = ['admin-approvers', 'list', page, debouncedSearch, unassignedOnly] as const;
 
   const listQuery = useQuery({
     queryKey: listQueryKey,
@@ -185,9 +179,7 @@ export function ApproversPage() {
       {canUpdate && (selected.size > 0 || unassignedOnly) && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-neutral-200 bg-neutral-50 px-4 py-2.5">
           <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-700">
-            <span className="font-medium">
-              {selected.size} selected
-            </span>
+            <span className="font-medium">{selected.size} selected</span>
             {unassignedOnly && listQuery.data && listQuery.data.total > 0 && (
               <button
                 type="button"
@@ -287,10 +279,7 @@ export function ApproversPage() {
             <PagerButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
               Previous
             </PagerButton>
-            <PagerButton
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!listQuery.data.has_more}
-            >
+            <PagerButton onClick={() => setPage((p) => p + 1)} disabled={!listQuery.data.has_more}>
               Next
             </PagerButton>
           </div>
@@ -318,10 +307,7 @@ export function ApproversPage() {
   );
 }
 
-const PagerButton = ({
-  children,
-  ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     type="button"
     className={cn(

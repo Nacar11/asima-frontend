@@ -21,7 +21,7 @@ const SheetOverlay = React.forwardRef<
       'fixed inset-0 z-50 bg-black/40',
       'data-[state=open]:animate-in data-[state=open]:fade-in-0',
       'data-[state=closed]:animate-out data-[state=closed]:fade-out-0',
-      'data-[state=open]:duration-300 data-[state=closed]:duration-200',
+      'data-[state=closed]:duration-200 data-[state=open]:duration-300',
       'ease-out',
       className,
     )}
@@ -64,7 +64,8 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
 const SheetContent = React.forwardRef<
@@ -73,11 +74,7 @@ const SheetContent = React.forwardRef<
 >(({ side = 'right', className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
-    <SheetPrimitive.Content
-      ref={ref}
-      className={cn(sheetVariants({ side }), className)}
-      {...props}
-    >
+    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
       {children}
       <SheetPrimitive.Close
         className={cn(
@@ -97,10 +94,7 @@ SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      'flex flex-col gap-1.5 border-b border-neutral-100 px-5 py-4 pr-14',
-      className,
-    )}
+    className={cn('flex flex-col gap-1.5 border-b border-neutral-100 px-5 py-4 pr-14', className)}
     {...props}
   />
 );

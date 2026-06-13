@@ -9,7 +9,9 @@ vi.mock('@/features/admin-approvers/api', () => ({
   adminApproversApi: { bulkReassign: (...a: unknown[]) => bulkReassignMock(...a) },
 }));
 const toastSuccess = vi.fn();
-vi.mock('sonner', () => ({ toast: { success: (...a: unknown[]) => toastSuccess(...a), error: vi.fn() } }));
+vi.mock('sonner', () => ({
+  toast: { success: (...a: unknown[]) => toastSuccess(...a), error: vi.fn() },
+}));
 
 const CANDIDATES = [
   { id: 5, name: 'Grace Hopper' },

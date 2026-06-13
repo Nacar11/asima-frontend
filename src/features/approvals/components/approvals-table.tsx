@@ -129,5 +129,9 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
 }
 
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={cn('whitespace-nowrap px-4 py-2.5 text-sm text-neutral-900', className)}>{children}</td>;
+  return (
+    <td className={cn('whitespace-nowrap px-4 py-2.5 text-sm text-neutral-900', className)}>
+      {children}
+    </td>
+  );
 }

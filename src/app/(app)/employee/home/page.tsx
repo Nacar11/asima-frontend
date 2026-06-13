@@ -121,9 +121,7 @@ export default function HomePage() {
             {isClockedIn ? 'Clocked in' : 'Clocked out'}
           </span>
           {isClockedIn && openEntry && (
-            <span className="text-neutral-500">
-              · since {formatTimeInTz(openEntry.time_in)}
-            </span>
+            <span className="text-neutral-500">· since {formatTimeInTz(openEntry.time_in)}</span>
           )}
         </div>
       </div>

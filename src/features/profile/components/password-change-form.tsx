@@ -57,7 +57,7 @@ export function PasswordChangeForm() {
         const body = err.body as { message?: string | string[] } | null;
         const detail = Array.isArray(body?.message)
           ? body.message.join(', ')
-          : body?.message ?? 'Validation failed.';
+          : (body?.message ?? 'Validation failed.');
         setServerError(detail);
         return;
       }

@@ -85,7 +85,18 @@ describe('EditUserDrawer — approver chain', () => {
   it('seeds the L1 select from the active chain', async () => {
     getChainMock.mockResolvedValue({
       employee_id: 12,
-      l1: { id: 1, employee_id: 12, step: 1, approver_id: 5, effective_at: '', ended_at: null, created_by: null, updated_by: null, created_at: '', updated_at: '' },
+      l1: {
+        id: 1,
+        employee_id: 12,
+        step: 1,
+        approver_id: 5,
+        effective_at: '',
+        ended_at: null,
+        created_by: null,
+        updated_by: null,
+        created_at: '',
+        updated_at: '',
+      },
       l2: null,
     });
     renderDrawer();

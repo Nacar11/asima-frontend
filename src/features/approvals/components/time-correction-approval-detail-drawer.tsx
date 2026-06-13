@@ -61,7 +61,9 @@ export function TimeCorrectionApprovalDetailDrawer({
         <SheetBody className="space-y-4">
           {query.isLoading && <p className="text-sm text-neutral-500">Loading details…</p>}
           {query.isError && (
-            <p className="text-sm text-red-600">Couldn&apos;t load this correction. It may have already been decided.</p>
+            <p className="text-sm text-red-600">
+              Couldn&apos;t load this correction. It may have already been decided.
+            </p>
           )}
 
           {request && (
@@ -76,7 +78,9 @@ export function TimeCorrectionApprovalDetailDrawer({
               </Detail>
               <Detail label="Reason">{request.reason}</Detail>
               <Detail label="Target entry">
-                {request.target_entry_id ? `#${request.target_entry_id}` : 'Missed punch (new entry)'}
+                {request.target_entry_id
+                  ? `#${request.target_entry_id}`
+                  : 'Missed punch (new entry)'}
               </Detail>
               <Detail label="Submitted">{formatDateTimeInTz(request.submitted_at)}</Detail>
               {request.decided_at && (
@@ -92,10 +96,20 @@ export function TimeCorrectionApprovalDetailDrawer({
 
         {pending && row && onApprove && onReject && (
           <SheetFooter className="flex-wrap gap-2">
-            <button type="button" onClick={() => onReject(row)} disabled={busy} className={btnDanger}>
+            <button
+              type="button"
+              onClick={() => onReject(row)}
+              disabled={busy}
+              className={btnDanger}
+            >
               Reject
             </button>
-            <button type="button" onClick={() => onApprove(row)} disabled={busy} className={btnPrimary}>
+            <button
+              type="button"
+              onClick={() => onApprove(row)}
+              disabled={busy}
+              className={btnPrimary}
+            >
               {busy ? 'Working…' : 'Approve'}
             </button>
           </SheetFooter>

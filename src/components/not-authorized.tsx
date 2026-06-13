@@ -16,12 +16,10 @@ export function NotAuthorized() {
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
         <ShieldAlert className="h-6 w-6" aria-hidden />
       </div>
-      <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">
-        Not authorized
-      </h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">Not authorized</h1>
       <p className="text-sm text-neutral-500">
-        You don&apos;t have permission to view this page. If you think this is
-        a mistake, contact your administrator.
+        You don&apos;t have permission to view this page. If you think this is a mistake, contact
+        your administrator.
       </p>
       <Link
         href="/employee/home"

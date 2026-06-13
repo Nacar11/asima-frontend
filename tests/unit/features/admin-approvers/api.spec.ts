@@ -46,7 +46,11 @@ describe('adminApproversApi', () => {
 
   it('setChain() PATCHes the employee endpoint and parses the active chain', async () => {
     const client = stubClient({ patch: { l1_approver_id: 5, l2_approver_id: 7 } });
-    const res = await adminApproversApi.setChain(12, { l1_approver_id: 5, l2_approver_id: 7 }, client);
+    const res = await adminApproversApi.setChain(
+      12,
+      { l1_approver_id: 5, l2_approver_id: 7 },
+      client,
+    );
     expect(client.patch).toHaveBeenCalledWith('/admin/approvers/12', {
       l1_approver_id: 5,
       l2_approver_id: 7,

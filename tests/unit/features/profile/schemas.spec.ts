@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  MyProfileSchema,
-  UpdateMyProfileSchema,
-} from '@/features/profile/schemas';
+import { MyProfileSchema, UpdateMyProfileSchema } from '@/features/profile/schemas';
 
 describe('MyProfileSchema', () => {
   it('parses a valid /users/me payload', () => {
@@ -47,9 +44,7 @@ describe('UpdateMyProfileSchema', () => {
   });
 
   it('rejects empty first_name', () => {
-    expect(() =>
-      UpdateMyProfileSchema.parse({ first_name: '   ', last_name: 'Smith' }),
-    ).toThrow();
+    expect(() => UpdateMyProfileSchema.parse({ first_name: '   ', last_name: 'Smith' })).toThrow();
   });
 
   it('rejects first_name longer than 100 chars', () => {

@@ -149,10 +149,7 @@ export function EmployeeLeavesPage() {
             <PagerButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
               Previous
             </PagerButton>
-            <PagerButton
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!listQuery.data.has_more}
-            >
+            <PagerButton onClick={() => setPage((p) => p + 1)} disabled={!listQuery.data.has_more}>
               Next
             </PagerButton>
           </div>
@@ -182,7 +179,11 @@ const btnGhostDanger = cn(
 );
 
 function Th({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <th scope="col" className={cn('px-4 py-2 text-left font-medium', className)}>{children}</th>;
+  return (
+    <th scope="col" className={cn('px-4 py-2 text-left font-medium', className)}>
+      {children}
+    </th>
+  );
 }
 
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {

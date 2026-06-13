@@ -105,13 +105,7 @@ export function AdminUsersTable({
   );
 }
 
-const Th = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
+const Th = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <th
     scope="col"
     className={cn(
@@ -123,13 +117,9 @@ const Th = ({
   </th>
 );
 
-const Td = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => <td className={cn('px-4 py-2.5 text-sm text-neutral-800', className)}>{children}</td>;
+const Td = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <td className={cn('px-4 py-2.5 text-sm text-neutral-800', className)}>{children}</td>
+);
 
 function RowButton({
   children,

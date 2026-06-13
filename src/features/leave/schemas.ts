@@ -34,8 +34,7 @@ export const canHalfDay = (t: LeaveType): boolean => HALF_DAY_LEAVE_TYPES.has(t)
  * blocks submit without a file for these; the server is the real boundary.
  */
 export const ATTACHMENT_REQUIRED_LEAVE_TYPES = new Set<LeaveType>(['sick', 'bereavement']);
-export const requiresAttachment = (t: LeaveType): boolean =>
-  ATTACHMENT_REQUIRED_LEAVE_TYPES.has(t);
+export const requiresAttachment = (t: LeaveType): boolean => ATTACHMENT_REQUIRED_LEAVE_TYPES.has(t);
 
 /** Accepted attachment MIME types + extensions (mirrors file-validation). */
 export const ACCEPTED_ATTACHMENT_TYPES = [

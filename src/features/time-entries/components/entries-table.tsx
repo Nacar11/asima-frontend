@@ -1,11 +1,7 @@
 'use client';
 
 import { formatDateInTz, formatTimeInTz } from '@/lib/format';
-import {
-  durationMinutes,
-  formatDuration,
-  type TimeEntry,
-} from '@/features/time-entries/schemas';
+import { durationMinutes, formatDuration, type TimeEntry } from '@/features/time-entries/schemas';
 import {
   findScheduleForDate,
   scheduledRegularHours,
@@ -98,30 +94,15 @@ export function EntriesTable({
   );
 }
 
-function MinutesCell({
-  minutes,
-  kind,
-}: {
-  minutes: number | null;
-  kind: 'late' | 'under';
-}) {
+function MinutesCell({ minutes, kind }: { minutes: number | null; kind: 'late' | 'under' }) {
   if (minutes === null) return <span className="text-neutral-400">—</span>;
-  if (minutes === 0)
-    return <span className="text-neutral-500">0</span>;
+  if (minutes === 0) return <span className="text-neutral-500">0</span>;
   return (
-    <span className={kind === 'late' ? 'text-amber-700' : 'text-rose-700'}>
-      {minutes} min
-    </span>
+    <span className={kind === 'late' ? 'text-amber-700' : 'text-rose-700'}>{minutes} min</span>
   );
 }
 
-const Th = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
+const Th = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <th
     scope="col"
     className={cn(
@@ -133,10 +114,6 @@ const Th = ({
   </th>
 );
 
-const Td = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => <td className={cn('px-4 py-2.5 text-sm text-neutral-800', className)}>{children}</td>;
+const Td = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <td className={cn('px-4 py-2.5 text-sm text-neutral-800', className)}>{children}</td>
+);

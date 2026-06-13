@@ -79,10 +79,18 @@ export function ApproversTable({
                 />
               </th>
             )}
-            <th scope="col" className="px-4 py-3 font-medium">Employee</th>
-            <th scope="col" className="px-4 py-3 font-medium">Level 1 approver</th>
-            <th scope="col" className="px-4 py-3 font-medium">Level 2 approver</th>
-            <th scope="col" className="px-4 py-3 font-medium">Updated</th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Employee
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Level 1 approver
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Level 2 approver
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Updated
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
@@ -142,5 +150,7 @@ export function ApproversTable({
 }
 
 function ReadOnly({ name }: { name: string | null }) {
-  return <span className={name ? 'text-neutral-900' : 'text-neutral-400'}>{name ?? '— None —'}</span>;
+  return (
+    <span className={name ? 'text-neutral-900' : 'text-neutral-400'}>{name ?? '— None —'}</span>
+  );
 }

@@ -27,10 +27,10 @@ const FormSchema = z
     proposed_time_out: z.string().optional(),
     reason: z.string().min(1, 'A reason is required').max(500),
   })
-  .refine(
-    (v) => !v.proposed_time_out || v.proposed_time_out > v.proposed_time_in,
-    { message: 'Time out must be after time in', path: ['proposed_time_out'] },
-  );
+  .refine((v) => !v.proposed_time_out || v.proposed_time_out > v.proposed_time_in, {
+    message: 'Time out must be after time in',
+    path: ['proposed_time_out'],
+  });
 type FormValues = z.infer<typeof FormSchema>;
 
 /**
@@ -103,10 +103,21 @@ export function RequestCorrectionDrawer({
         <SheetBody>
           <form id="correction-form" onSubmit={onSubmit} className="space-y-4" noValidate>
             <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
-              <input type="datetime-local" className={inputCls} {...form.register('proposed_time_in')} />
+              <input
+                type="datetime-local"
+                className={inputCls}
+                {...form.register('proposed_time_in')}
+              />
             </Field>
-            <Field label="Time out (optional)" error={form.formState.errors.proposed_time_out?.message}>
-              <input type="datetime-local" className={inputCls} {...form.register('proposed_time_out')} />
+            <Field
+              label="Time out (optional)"
+              error={form.formState.errors.proposed_time_out?.message}
+            >
+              <input
+                type="datetime-local"
+                className={inputCls}
+                {...form.register('proposed_time_out')}
+              />
             </Field>
             <Field label="Reason" error={form.formState.errors.reason?.message}>
               <textarea rows={3} className={inputCls} {...form.register('reason')} />

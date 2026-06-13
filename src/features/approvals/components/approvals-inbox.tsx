@@ -33,9 +33,7 @@ function describeError(err: unknown): string {
   if (err instanceof ApiError) {
     const body = err.body as { message?: string | string[] } | null;
     const msg = Array.isArray(body?.message) ? body!.message.join(', ') : body?.message;
-    return msg
-      ? `${err.status}: ${msg}`
-      : `Request failed (HTTP ${err.status}). Please try again.`;
+    return msg ? `${err.status}: ${msg}` : `Request failed (HTTP ${err.status}). Please try again.`;
   }
   if (err instanceof Error) return err.message;
   return 'Something went wrong while loading approvals.';
@@ -60,8 +58,7 @@ export function ApprovalsInbox({
   const { user } = useAuth();
   const { permissions } = usePermissions();
   const isSysAdmin = user?.system_admin ?? false;
-  const canSeeAll =
-    isSysAdmin || hasPermission(permissions, 'APPROVAL:ApproveAny', isSysAdmin);
+  const canSeeAll = isSysAdmin || hasPermission(permissions, 'APPROVAL:ApproveAny', isSysAdmin);
 
   const [page, setPage] = useState(1);
   const query = usePendingApprovals({ type, page, limit: PAGE_LIMIT });
@@ -109,9 +106,7 @@ export function ApprovalsInbox({
   };
 
   const busy = approveMutation.isPending || rejectMutation.isPending;
-  const pendingId = approveMutation.isPending
-    ? (approveMutation.variables?.id ?? null)
-    : null;
+  const pendingId = approveMutation.isPending ? (approveMutation.variables?.id ?? null) : null;
   const drawerBusy = busy && selected != null;
 
   return (

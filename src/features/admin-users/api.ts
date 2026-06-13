@@ -19,29 +19,19 @@ import {
  * for friendly UX, but this client trusts the server to enforce.
  */
 export const adminUsersApi = {
-  list(
-    params: AdminUsersQuery = {},
-    client: ApiClient = apiClient(),
-  ): Promise<AdminUserList> {
+  list(params: AdminUsersQuery = {}, client: ApiClient = apiClient()): Promise<AdminUserList> {
     return client
       .get<unknown>('/admin/users', { params })
       .then((res) => AdminUserListSchema.parse(res));
   },
 
   get(id: number, client: ApiClient = apiClient()): Promise<AdminUser> {
-    return client
-      .get<unknown>(`/admin/users/${id}`)
-      .then((res) => AdminUserSchema.parse(res));
+    return client.get<unknown>(`/admin/users/${id}`).then((res) => AdminUserSchema.parse(res));
   },
 
-  create(
-    input: CreateAdminUserInput,
-    client: ApiClient = apiClient(),
-  ): Promise<AdminUser> {
+  create(input: CreateAdminUserInput, client: ApiClient = apiClient()): Promise<AdminUser> {
     const body = CreateAdminUserSchema.parse(input);
-    return client
-      .post<unknown>('/admin/users', body)
-      .then((res) => AdminUserSchema.parse(res));
+    return client.post<unknown>('/admin/users', body).then((res) => AdminUserSchema.parse(res));
   },
 
   update(

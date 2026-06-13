@@ -12,15 +12,7 @@ export type MyProfile = z.infer<typeof MyProfileSchema>;
 
 /* PATCH /users/me — narrow allowlist matching UpdateMeDto. */
 export const UpdateMyProfileSchema = z.object({
-  first_name: z
-    .string()
-    .trim()
-    .min(1, 'First name is required')
-    .max(100, 'First name is too long'),
-  last_name: z
-    .string()
-    .trim()
-    .min(1, 'Last name is required')
-    .max(100, 'Last name is too long'),
+  first_name: z.string().trim().min(1, 'First name is required').max(100, 'First name is too long'),
+  last_name: z.string().trim().min(1, 'Last name is required').max(100, 'Last name is too long'),
 });
 export type UpdateMyProfileInput = z.infer<typeof UpdateMyProfileSchema>;

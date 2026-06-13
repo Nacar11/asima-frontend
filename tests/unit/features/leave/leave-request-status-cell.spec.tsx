@@ -129,9 +129,7 @@ describe('LeaveRequestStatusCell', () => {
   });
 
   it('falls back to an em dash when an approver name is missing', () => {
-    const text = renderCell(
-      row({ status: 'pending_l1', l1_approver_name: null }),
-    );
+    const text = renderCell(row({ status: 'pending_l1', l1_approver_name: null }));
     expect(text).toContain('Pending L1');
     expect(text).toContain('—');
   });

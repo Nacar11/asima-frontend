@@ -27,12 +27,8 @@ const PAGE_LIMIT = 20;
 function describeError(err: unknown): string {
   if (err instanceof ApiError) {
     const body = err.body as { message?: string | string[] } | null;
-    const msg = Array.isArray(body?.message)
-      ? body!.message.join(', ')
-      : body?.message;
-    return msg
-      ? `${err.status}: ${msg}`
-      : `Request failed (HTTP ${err.status}). Please try again.`;
+    const msg = Array.isArray(body?.message) ? body!.message.join(', ') : body?.message;
+    return msg ? `${err.status}: ${msg}` : `Request failed (HTTP ${err.status}). Please try again.`;
   }
   if (err instanceof Error) return err.message;
   return 'Something went wrong while fetching the list.';
@@ -82,8 +78,7 @@ function AdminEmployeesPageBody() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const hasFilters =
-    debouncedSearch.length > 0 || roleId !== '' || isActive !== '';
+  const hasFilters = debouncedSearch.length > 0 || roleId !== '' || isActive !== '';
 
   const listQuery = useQuery({
     queryKey: ['admin-users', 'list', page, debouncedSearch, roleId, isActive],
@@ -285,10 +280,7 @@ function Paginator({
   );
 }
 
-const PagerButton = ({
-  children,
-  ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     type="button"
     className={cn(

@@ -24,12 +24,26 @@ vi.mock('@/features/admin-users/api', () => ({
 }));
 
 const ROW = {
-  id: 7, employee_id: 12, employee_name: 'Ada Lovelace', target_entry_id: 88, work_date: '2026-06-10',
-  proposed_time_in: '2026-06-10T09:00:00.000Z', proposed_time_out: '2026-06-10T18:00:00.000Z',
-  reason: 'x', status: 'pending_l1', submitted_at: '2026-06-10T19:00:00.000Z',
-  decided_at: null, decided_by: null, decision_note: null, decision_path: null,
-  cancelled_at: null, cancelled_by: null, l1_approver_id: 5, l2_approver_id: null,
-  created_at: '2026-06-10T19:00:00.000Z', updated_at: '2026-06-10T19:00:00.000Z',
+  id: 7,
+  employee_id: 12,
+  employee_name: 'Ada Lovelace',
+  target_entry_id: 88,
+  work_date: '2026-06-10',
+  proposed_time_in: '2026-06-10T09:00:00.000Z',
+  proposed_time_out: '2026-06-10T18:00:00.000Z',
+  reason: 'x',
+  status: 'pending_l1',
+  submitted_at: '2026-06-10T19:00:00.000Z',
+  decided_at: null,
+  decided_by: null,
+  decision_note: null,
+  decision_path: null,
+  cancelled_at: null,
+  cancelled_by: null,
+  l1_approver_id: 5,
+  l2_approver_id: null,
+  created_at: '2026-06-10T19:00:00.000Z',
+  updated_at: '2026-06-10T19:00:00.000Z',
 };
 
 function renderPage() {
@@ -44,13 +58,34 @@ function renderPage() {
 describe('AdminTimeCorrectionsPage', () => {
   beforeEach(() => {
     adminListMock.mockReset().mockResolvedValue({
-      data: [ROW], total: 1, page: 1, limit: 20, has_more: false,
+      data: [ROW],
+      total: 1,
+      page: 1,
+      limit: 20,
+      has_more: false,
     });
     usersListMock.mockReset().mockResolvedValue({
-      data: [{ id: 12, first_name: 'Ada', last_name: 'Lovelace', email: 'ada@asima.test',
-        title: null, role_id: 1, role: { id: 1, name: 'EMPLOYEE' }, system_admin: false,
-        is_active: true, last_login_at: null, created_at: '', updated_at: '', deleted_at: null }],
-      total: 1, page: 1, limit: 100, has_more: false,
+      data: [
+        {
+          id: 12,
+          first_name: 'Ada',
+          last_name: 'Lovelace',
+          email: 'ada@asima.test',
+          title: null,
+          role_id: 1,
+          role: { id: 1, name: 'EMPLOYEE' },
+          system_admin: false,
+          is_active: true,
+          last_login_at: null,
+          created_at: '',
+          updated_at: '',
+          deleted_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 100,
+      has_more: false,
     });
   });
 
