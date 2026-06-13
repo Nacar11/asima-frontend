@@ -41,6 +41,9 @@ export const TimeCorrectionSchema = z.object({
   cancelled_by: z.number().int().nullable(),
   l1_approver_id: z.number().int(),
   l2_approver_id: z.number().int().nullable(),
+  // Present on list responses (joined read-model); absent on single GET.
+  l1_approver_name: z.string().nullable().optional(),
+  l2_approver_name: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
