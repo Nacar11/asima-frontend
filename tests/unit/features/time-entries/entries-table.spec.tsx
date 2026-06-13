@@ -125,7 +125,10 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
   it('renders a merged Time in/out cell with original → proposed when a correction exists', () => {
     const rows = [entry(1, '2026-06-13', { time_in: isoOn('2026-06-13', '09:02:00') })];
     const corrections = new Map([
-      ['2026-06-13', correction('2026-06-13', { proposed_time_in: isoOn('2026-06-13', '09:00:00') })],
+      [
+        '2026-06-13',
+        correction('2026-06-13', { proposed_time_in: isoOn('2026-06-13', '09:00:00') }),
+      ],
     ]);
     render(<EntriesTable rows={rows} schedules={[]} correctionsByDate={corrections} />);
 
@@ -158,7 +161,13 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
     const corrections = new Map([
       ['2026-06-13', correction('2026-06-13', { status: 'pending_l2' })],
     ]);
-    render(<EntriesTable rows={[entry(1, '2026-06-13')]} schedules={[]} correctionsByDate={corrections} />);
+    render(
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByDate={corrections}
+      />,
+    );
 
     const row = within(rowFor('2026-06-13'));
     expect(row.getByText(/Jane Cruz/)).toBeInTheDocument();
