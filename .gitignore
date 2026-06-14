@@ -30,3 +30,7 @@ test-results/
 
 # Vercel
 .vercel
+
+# Local-only working files + committed docs live in the parent repo (../docs)
+tasks/
+docs/
