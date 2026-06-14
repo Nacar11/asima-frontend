@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { timeEntriesApi } from '@/features/time-entries/api';
+import { timeEntryKeys } from '@/features/time-entries/keys';
 import { EntriesTable } from '@/features/time-entries/components/entries-table';
 import { RequestCorrectionDrawer } from '@/features/time-correction/components/request-correction-drawer';
 import { AddLogDrawer } from '@/features/time-correction/components/add-log-drawer';
 import { useMyCorrectionsByDate } from '@/features/time-correction/hooks/use-my-active-corrections';
 import { scheduleApi } from '@/features/schedule/api';
+import { scheduleKeys } from '@/features/schedule/keys';
 import { cn } from '@/lib/cn';
 import type { TimeEntry } from '@/features/time-entries/schemas';
 
@@ -19,13 +21,13 @@ export default function MyTimeSheetPage() {
   const [addingLog, setAddingLog] = useState(false);
 
   const listQuery = useQuery({
-    queryKey: ['time-entries', 'me', page],
+    queryKey: timeEntryKeys.meList(page),
     queryFn: () => timeEntriesApi.listMine({ page, limit: PAGE_LIMIT }),
     placeholderData: (prev) => prev,
   });
 
   const scheduleQuery = useQuery({
-    queryKey: ['schedule', 'me'],
+    queryKey: scheduleKeys.me(),
     queryFn: () => scheduleApi.mySchedule(),
   });
 

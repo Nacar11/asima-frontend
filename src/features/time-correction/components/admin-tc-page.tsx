@@ -12,7 +12,9 @@ import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
 import {
   TC_STATUSES,
   type TcStatus,
@@ -53,14 +55,14 @@ export function AdminTimeCorrectionsPage() {
   // Row display names come joined from the backend list (employee_name).
   // The users directory is fetched only to populate the employee filter.
   const usersQuery = useQuery({
-    queryKey: ['admin-users', 'filter-options'],
+    queryKey: adminUserKeys.filterOptions(),
     queryFn: () => adminUsersApi.list({ limit: 100 }),
     staleTime: 5 * 60 * 1000,
   });
   const displayName = (row: TimeCorrectionRequest) => row.employee_name ?? `#${row.employee_id}`;
 
   const listQuery = useQuery({
-    queryKey: ['time-correction', 'admin', 'list', page, status, employeeId, from, to],
+    queryKey: timeCorrectionKeys.adminList({ page, status, employeeId, from, to }),
     queryFn: () =>
       timeCorrectionApi.admin.list({
         page,

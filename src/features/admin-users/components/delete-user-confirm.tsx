@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import type { AdminUser } from '@/features/admin-users/schemas';
 
 export function DeleteUserConfirm({
@@ -31,7 +32,7 @@ export function DeleteUserConfirm({
       return adminUsersApi.remove(user.id);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
       toast.success('Employee deleted.');
       onClose();
     },

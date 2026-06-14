@@ -10,8 +10,10 @@ import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { ApiError } from '@/lib/api-client';
 import { adminRolesApi } from '@/features/admin-roles/api';
+import { adminRoleKeys } from '@/features/admin-roles/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
 import { AdminUsersTable } from '@/features/admin-users/components/admin-users-table';
 import { CreateUserDrawer } from '@/features/admin-users/components/create-user-drawer';
@@ -73,7 +75,7 @@ function AdminEmployeesPageBody() {
   }, [debouncedSearch, roleId, isActive]);
 
   const rolesQuery = useQuery({
-    queryKey: ['admin-roles', 'list'],
+    queryKey: adminRoleKeys.list(),
     queryFn: () => adminRolesApi.list(),
     staleTime: 5 * 60 * 1000,
   });
@@ -81,7 +83,7 @@ function AdminEmployeesPageBody() {
   const hasFilters = debouncedSearch.length > 0 || roleId !== '' || isActive !== '';
 
   const listQuery = useQuery({
-    queryKey: ['admin-users', 'list', page, debouncedSearch, roleId, isActive],
+    queryKey: adminUserKeys.list({ page, search: debouncedSearch, roleId, isActive }),
     queryFn: () =>
       adminUsersApi.list({
         page,

@@ -3,11 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/layout/app-shell';
 import { scheduleApi } from '@/features/schedule/api';
+import { scheduleKeys } from '@/features/schedule/keys';
 import { WeeklySchedule } from '@/features/schedule/components/weekly-schedule';
 
 export default function MySchedulePage() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['schedule', 'me'],
+    queryKey: scheduleKeys.me(),
     queryFn: () => scheduleApi.mySchedule(),
   });
 

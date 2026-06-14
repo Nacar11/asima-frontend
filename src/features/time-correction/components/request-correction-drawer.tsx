@@ -18,6 +18,8 @@ import {
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
+import { timeEntryKeys } from '@/features/time-entries/keys';
 import { isoToTimeInput, replaceTimeOnIso } from '@/features/time-correction/datetime';
 import type { TimeEntry } from '@/features/time-entries/schemas';
 
@@ -84,8 +86,8 @@ export function RequestCorrectionDrawer({
       });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['time-correction'] });
-      void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
+      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
       toast.success('Correction request submitted.');
       onClose();
     },

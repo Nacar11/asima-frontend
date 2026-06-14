@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { profileApi } from '@/features/profile/api';
+import { profileKeys } from '@/features/profile/keys';
 import {
   UpdateMyProfileSchema,
   type MyProfile,
@@ -40,7 +41,7 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
   const mutation = useMutation({
     mutationFn: (input: UpdateMyProfileInput) => profileApi.update(input),
     onSuccess: (next) => {
-      queryClient.setQueryData(['profile', 'me'], next);
+      queryClient.setQueryData(profileKeys.me(), next);
       toast.success('Profile updated.');
       setServerError(null);
     },

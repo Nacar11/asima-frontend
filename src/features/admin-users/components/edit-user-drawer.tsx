@@ -18,8 +18,11 @@ import { LabeledCheckbox } from '@/components/labeled-checkbox';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { adminRolesApi } from '@/features/admin-roles/api';
+import { adminRoleKeys } from '@/features/admin-roles/keys';
 import { adminApproversApi } from '@/features/admin-approvers/api';
+import { adminApproverKeys } from '@/features/admin-approvers/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
 import type { SetChainInput } from '@/features/admin-approvers/schemas';
 import {
@@ -43,7 +46,7 @@ export function EditUserDrawer({
   const queryClient = useQueryClient();
 
   const rolesQuery = useQuery({
-    queryKey: ['admin-roles', 'list'],
+    queryKey: adminRoleKeys.list(),
     queryFn: () => adminRolesApi.list(),
     enabled: open,
   });
@@ -51,7 +54,7 @@ export function EditUserDrawer({
   // Candidate approvers — active users, capped. Excludes the employee
   // being edited (no self-approval) when building options below.
   const candidatesQuery = useQuery({
-    queryKey: ['admin-users', 'approver-candidates'],
+    queryKey: adminUserKeys.approverCandidates(),
     queryFn: () => adminUsersApi.list({ is_active: true, limit: 100 }),
     enabled: open,
     staleTime: 60 * 1000,
@@ -59,7 +62,7 @@ export function EditUserDrawer({
 
   // Current chain for this employee, seeds the selects on open.
   const chainQuery = useQuery({
-    queryKey: ['admin-approvers', 'chain', user?.id],
+    queryKey: adminApproverKeys.chain(user?.id),
     queryFn: () => adminApproversApi.getOne(user!.id),
     enabled: open && user !== null,
   });
@@ -172,14 +175,14 @@ export function EditUserDrawer({
         await chainMutation.mutateAsync(patch);
       } catch {
         // Profile already committed — don't silently roll it back.
-        void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+        void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
         toast.error('Profile saved, approvers update failed — retry.');
         return;
       }
     }
 
-    void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-    void queryClient.invalidateQueries({ queryKey: ['admin-approvers'] });
+    void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
+    void queryClient.invalidateQueries({ queryKey: adminApproverKeys.all });
     toast.success('Employee updated.');
     onClose();
   });

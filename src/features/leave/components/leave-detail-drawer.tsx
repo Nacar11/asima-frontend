@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
+import { approvalKeys } from '@/features/approvals/keys';
 import {
   LEAVE_PORTION_LABELS,
   LEAVE_TYPE_LABELS,
@@ -76,8 +78,8 @@ export function LeaveDetailDrawer({
   }, [request]);
 
   const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: ['leave'] });
-    void queryClient.invalidateQueries({ queryKey: ['approvals'] });
+    void queryClient.invalidateQueries({ queryKey: leaveKeys.all });
+    void queryClient.invalidateQueries({ queryKey: approvalKeys.all });
   };
 
   const approveMutation = useMutation({

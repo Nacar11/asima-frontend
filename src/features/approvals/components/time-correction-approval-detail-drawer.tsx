@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
 import { isTcPending } from '@/features/time-correction/format';
 import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
 import { TimeDiff } from '@/features/time-correction/components/time-in-out-diff';
@@ -44,7 +45,7 @@ export function TimeCorrectionApprovalDetailDrawer({
   busy?: boolean;
 }) {
   const query = useQuery({
-    queryKey: ['time-correction', 'request', row?.id],
+    queryKey: timeCorrectionKeys.request(row?.id),
     queryFn: () => timeCorrectionApi.getOne(row!.id),
     enabled: open && row != null,
   });

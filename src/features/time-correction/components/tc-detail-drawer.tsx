@@ -15,6 +15,9 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
+import { approvalKeys } from '@/features/approvals/keys';
+import { timeEntryKeys } from '@/features/time-entries/keys';
 import { isoToLocalInput, localInputToIso } from '@/features/time-correction/datetime';
 import { isTcPending } from '@/features/time-correction/format';
 import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
@@ -64,9 +67,9 @@ export function TcDetailDrawer({
   }, [request]);
 
   const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: ['time-correction'] });
-    void queryClient.invalidateQueries({ queryKey: ['approvals'] });
-    void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+    void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
+    void queryClient.invalidateQueries({ queryKey: approvalKeys.all });
+    void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
   };
 
   const approveMutation = useMutation({

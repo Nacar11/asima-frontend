@@ -18,6 +18,7 @@ import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 import {
   GrantAllocationSchema,
   LEAVE_TYPES,
@@ -61,13 +62,13 @@ export function GrantLeaveDrawer({
   const selected = employeeId !== '';
 
   const balancesQuery = useQuery({
-    queryKey: ['admin', 'leave-balances', employeeId],
+    queryKey: leaveKeys.adminBalances(employeeId),
     queryFn: () => leaveApi.admin.balances(employeeId as number),
     enabled: open && selected,
   });
 
   const historyQuery = useQuery({
-    queryKey: ['admin', 'leave-allocations', employeeId],
+    queryKey: leaveKeys.adminAllocations(employeeId),
     queryFn: () => leaveApi.admin.allocations(employeeId as number),
     enabled: open && selected,
   });
@@ -75,8 +76,8 @@ export function GrantLeaveDrawer({
   const grantMutation = useMutation({
     mutationFn: (input: GrantAllocationInput) => leaveApi.admin.grant(employeeId as number, input),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'leave-balances', employeeId] });
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'leave-allocations', employeeId] });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.adminBalances(employeeId) });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.adminAllocations(employeeId) });
       toast.success('Leave granted.');
       form.reset({ leave_type: form.getValues('leave_type'), amount: 1, reason: '' });
     },

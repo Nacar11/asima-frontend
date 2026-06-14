@@ -14,6 +14,7 @@ import { RejectApprovalDialog } from '@/features/approvals/components/reject-app
 import { ApprovalsEmptyState } from '@/features/approvals/components/approvals-empty-state';
 import { ApprovalsTable } from '@/features/approvals/components/approvals-table';
 import type { PendingApproval, PendingApprovalKind } from '@/features/approvals/schemas';
+import { approvalKeys } from '@/features/approvals/keys';
 import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
 
@@ -67,7 +68,7 @@ export function ApprovalsInbox({
   const [selected, setSelected] = useState<PendingApproval | null>(null);
   const [rejecting, setRejecting] = useState<PendingApproval | null>(null);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['approvals'] });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: approvalKeys.all });
 
   const approveMutation = useMutation({
     mutationFn: (row: PendingApproval) => {

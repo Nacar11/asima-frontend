@@ -12,7 +12,9 @@ import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '@/features/leave/schemas';
 import {
   LEAVE_PORTION_LABELS,
@@ -56,14 +58,14 @@ export function AdminLeavePage() {
   // Row display names come joined from the backend list (employee_name).
   // The users directory is fetched only to populate the employee filter.
   const usersQuery = useQuery({
-    queryKey: ['admin-users', 'filter-options'],
+    queryKey: adminUserKeys.filterOptions(),
     queryFn: () => adminUsersApi.list({ limit: 100 }),
     staleTime: 5 * 60 * 1000,
   });
   const displayName = (row: LeaveRequest) => row.employee_name ?? `#${row.employee_id}`;
 
   const listQuery = useQuery({
-    queryKey: ['leave', 'admin', 'list', page, status, employeeId, from, to],
+    queryKey: leaveKeys.adminList({ page, status, employeeId, from, to }),
     queryFn: () =>
       leaveApi.admin.list({
         page,

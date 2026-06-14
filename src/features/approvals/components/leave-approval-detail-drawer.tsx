@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 import {
   LEAVE_PORTION_LABELS,
   LEAVE_TYPE_LABELS,
@@ -52,7 +53,7 @@ export function LeaveApprovalDetailDrawer({
   busy?: boolean;
 }) {
   const query = useQuery({
-    queryKey: ['leave', 'request', row?.id],
+    queryKey: leaveKeys.request(row?.id),
     queryFn: () => leaveApi.getOne(row!.id),
     enabled: open && row != null,
   });

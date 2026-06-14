@@ -11,7 +11,9 @@ import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { toast } from 'sonner';
 import { adminApproversApi } from '@/features/admin-approvers/api';
+import { adminApproverKeys } from '@/features/admin-approvers/keys';
 import { adminUsersApi } from '@/features/admin-users/api';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { ApproversTable, type ApproverCandidate } from './approvers-table';
 import { BulkReassignDialog } from './bulk-reassign-dialog';
 import { BulkAssignDialog } from './bulk-assign-dialog';
@@ -60,7 +62,7 @@ export function ApproversPage() {
     setPage(1);
   }, [debouncedSearch, unassignedOnly]);
 
-  const listQueryKey = ['admin-approvers', 'list', page, debouncedSearch, unassignedOnly] as const;
+  const listQueryKey = adminApproverKeys.list(page, debouncedSearch, unassignedOnly);
 
   const listQuery = useQuery({
     queryKey: listQueryKey,
@@ -109,7 +111,7 @@ export function ApproversPage() {
   // Candidate approvers for the inline selects + bulk dialog. Only
   // fetched when the caller can actually edit.
   const candidatesQuery = useQuery({
-    queryKey: ['admin-users', 'approver-candidates'],
+    queryKey: adminUserKeys.approverCandidates(),
     queryFn: () => adminUsersApi.list({ is_active: true, limit: 100 }),
     enabled: canUpdate,
     staleTime: 60 * 1000,

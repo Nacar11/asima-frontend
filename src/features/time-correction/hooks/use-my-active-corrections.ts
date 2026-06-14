@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
 import type { TcStatus, TimeCorrectionRequest } from '@/features/time-correction/schemas';
 
 /** Statuses that block a second correction for the same day (mirrors the
@@ -27,7 +28,7 @@ export function useMyCorrectionsByDate(
   const to = dates[dates.length - 1];
 
   const query = useQuery({
-    queryKey: ['time-correction', 'me', 'active', from, to],
+    queryKey: timeCorrectionKeys.meActive(from, to),
     queryFn: () => timeCorrectionApi.me.list({ from, to, status: ACTIVE_STATUSES, limit: 100 }),
     enabled: dates.length > 0,
   });

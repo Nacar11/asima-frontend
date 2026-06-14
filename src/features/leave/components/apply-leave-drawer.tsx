@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 import { Select } from '@/components/select';
 import {
   ACCEPTED_ATTACHMENT_ACCEPT,
@@ -105,7 +106,7 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
   const effectivePortion: DayPortion = showPortion ? dayPortion : 'full';
 
   const preview = useQuery({
-    queryKey: ['leave', 'day-count', start, end, effectivePortion, leaveType],
+    queryKey: leaveKeys.dayCount(start, end, effectivePortion, leaveType),
     queryFn: () =>
       leaveApi.me.dayCountPreview(start, end, {
         day_portion: effectivePortion,
@@ -126,8 +127,8 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
     mutationFn: (vars: { input: SubmitLeaveInput; file: File | null }) =>
       leaveApi.me.submit(vars.input, vars.file),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
-      void queryClient.invalidateQueries({ queryKey: ['leave', 'balances'] });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.me() });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.balances() });
       toast.success('Leave request submitted.');
       onClose();
     },

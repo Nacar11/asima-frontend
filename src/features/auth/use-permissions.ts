@@ -2,15 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from './api';
+import { authKeys } from './keys';
 import { useAuth } from './use-auth';
-
-/**
- * Query key for the current user's permissions. Exported so AuthProvider
- * can invalidate the cache on logout — keeping the cache key in one
- * place is the only way to avoid permission leakage between sessions on
- * the same tab.
- */
-export const PERMISSIONS_QUERY_KEY = ['auth', 'me', 'permissions'] as const;
 
 /**
  * Fetches and caches the flat array of permission codes the current
@@ -25,7 +18,7 @@ export const PERMISSIONS_QUERY_KEY = ['auth', 'me', 'permissions'] as const;
 export function usePermissions() {
   const { status } = useAuth();
   const query = useQuery({
-    queryKey: PERMISSIONS_QUERY_KEY,
+    queryKey: authKeys.permissions(),
     queryFn: () => authApi.permissions(),
     enabled: status === 'authenticated',
     staleTime: 5 * 60 * 1000,

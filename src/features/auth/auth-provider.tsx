@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { authApi } from './api';
-import { PERMISSIONS_QUERY_KEY } from './use-permissions';
+import { authKeys } from './keys';
 import type { AuthUser, LoginInput } from './schemas';
 
 /**
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus('unauthenticated');
     // Drop cached permissions so a different user signing in on the same
     // tab fetches fresh — never inherits the previous user's grants.
-    queryClient.removeQueries({ queryKey: PERMISSIONS_QUERY_KEY });
+    queryClient.removeQueries({ queryKey: authKeys.permissions() });
   }, [setAccessToken, writeRefreshToken, queryClient]);
 
   return (

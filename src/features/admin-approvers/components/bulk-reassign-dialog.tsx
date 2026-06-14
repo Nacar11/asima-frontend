@@ -14,6 +14,7 @@ import {
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
 import { adminApproversApi } from '@/features/admin-approvers/api';
+import { adminApproverKeys } from '@/features/admin-approvers/keys';
 
 export type ApproverCandidate = { id: number; name: string };
 
@@ -55,7 +56,7 @@ export function BulkReassignDialog({
         to_approver_id: to as number,
       }),
     onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: ['admin-approvers'] });
+      void queryClient.invalidateQueries({ queryKey: adminApproverKeys.all });
       const skipped = result.skipped.length > 0 ? ` (${result.skipped.length} skipped)` : '';
       toast.success(`Reassigned ${result.reassigned} rows.${skipped}`);
       onClose();

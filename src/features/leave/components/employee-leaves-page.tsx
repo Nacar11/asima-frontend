@@ -9,6 +9,7 @@ import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel } from '@/features/leave/format';
 import { LeaveRequestStatusCell } from '@/features/leave/components/leave-request-status-cell';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
@@ -23,12 +24,12 @@ export function EmployeeLeavesPage() {
   const [applyOpen, setApplyOpen] = useState(false);
 
   const balancesQuery = useQuery({
-    queryKey: ['leave', 'balances'],
+    queryKey: leaveKeys.balances(),
     queryFn: () => leaveApi.me.balances(),
   });
 
   const listQuery = useQuery({
-    queryKey: ['leave', 'me', 'list', page],
+    queryKey: leaveKeys.meList(page),
     queryFn: () => leaveApi.me.list({ page, limit: PAGE_LIMIT }),
     placeholderData: (prev) => prev,
   });
@@ -36,8 +37,8 @@ export function EmployeeLeavesPage() {
   const cancelMutation = useMutation({
     mutationFn: (id: number) => leaveApi.me.cancel(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['leave', 'me'] });
-      void queryClient.invalidateQueries({ queryKey: ['leave', 'balances'] });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.me() });
+      void queryClient.invalidateQueries({ queryKey: leaveKeys.balances() });
       toast.success('Leave request cancelled.');
     },
     onError: () => toast.error('Could not cancel the request.'),

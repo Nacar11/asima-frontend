@@ -17,6 +17,8 @@ import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
+import { adminRoleKeys } from '@/features/admin-roles/keys';
+import { adminUserKeys } from '@/features/admin-users/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
 import { CreateAdminUserSchema, type CreateAdminUserInput } from '@/features/admin-users/schemas';
 
@@ -24,7 +26,7 @@ export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: ()
   const queryClient = useQueryClient();
 
   const rolesQuery = useQuery({
-    queryKey: ['admin-roles', 'list'],
+    queryKey: adminRoleKeys.list(),
     queryFn: () => adminRolesApi.list(),
     enabled: open,
   });
@@ -45,7 +47,7 @@ export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: ()
   const mutation = useMutation({
     mutationFn: (input: CreateAdminUserInput) => adminUsersApi.create(input),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
       toast.success('Employee created.');
       form.reset();
       onClose();

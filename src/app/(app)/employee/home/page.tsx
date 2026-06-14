@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/features/auth/use-auth';
 import { timeEntriesApi } from '@/features/time-entries/api';
+import { timeEntryKeys } from '@/features/time-entries/keys';
 import { ApiError } from '@/lib/api-client';
 import { formatInTz, formatTimeInTz } from '@/lib/format';
 import { cn } from '@/lib/cn';
@@ -26,7 +27,7 @@ export default function HomePage() {
   const now = useNow();
 
   const todayQuery = useQuery({
-    queryKey: ['time-entries', 'today'],
+    queryKey: timeEntryKeys.today(),
     queryFn: () => timeEntriesApi.today(),
   });
 
@@ -39,12 +40,12 @@ export default function HomePage() {
   const mutation = useMutation({
     mutationFn: () => timeEntriesApi.punch(),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
       toast.success(isClockedIn ? 'Punched out.' : 'Punched in.');
     },
     onError: (err) => {
       if (err instanceof ApiError && err.status === 409) {
-        void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+        void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
         toast.warning('Punch state already updated — refreshed.');
         return;
       }

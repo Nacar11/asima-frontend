@@ -18,6 +18,8 @@ import {
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { timeCorrectionApi } from '@/features/time-correction/api';
+import { timeCorrectionKeys } from '@/features/time-correction/keys';
+import { timeEntryKeys } from '@/features/time-entries/keys';
 import { localDateTimeToIso } from '@/features/time-correction/datetime';
 
 /** Browser-local YYYY-MM-DD for "today" (the latest date a log may be added for). */
@@ -75,8 +77,8 @@ export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => 
         reason: values.reason.trim(),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['time-correction'] });
-      void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
+      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
       toast.success('Log submitted for approval.');
       onClose();
     },

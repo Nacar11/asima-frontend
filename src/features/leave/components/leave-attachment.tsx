@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/cn';
 import { leaveApi } from '@/features/leave/api';
+import { leaveKeys } from '@/features/leave/keys';
 
 /**
  * Renders a leave request's attachment. For images it shows a thumbnail that
@@ -14,7 +15,7 @@ import { leaveApi } from '@/features/leave/api';
  */
 export function LeaveAttachment({ requestId }: { requestId: number }) {
   const thumb = useQuery({
-    queryKey: ['leave', 'attachment', requestId, 'thumbnail'],
+    queryKey: leaveKeys.attachmentThumb(requestId),
     queryFn: async () => {
       const blob = await leaveApi.downloadAttachment(requestId, 'thumbnail');
       return URL.createObjectURL(blob);
