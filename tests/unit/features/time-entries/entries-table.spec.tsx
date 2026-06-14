@@ -183,7 +183,11 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
   it('shows L1/L2 approver names and per-level state', () => {
     const corrections = new Map([[1, correction('2026-06-13', { status: 'pending_l2' })]]);
     render(
-      <EntriesTable rows={[entry(1, '2026-06-13')]} schedules={[]} correctionsByEntry={corrections} />,
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByEntry={corrections}
+      />,
     );
 
     const row = within(rowFor('2026-06-13'));
@@ -198,7 +202,11 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
       [1, correction('2026-06-13', { l2_approver_id: null, l2_approver_name: null })],
     ]);
     render(
-      <EntriesTable rows={[entry(1, '2026-06-13')]} schedules={[]} correctionsByEntry={corrections} />,
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByEntry={corrections}
+      />,
     );
 
     const row = within(rowFor('2026-06-13'));
