@@ -1,11 +1,14 @@
 # asima-frontend
 
 Next.js 15 SPA for **asima**, an Ashima-inspired Employee Time
-Management System. v0 ships the self-service surface only — admin
-screens land in v1.
+Management System. It ships both the employee **self-service** surface and
+the **admin** management + **approvals** surfaces.
 
 System-level architecture lives in `../CLAUDE.md` (parent repo).
-Frontend-only rules live in `./SPEC.md`. This README is the runbook.
+Frontend-only rules live in `./CLAUDE.md`; the deeper reference is
+`../docs/universal-guidelines/frontend-architecture.md`. (`SPEC.md` is the
+frozen v0 spec — kept for audit and now partly superseded.) This README is
+the runbook.
 
 ## Stack
 
@@ -31,8 +34,8 @@ npm run dev                        # → http://localhost:3001
 ```
 
 Open the app at `http://localhost:3001`. The root route redirects to
-`/dashboard`, which redirects to `/login?reason=expired` for an
-unauthenticated visitor.
+`/employee/home`; `AuthGate` bounces an unauthenticated visitor to
+`/login`.
 
 The backend's `CORS_ALLOWED_ORIGINS` env var must include
 `http://localhost:3001` or the browser will block requests.
@@ -117,19 +120,28 @@ on every push and pull request — see `.github/workflows/ci.yml`.
 
 ```
 src/
-├── app/                  # Next.js App Router routes
-│   ├── (auth)/           # /login — unauthenticated surface
-│   ├── (app)/            # /dashboard, /me, /me/schedule, /me/time-entries
+├── app/                  # Next.js App Router routes (thin shells)
+│   ├── (auth)/login/     # unauthenticated surface
+│   ├── (app)/
+│   │   ├── employee/     # home, schedule, leaves, profile, timesheet
+│   │   ├── admin/        # employees, approvers, leave-requests, time-corrections
+│   │   ├── leave-approvals/            # approver inbox (leave)
+│   │   └── time-correction-approvals/  # approver inbox (corrections)
 │   ├── layout.tsx        # root layout (fonts + providers)
 │   ├── providers.tsx     # QueryClientProvider + AuthProvider + Toaster
-│   └── page.tsx          # redirects to /dashboard
-├── features/             # feature-scoped slices (auth, profile, schedule, time-entries)
+│   └── page.tsx          # redirects to /employee/home
+├── features/             # vertical feature slices: auth, profile, schedule,
+│   │                     # time-entries, time-correction, leave, approvals,
+│   │                     # admin-users, admin-roles, admin-approvers
 │   └── <feature>/
-│       ├── schemas.ts    # Zod schemas + types
-│       ├── api.ts        # endpoint wrappers
-│       └── components/   # feature-scoped UI
-├── components/layout/    # cross-feature UI (AppShell, Card)
-└── lib/                  # cross-cutting primitives (apiClient, env, tz, format)
+│       ├── api.ts        # HTTP + zod .parse() (no React, no caching)
+│       ├── schemas.ts    # Zod schemas + inferred types (snake_case)
+│       ├── keys.ts       # query-key factory (the only cache-key source)
+│       ├── hooks/        # all React Query (use-*-query / use-*-mutation)
+│       ├── components/   # UI only — calls hooks, never api.ts
+│       └── index.ts      # public API barrel (cross-slice import boundary)
+├── components/           # cross-feature UI (layout/ + ui/ shadcn primitives)
+└── lib/                  # cross-cutting primitives (api-client, env, tz, format)
 
 tests/
 ├── setup.ts              # jsdom + @testing-library/jest-dom
@@ -138,4 +150,5 @@ tests/
 docker/                   # Dockerfile + (eventually) entrypoint.sh
 ```
 
-See `SPEC.md` for the full architecture rationale.
+See `./CLAUDE.md` and `../docs/universal-guidelines/frontend-architecture.md`
+for the full architecture rationale.
