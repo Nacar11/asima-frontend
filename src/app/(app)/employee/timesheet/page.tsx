@@ -7,7 +7,7 @@ import { timeEntryKeys } from '@/features/time-entries/keys';
 import { EntriesTable } from '@/features/time-entries/components/entries-table';
 import { RequestCorrectionDrawer } from '@/features/time-correction/components/request-correction-drawer';
 import { AddLogDrawer } from '@/features/time-correction/components/add-log-drawer';
-import { useMyCorrectionsByDate } from '@/features/time-correction/hooks/use-my-active-corrections';
+import { useMyCorrectionsByEntry } from '@/features/time-correction/hooks/use-my-active-corrections';
 import { scheduleApi } from '@/features/schedule/api';
 import { scheduleKeys } from '@/features/schedule/keys';
 import { cn } from '@/lib/cn';
@@ -31,7 +31,7 @@ export default function MyTimeSheetPage() {
     queryFn: () => scheduleApi.mySchedule(),
   });
 
-  const correctionsByDate = useMyCorrectionsByDate(listQuery.data?.data ?? []);
+  const correctionsByEntry = useMyCorrectionsByEntry(listQuery.data?.data ?? []);
 
   return (
     <div className="space-y-6">
@@ -61,7 +61,7 @@ export default function MyTimeSheetPage() {
           rows={listQuery.data.data}
           schedules={scheduleQuery.data ?? []}
           onRequestCorrection={setCorrecting}
-          correctionsByDate={correctionsByDate}
+          correctionsByEntry={correctionsByEntry}
         />
       )}
 

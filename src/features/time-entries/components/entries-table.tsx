@@ -30,18 +30,19 @@ export function EntriesTable({
   rows,
   schedules,
   onRequestCorrection,
-  correctionsByDate,
+  correctionsByEntry,
 }: {
   rows: TimeEntry[];
   schedules: WorkSchedule[];
   onRequestCorrection?: (entry: TimeEntry) => void;
   /**
-   * `work_date` → the active (pending/approved) correction for that day. Drives
-   * the merged Time in/out diff, the Status and Approver columns, and disables
-   * "Request correction" on days that already have one — the server blocks a
-   * second per day, so this just surfaces that rule in the UI.
+   * `target_entry_id` → the active (pending/approved) correction for that
+   * entry. Drives the merged Time in/out diff, the Status and Approver columns,
+   * and disables "Request correction" on entries that already have one. Keyed
+   * per entry (not per day) so a correction on one entry never marks sibling
+   * same-day rows — the server enforces one active correction per entry.
    */
-  correctionsByDate?: Map<string, TimeCorrectionRequest>;
+  correctionsByEntry?: Map<number, TimeCorrectionRequest>;
 }) {
   if (rows.length === 0) {
     return (
@@ -69,7 +70,7 @@ export function EntriesTable({
         </thead>
         <tbody className="divide-y divide-neutral-100 bg-white">
           {rows.map((row) => {
-            const correction = correctionsByDate?.get(row.work_date);
+            const correction = correctionsByEntry?.get(row.id);
             const schedule = findScheduleForDate(schedules, row.work_date);
             const late = tardinessMinutes(row, schedule);
             const under = undertimeMinutes(row, schedule);
@@ -77,7 +78,7 @@ export function EntriesTable({
             const worked = durationMinutes(row);
             const regular = scheduledRegularHours(schedule);
             const status = timesheetStatus(row, correction);
-            const guarded = correctionsByDate?.has(row.work_date) ?? false;
+            const guarded = correctionsByEntry?.has(row.id) ?? false;
 
             return (
               <tr key={row.id}>

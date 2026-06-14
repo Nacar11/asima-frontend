@@ -88,13 +88,13 @@ function rowFor(date: string) {
   return screen.getByText(date).closest('tr') as HTMLElement;
 }
 
-describe('EntriesTable — correction guard', () => {
-  it('disables Request correction and shows a status for a day with an active correction', () => {
+describe('EntriesTable — correction guard (per entry)', () => {
+  it('disables Request correction and shows a status for an entry with an active correction', () => {
     render(
       <EntriesTable
         rows={ROWS}
         schedules={[]}
-        correctionsByDate={new Map([['2026-06-13', correction('2026-06-13')]])}
+        correctionsByEntry={new Map([[1, correction('2026-06-13')]])}
       />,
     );
 
@@ -103,13 +103,13 @@ describe('EntriesTable — correction guard', () => {
     expect(guarded.getByText(/correction requested/i)).toBeInTheDocument();
   });
 
-  it('keeps the button enabled for a day with no active correction', async () => {
+  it('keeps the button enabled for an entry with no active correction', async () => {
     const onRequestCorrection = vi.fn();
     render(
       <EntriesTable
         rows={ROWS}
         schedules={[]}
-        correctionsByDate={new Map([['2026-06-13', correction('2026-06-13')]])}
+        correctionsByEntry={new Map([[1, correction('2026-06-13')]])}
         onRequestCorrection={onRequestCorrection}
       />,
     );
@@ -119,18 +119,41 @@ describe('EntriesTable — correction guard', () => {
     await userEvent.click(open);
     expect(onRequestCorrection).toHaveBeenCalledTimes(1);
   });
+
+  it('does NOT bleed a correction across same-day entries (per-entry keying, I3)', () => {
+    // Two entries on the SAME day; a correction targets only entry #1.
+    const rows = [entry(1, '2026-06-14'), entry(2, '2026-06-14')];
+    render(
+      <EntriesTable
+        rows={rows}
+        schedules={[]}
+        correctionsByEntry={new Map([[1, correction('2026-06-14', { target_entry_id: 1 })]])}
+      />,
+    );
+
+    const cells = screen.getAllByText('2026-06-14'); // both same-day rows
+    const row1 = within(cells[0]!.closest('tr') as HTMLElement);
+    const row2 = within(cells[1]!.closest('tr') as HTMLElement);
+
+    // Entry #1: guarded.
+    expect(row1.getByRole('button', { name: /request correction/i })).toBeDisabled();
+    expect(row1.getByText(/correction requested/i)).toBeInTheDocument();
+    expect(row1.getByText('Applied')).toBeInTheDocument();
+
+    // Entry #2: untouched — enabled button, plain "Logged" status, no bleed.
+    expect(row2.getByRole('button', { name: /request correction/i })).not.toBeDisabled();
+    expect(row2.queryByText(/correction requested/i)).not.toBeInTheDocument();
+    expect(row2.getByText('Logged')).toBeInTheDocument();
+  });
 });
 
 describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => {
   it('renders a merged Time in/out cell with original → proposed when a correction exists', () => {
     const rows = [entry(1, '2026-06-13', { time_in: isoOn('2026-06-13', '09:02:00') })];
     const corrections = new Map([
-      [
-        '2026-06-13',
-        correction('2026-06-13', { proposed_time_in: isoOn('2026-06-13', '09:00:00') }),
-      ],
+      [1, correction('2026-06-13', { proposed_time_in: isoOn('2026-06-13', '09:00:00') })],
     ]);
-    render(<EntriesTable rows={rows} schedules={[]} correctionsByDate={corrections} />);
+    render(<EntriesTable rows={rows} schedules={[]} correctionsByEntry={corrections} />);
 
     const row = rowFor('2026-06-13');
     expect(row.textContent).toMatch(/09:02/);
@@ -141,7 +164,7 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
 
   it('shows Status "Ongoing" for an open entry', () => {
     const rows = [entry(1, '2026-06-13', { time_out: null })];
-    render(<EntriesTable rows={rows} schedules={[]} correctionsByDate={new Map()} />);
+    render(<EntriesTable rows={rows} schedules={[]} correctionsByEntry={new Map()} />);
     expect(within(rowFor('2026-06-13')).getByText('Ongoing')).toBeInTheDocument();
   });
 
@@ -151,22 +174,16 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
       <EntriesTable
         rows={rows}
         schedules={[scheduleFor('2026-06-13')]}
-        correctionsByDate={new Map()}
+        correctionsByEntry={new Map()}
       />,
     );
     expect(within(rowFor('2026-06-13')).getByText('1.00')).toBeInTheDocument();
   });
 
   it('shows L1/L2 approver names and per-level state', () => {
-    const corrections = new Map([
-      ['2026-06-13', correction('2026-06-13', { status: 'pending_l2' })],
-    ]);
+    const corrections = new Map([[1, correction('2026-06-13', { status: 'pending_l2' })]]);
     render(
-      <EntriesTable
-        rows={[entry(1, '2026-06-13')]}
-        schedules={[]}
-        correctionsByDate={corrections}
-      />,
+      <EntriesTable rows={[entry(1, '2026-06-13')]} schedules={[]} correctionsByEntry={corrections} />,
     );
 
     const row = within(rowFor('2026-06-13'));
@@ -178,14 +195,10 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
 
   it('shows just the lone approver name (no L1/L2 labels) for a single-level chain', () => {
     const corrections = new Map([
-      ['2026-06-13', correction('2026-06-13', { l2_approver_id: null, l2_approver_name: null })],
+      [1, correction('2026-06-13', { l2_approver_id: null, l2_approver_name: null })],
     ]);
     render(
-      <EntriesTable
-        rows={[entry(1, '2026-06-13')]}
-        schedules={[]}
-        correctionsByDate={corrections}
-      />,
+      <EntriesTable rows={[entry(1, '2026-06-13')]} schedules={[]} correctionsByEntry={corrections} />,
     );
 
     const row = within(rowFor('2026-06-13'));
