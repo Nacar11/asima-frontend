@@ -31,6 +31,25 @@ describe('Field', () => {
     expect(screen.queryByText('Already taken')).not.toBeInTheDocument();
   });
 
+  it('renders helper text when there is no error', () => {
+    render(
+      <Field label="New password" helper="At least 8 characters.">
+        <input />
+      </Field>,
+    );
+    expect(screen.getByText('At least 8 characters.')).toBeInTheDocument();
+  });
+
+  it('hides helper text when an error is present', () => {
+    render(
+      <Field label="New password" helper="At least 8 characters." error="Too short">
+        <input />
+      </Field>,
+    );
+    expect(screen.queryByText('At least 8 characters.')).not.toBeInTheDocument();
+    expect(screen.getByText('Too short')).toBeInTheDocument();
+  });
+
   it('associates the label with the control via htmlFor', () => {
     render(
       <Field label="Email" htmlFor="email">

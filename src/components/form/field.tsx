@@ -6,6 +6,8 @@ type FieldProps = {
   label: string;
   /** Field-level error; renders red helper text beneath the control when set. */
   error?: string;
+  /** Hint shown beneath the control; hidden while an `error` is present. */
+  helper?: string;
   /**
    * When set, the label associates with the control via `htmlFor`/`id`
    * (control passed as `children` must carry the matching `id`). When omitted,
@@ -23,11 +25,11 @@ type FieldProps = {
  * copies. Two association modes: pass `htmlFor` to bind an external control by
  * id, or omit it to wrap the control in the `<label>` directly.
  */
-export function Field({ label, error, htmlFor, children, className }: FieldProps) {
+export function Field({ label, error, helper, htmlFor, children, className }: FieldProps) {
   const labelText = <span className="block text-sm font-medium text-neutral-800">{label}</span>;
-  const errorText = error ? (
-    <span className="block text-xs text-red-600">{error}</span>
-  ) : null;
+  const helperText =
+    helper && !error ? <span className="block text-xs text-neutral-500">{helper}</span> : null;
+  const errorText = error ? <span className="block text-xs text-red-600">{error}</span> : null;
 
   if (htmlFor) {
     return (
@@ -36,6 +38,7 @@ export function Field({ label, error, htmlFor, children, className }: FieldProps
           {label}
         </label>
         {children}
+        {helperText}
         {errorText}
       </div>
     );
@@ -45,6 +48,7 @@ export function Field({ label, error, htmlFor, children, className }: FieldProps
     <label className={cn('block space-y-1.5', className)}>
       {labelText}
       {children}
+      {helperText}
       {errorText}
     </label>
   );

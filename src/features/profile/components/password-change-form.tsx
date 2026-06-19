@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { profileApi } from '@/features/profile/api';
+import { Field } from '@/components/form/field';
+import { useChangePassword } from '@/features/profile/hooks/use-change-password-mutation';
 import {
   ChangeMyPasswordInputSchema,
   type ChangeMyPasswordInput,
 } from '@/features/profile/password-schemas';
 import { ApiError } from '@/lib/api-client';
+import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';
 import { useThrottleCountdown } from '@/lib/use-throttle-countdown';
 
@@ -32,40 +32,32 @@ export function PasswordChangeForm() {
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  const mutation = useMutation({
-    mutationFn: (input: ChangeMyPasswordInput) =>
-      profileApi.changePassword({
-        current_password: input.current_password,
-        new_password: input.new_password,
-      }),
-    onSuccess: () => {
-      toast.success('Password updated.');
-      form.reset();
-      setServerError(null);
-    },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 429) {
-        throttle.arm(err.retryAfterSec ?? 60);
-        setServerError(null);
-        return;
-      }
-      if (err instanceof ApiError && err.status === 401) {
-        setServerError('Current password is incorrect.');
-        return;
-      }
-      if (err instanceof ApiError && err.status === 400) {
-        const body = err.body as { message?: string | string[] } | null;
-        const detail = Array.isArray(body?.message)
-          ? body.message.join(', ')
-          : (body?.message ?? 'Validation failed.');
-        setServerError(detail);
-        return;
-      }
-      setServerError('Could not update password. Please try again.');
-    },
-  });
+  const mutation = useChangePassword();
 
-  const onSubmit = form.handleSubmit((input) => mutation.mutate(input));
+  const onSubmit = form.handleSubmit((input) =>
+    mutation.mutate(
+      { current_password: input.current_password, new_password: input.new_password },
+      {
+        onSuccess: () => {
+          form.reset();
+          setServerError(null);
+        },
+        onError: (err) => {
+          if (err instanceof ApiError && err.status === 429) {
+            throttle.arm(err.retryAfterSec ?? 60);
+            setServerError(null);
+            return;
+          }
+          if (err instanceof ApiError && err.status === 401) {
+            setServerError('Current password is incorrect.');
+            return;
+          }
+          setServerError(errorMessage(err, 'Could not update password. Please try again.'));
+        },
+      },
+    ),
+  );
+
   const pending = mutation.isPending;
   const buttonDisabled = pending || throttle.locked;
 
@@ -73,29 +65,44 @@ export function PasswordChangeForm() {
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       <Field
         label="Current password"
-        id="current_password"
-        type="password"
-        autoComplete="current-password"
+        htmlFor="current_password"
         error={form.formState.errors.current_password?.message}
-        {...form.register('current_password')}
-      />
+      >
+        <input
+          id="current_password"
+          type="password"
+          autoComplete="current-password"
+          className={inputCls(!!form.formState.errors.current_password)}
+          {...form.register('current_password')}
+        />
+      </Field>
       <Field
         label="New password"
-        id="new_password"
-        type="password"
-        autoComplete="new-password"
+        htmlFor="new_password"
         helper="At least 8 characters, with a lowercase, uppercase, digit, and symbol."
         error={form.formState.errors.new_password?.message}
-        {...form.register('new_password')}
-      />
+      >
+        <input
+          id="new_password"
+          type="password"
+          autoComplete="new-password"
+          className={inputCls(!!form.formState.errors.new_password)}
+          {...form.register('new_password')}
+        />
+      </Field>
       <Field
         label="Confirm new password"
-        id="confirm_password"
-        type="password"
-        autoComplete="new-password"
+        htmlFor="confirm_password"
         error={form.formState.errors.confirm_password?.message}
-        {...form.register('confirm_password')}
-      />
+      >
+        <input
+          id="confirm_password"
+          type="password"
+          autoComplete="new-password"
+          className={inputCls(!!form.formState.errors.confirm_password)}
+          {...form.register('confirm_password')}
+        />
+      </Field>
 
       {serverError && (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -128,28 +135,9 @@ export function PasswordChangeForm() {
   );
 }
 
-type FieldProps = {
-  label: string;
-  id: string;
-  error?: string;
-  helper?: string;
-} & React.InputHTMLAttributes<HTMLInputElement>;
-
-const Field = ({ label, id, error, helper, ...rest }: FieldProps) => (
-  <div className="space-y-1.5">
-    <label htmlFor={id} className="block text-sm font-medium text-neutral-800">
-      {label}
-    </label>
-    <input
-      id={id}
-      className={cn(
-        'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm',
-        'focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950',
-        error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-      )}
-      {...rest}
-    />
-    {helper && !error && <p className="text-xs text-neutral-500">{helper}</p>}
-    {error && <p className="text-xs text-red-600">{error}</p>}
-  </div>
-);
+const inputCls = (error: boolean) =>
+  cn(
+    'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm',
+    'focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950',
+    error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+  );
