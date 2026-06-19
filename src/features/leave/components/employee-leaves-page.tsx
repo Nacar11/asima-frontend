@@ -181,4 +181,3 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
   return <td className={cn('px-4 py-2.5 text-neutral-900', className)}>{children}</td>;
 }
-

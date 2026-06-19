@@ -83,7 +83,12 @@ export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => 
       submitting={mutation.isPending}
     >
       <Field label="Date" error={form.formState.errors.work_date?.message}>
-        <input type="date" max={localToday()} className={inputCls} {...form.register('work_date')} />
+        <input
+          type="date"
+          max={localToday()}
+          className={inputCls}
+          {...form.register('work_date')}
+        />
       </Field>
       <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
         <input type="time" className={inputCls} {...form.register('proposed_time_in')} />

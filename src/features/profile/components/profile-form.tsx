@@ -49,7 +49,11 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="First name" htmlFor="first_name" error={form.formState.errors.first_name?.message}>
+        <Field
+          label="First name"
+          htmlFor="first_name"
+          error={form.formState.errors.first_name?.message}
+        >
           <input
             id="first_name"
             type="text"
@@ -57,7 +61,11 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
             {...form.register('first_name')}
           />
         </Field>
-        <Field label="Last name" htmlFor="last_name" error={form.formState.errors.last_name?.message}>
+        <Field
+          label="Last name"
+          htmlFor="last_name"
+          error={form.formState.errors.last_name?.message}
+        >
           <input
             id="last_name"
             type="text"

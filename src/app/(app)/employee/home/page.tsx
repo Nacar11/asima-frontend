@@ -81,9 +81,7 @@ export default function HomePage() {
             { time_in: new Date().toISOString() } as TimeEntry,
             todaySchedule,
           );
-          toast.success(
-            late && late > 0 ? `Punched in — you're ${late} min late.` : 'Punched in.',
-          );
+          toast.success(late && late > 0 ? `Punched in — you're ${late} min late.` : 'Punched in.');
         } else {
           toast.success('Punched out.');
         }

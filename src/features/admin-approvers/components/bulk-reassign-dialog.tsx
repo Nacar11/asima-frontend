@@ -98,12 +98,7 @@ export function BulkReassignDialog({
           <button type="button" onClick={onClose} className={btnSecondary}>
             Cancel
           </button>
-          <button
-            type="button"
-            onClick={submit}
-            disabled={!canSubmit}
-            className={btnPrimary}
-          >
+          <button type="button" onClick={submit} disabled={!canSubmit} className={btnPrimary}>
             {mutation.isPending ? 'Reassigning…' : 'Reassign'}
           </button>
         </DialogFooter>

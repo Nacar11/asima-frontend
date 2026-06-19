@@ -57,7 +57,8 @@ export function useTimeCorrectionActions(requestId: number | undefined) {
   });
 
   const update = useMutation({
-    mutationFn: (input: UpdateCorrectionInput) => timeCorrectionApi.admin.update(requireId(), input),
+    mutationFn: (input: UpdateCorrectionInput) =>
+      timeCorrectionApi.admin.update(requireId(), input),
     onSuccess: () => {
       invalidate();
       toast.success('Correction updated.');

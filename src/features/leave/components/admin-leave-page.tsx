@@ -194,12 +194,7 @@ export function AdminLeavePage() {
         ))}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-        <Pagination
-          page={page}
-          hasMore={listQuery.data.has_more}
-          onPrev={toPrev}
-          onNext={toNext}
-        />
+        <Pagination page={page} hasMore={listQuery.data.has_more} onPrev={toPrev} onNext={toNext} />
       )}
 
       <LeaveDetailDrawer

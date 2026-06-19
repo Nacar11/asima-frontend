@@ -62,6 +62,8 @@ describe('errorMessage', () => {
   });
 
   it('respects a custom fallback', () => {
-    expect(errorMessage(new Error('boom'), 'Could not add the log.')).toBe('Could not add the log.');
+    expect(errorMessage(new Error('boom'), 'Could not add the log.')).toBe(
+      'Could not add the log.',
+    );
   });
 });

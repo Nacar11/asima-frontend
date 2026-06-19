@@ -35,7 +35,10 @@ export function firstFieldError(err: unknown): string | null {
  * the envelope `message` (a `string[]` is joined), then `fallback`. Use the
  * `fallback` to keep flow-specific copy ("Could not add the log.").
  */
-export function errorMessage(err: unknown, fallback = 'Something went wrong. Please try again.'): string {
+export function errorMessage(
+  err: unknown,
+  fallback = 'Something went wrong. Please try again.',
+): string {
   const body = envelope(err);
   const first = body?.errors ? Object.values(body.errors)[0] : undefined;
   if (first) return first;

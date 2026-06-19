@@ -27,9 +27,7 @@ describe('Pagination', () => {
   });
 
   it('renders a "Showing X–Y of Z" summary when total + limit are given', () => {
-    render(
-      <Pagination page={2} hasMore total={45} limit={20} onPrev={vi.fn()} onNext={vi.fn()} />,
-    );
+    render(<Pagination page={2} hasMore total={45} limit={20} onPrev={vi.fn()} onNext={vi.fn()} />);
     expect(screen.getByText(/showing 21–40 of 45/i)).toBeInTheDocument();
   });
 
