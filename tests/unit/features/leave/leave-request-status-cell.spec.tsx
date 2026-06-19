@@ -36,8 +36,8 @@ function row(overrides: Partial<LeaveRequest> = {}): LeaveRequest {
   } as LeaveRequest;
 }
 
-function renderCell(r: LeaveRequest) {
-  const { container } = render(<LeaveRequestStatusCell request={r} />);
+function renderCell(r: LeaveRequest, viewerId?: number) {
+  const { container } = render(<LeaveRequestStatusCell request={r} viewerId={viewerId} />);
   return container.textContent ?? '';
 }
 
@@ -126,6 +126,29 @@ describe('LeaveRequestStatusCell', () => {
     expect(text).toContain('Cancelled');
     expect(text).toContain('2 minutes ago');
     expect(text).not.toContain('Grace Hopper');
+  });
+
+  it('marks the awaited L1 approver "(you)" when the viewer is that approver', () => {
+    const text = renderCell(row({ status: 'pending_l1', l1_approver_id: 5 }), 5);
+    expect(text).toContain('Grace Hopper (you)');
+  });
+
+  it('marks the awaited L2 approver "(you)" when the viewer is that approver', () => {
+    const text = renderCell(
+      row({
+        status: 'pending_l2',
+        l2_approver_id: 9,
+        l2_approver_name: 'Alan Turing',
+      }),
+      9,
+    );
+    expect(text).toContain('Alan Turing (you)');
+  });
+
+  it('does not mark "(you)" when the viewer is not the pending approver', () => {
+    const text = renderCell(row({ status: 'pending_l1', l1_approver_id: 5 }), 999);
+    expect(text).toContain('Grace Hopper');
+    expect(text).not.toContain('(you)');
   });
 
   it('falls back to an em dash when an approver name is missing', () => {

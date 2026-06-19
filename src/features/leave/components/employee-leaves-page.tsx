@@ -9,6 +9,7 @@ import { usePagination } from '@/lib/use-pagination';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
+import { useAuth } from '@/features/auth/use-auth';
 import { leaveApi } from '@/features/leave/api';
 import { leaveKeys } from '@/features/leave/keys';
 import { useCancelMyLeave } from '@/features/leave/hooks/use-cancel-my-leave-mutation';
@@ -21,6 +22,7 @@ const PAGE_LIMIT = 20;
 
 /** /employee/leaves — my balances, my request history, and the apply drawer. */
 export function EmployeeLeavesPage() {
+  const { user } = useAuth();
   const { page, toPrev, toNext } = usePagination();
   const [applyOpen, setApplyOpen] = useState(false);
 
@@ -114,7 +116,7 @@ export function EmployeeLeavesPage() {
                       </Td>
                       <Td className="text-right tabular-nums">{row.working_days}</Td>
                       <Td>
-                        <LeaveRequestStatusCell request={row} />
+                        <LeaveRequestStatusCell request={row} viewerId={user?.id} />
                       </Td>
                       <Td className="text-neutral-500">{formatDateTimeInTz(row.submitted_at)}</Td>
                       <Td className="text-right">

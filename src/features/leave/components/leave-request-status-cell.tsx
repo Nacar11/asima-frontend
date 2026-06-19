@@ -1,5 +1,6 @@
 import { cn } from '@/lib/cn';
 import { formatRelative } from '@/lib/format';
+import { approverLabel } from '@/lib/approver-label';
 import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
 import type { LeaveRequest } from '@/features/leave/schemas';
 
@@ -10,24 +11,32 @@ import type { LeaveRequest } from '@/features/leave/schemas';
  *
  * Approver/decider names ride on the joined list read-model; any missing
  * one renders as an em dash (no L2, not yet decided, or a deactivated user).
+ * `viewerId` marks the *pending* approver "(you)" when it's the signed-in user.
  */
-export function LeaveRequestStatusCell({ request }: { request: LeaveRequest }) {
+export function LeaveRequestStatusCell({
+  request,
+  viewerId,
+}: {
+  request: LeaveRequest;
+  viewerId?: number;
+}) {
   return (
     <div className="flex flex-col gap-1">
       <LeaveStatusBadge status={request.status} />
-      <div className="space-y-0.5 text-xs leading-snug">{supportingLines(request)}</div>
+      <div className="space-y-0.5 text-xs leading-snug">{supportingLines(request, viewerId)}</div>
     </div>
   );
 }
 
-function supportingLines(r: LeaveRequest): React.ReactNode {
+function supportingLines(r: LeaveRequest, viewerId?: number): React.ReactNode {
   const hasL2 = r.l2_approver_id !== null;
+  const isSelf = (approverId: number | null) => approverId != null && approverId === viewerId;
 
   switch (r.status) {
     case 'pending_l1':
       return (
         <>
-          <Line label="Awaiting L1" name={r.l1_approver_name} />
+          <Line label="Awaiting L1" name={r.l1_approver_name} isSelf={isSelf(r.l1_approver_id)} />
           {hasL2 && <Line label="then L2" name={r.l2_approver_name} muted />}
         </>
       );
@@ -35,7 +44,7 @@ function supportingLines(r: LeaveRequest): React.ReactNode {
       return (
         <>
           <Line label="L1 ✓" name={r.l1_approver_name} muted />
-          <Line label="Awaiting L2" name={r.l2_approver_name} />
+          <Line label="Awaiting L2" name={r.l2_approver_name} isSelf={isSelf(r.l2_approver_id)} />
         </>
       );
     case 'approved':
@@ -48,11 +57,21 @@ function supportingLines(r: LeaveRequest): React.ReactNode {
   }
 }
 
-/** "Awaiting L1 · Grace Hopper" — an approver row in the chain. */
-function Line({ label, name, muted }: { label: string; name?: string | null; muted?: boolean }) {
+/** "Awaiting L1 · Grace Hopper (you)" — an approver row in the chain. */
+function Line({
+  label,
+  name,
+  muted,
+  isSelf,
+}: {
+  label: string;
+  name?: string | null;
+  muted?: boolean;
+  isSelf?: boolean;
+}) {
   return (
     <p className={cn(muted ? 'text-neutral-400' : 'text-neutral-600')}>
-      {label} · <span className="text-neutral-900">{name ?? '—'}</span>
+      {label} · <span className="text-neutral-900">{approverLabel(name, isSelf ?? false)}</span>
     </p>
   );
 }

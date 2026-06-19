@@ -21,6 +21,9 @@ vi.mock('@/features/leave/api', () => ({
   },
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('@/features/auth/use-auth', () => ({
+  useAuth: () => ({ status: 'authenticated', user: { id: 1, system_admin: false } }),
+}));
 
 const PENDING_ROW = {
   id: 1,
