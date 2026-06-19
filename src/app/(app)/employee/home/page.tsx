@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/features/auth/use-auth';
 import { timeEntriesApi } from '@/features/time-entries/api';
 import { timeEntryKeys } from '@/features/time-entries/keys';
+import { usePunch } from '@/features/time-entries/hooks/use-punch-mutation';
 import { durationMinutes, formatDuration } from '@/features/time-entries/schemas';
 import { findScheduleForDate, tardinessMinutes } from '@/features/time-entries/metrics';
 import { cooldownRemainingSeconds } from '@/features/time-entries/cooldown';
 import { scheduleApi } from '@/features/schedule/api';
 import { scheduleKeys } from '@/features/schedule/keys';
-import { ApiError } from '@/lib/api-client';
 import { formatInTz, formatTimeInTz } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import type { TimeEntry } from '@/features/time-entries/schemas';
@@ -31,7 +31,6 @@ const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export default function HomePage() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const now = useNow();
 
   const todayQuery = useQuery({
@@ -72,34 +71,24 @@ export default function HomePage() {
   // Tardiness for the in-progress session, shown as a chip while clocked in.
   const openLate = isClockedIn && openEntry ? tardinessMinutes(openEntry, todaySchedule) : null;
 
-  const mutation = useMutation({
-    mutationFn: () => timeEntriesApi.punch(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-      if (!isClockedIn) {
-        const late = tardinessMinutes(
-          { time_in: new Date().toISOString() } as TimeEntry,
-          todaySchedule,
-        );
-        toast.success(late && late > 0 ? `Punched in — you're ${late} min late.` : 'Punched in.');
-      } else {
-        toast.success('Punched out.');
-      }
-    },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 429) {
-        void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-        toast.warning('Please wait 5 minutes between punches.');
-        return;
-      }
-      if (err instanceof ApiError && err.status === 409) {
-        void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-        toast.warning('Punch state already updated — refreshed.');
-        return;
-      }
-      toast.error('Could not punch. Try again.');
-    },
-  });
+  const mutation = usePunch();
+
+  const onPunch = () =>
+    mutation.mutate(undefined, {
+      onSuccess: () => {
+        if (!isClockedIn) {
+          const late = tardinessMinutes(
+            { time_in: new Date().toISOString() } as TimeEntry,
+            todaySchedule,
+          );
+          toast.success(
+            late && late > 0 ? `Punched in — you're ${late} min late.` : 'Punched in.',
+          );
+        } else {
+          toast.success('Punched out.');
+        }
+      },
+    });
 
   const pending = mutation.isPending || todayQuery.isLoading;
   const disabled = pending || onCooldown;
@@ -128,7 +117,7 @@ export default function HomePage() {
       <div className="flex flex-col items-center gap-5">
         <button
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={onPunch}
           disabled={disabled}
           aria-label={isClockedIn ? 'Punch out' : 'Punch in'}
           className={cn(
