@@ -16,6 +16,7 @@ import {
 import type { WorkSchedule } from '@/features/schedule/schemas';
 import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
 import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
+import { approverLabel } from '@/lib/approver-label';
 import { cn } from '@/lib/cn';
 
 /**
@@ -31,6 +32,7 @@ export function EntriesTable({
   schedules,
   onRequestCorrection,
   correctionsByEntry,
+  viewerId,
 }: {
   rows: TimeEntry[];
   schedules: WorkSchedule[];
@@ -43,6 +45,8 @@ export function EntriesTable({
    * same-day rows — the server enforces one active correction per entry.
    */
   correctionsByEntry?: Map<number, TimeCorrectionRequest>;
+  /** The signed-in user's id — marks the pending approver "(you)" in the Approver column. */
+  viewerId?: number;
 }) {
   if (rows.length === 0) {
     return (
@@ -109,7 +113,7 @@ export function EntriesTable({
                   <StatusBadge status={status} />
                 </Td>
                 <Td>
-                  <ApproverCell correction={correction} />
+                  <ApproverCell correction={correction} viewerId={viewerId} />
                 </Td>
                 <Td className="text-right">
                   <div className="flex flex-col items-end gap-1">
@@ -184,22 +188,46 @@ function StatusBadge({ status }: { status: TimesheetStatus }) {
   );
 }
 
-function ApproverCell({ correction }: { correction?: TimeCorrectionRequest }) {
+function ApproverCell({
+  correction,
+  viewerId,
+}: {
+  correction?: TimeCorrectionRequest;
+  viewerId?: number;
+}) {
   if (!correction) return <span className="text-neutral-400">—</span>;
   const { l1, l2 } = approverStates(correction);
+  // "(you)" marks the approver the viewer must act on — the pending level whose
+  // approver id is the signed-in user.
+  const isSelf = (approverId: number | null, state: ApproverLevelState) =>
+    state === 'pending' && approverId != null && approverId === viewerId;
   // Single-level chain (no L2): show just the lone approver's name + state,
   // without the L1/L2 scaffolding (no "L2: n/a" line).
   if (correction.l2_approver_id === null) {
     return (
       <div className="text-xs">
-        <ApproverLine name={correction.l1_approver_name ?? null} state={l1} />
+        <ApproverLine
+          name={correction.l1_approver_name ?? null}
+          state={l1}
+          isSelf={isSelf(correction.l1_approver_id, l1)}
+        />
       </div>
     );
   }
   return (
     <div className="space-y-0.5 text-xs">
-      <ApproverLine level="L1" name={correction.l1_approver_name ?? null} state={l1} />
-      <ApproverLine level="L2" name={correction.l2_approver_name ?? null} state={l2} />
+      <ApproverLine
+        level="L1"
+        name={correction.l1_approver_name ?? null}
+        state={l1}
+        isSelf={isSelf(correction.l1_approver_id, l1)}
+      />
+      <ApproverLine
+        level="L2"
+        name={correction.l2_approver_name ?? null}
+        state={l2}
+        isSelf={isSelf(correction.l2_approver_id, l2)}
+      />
     </div>
   );
 }
@@ -221,10 +249,12 @@ function ApproverLine({
   level,
   name,
   state,
+  isSelf,
 }: {
   level?: string;
   name: string | null;
   state: ApproverLevelState;
+  isSelf?: boolean;
 }) {
   return (
     <div>
@@ -233,7 +263,7 @@ function ApproverLine({
         <span className="text-neutral-400">n/a</span>
       ) : (
         <>
-          <span className="text-neutral-800">{name ?? '—'}</span>{' '}
+          <span className="text-neutral-800">{approverLabel(name, isSelf ?? false)}</span>{' '}
           <span className={STATE_CLASS[state]}>{STATE_MARK[state]}</span>
         </>
       )}

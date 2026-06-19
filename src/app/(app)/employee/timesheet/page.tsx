@@ -8,6 +8,7 @@ import { EntriesTable } from '@/features/time-entries/components/entries-table';
 import { RequestCorrectionDrawer } from '@/features/time-correction/components/request-correction-drawer';
 import { AddLogDrawer } from '@/features/time-correction/components/add-log-drawer';
 import { useMyCorrectionsByEntry } from '@/features/time-correction/hooks/use-my-active-corrections';
+import { useAuth } from '@/features/auth/use-auth';
 import { scheduleApi } from '@/features/schedule/api';
 import { scheduleKeys } from '@/features/schedule/keys';
 import { Pagination } from '@/components/pagination';
@@ -18,6 +19,7 @@ import type { TimeEntry } from '@/features/time-entries/schemas';
 const PAGE_LIMIT = 20;
 
 export default function MyTimeSheetPage() {
+  const { user } = useAuth();
   const { page, toPrev, toNext } = usePagination();
   const [correcting, setCorrecting] = useState<TimeEntry | null>(null);
   const [addingLog, setAddingLog] = useState(false);
@@ -64,6 +66,7 @@ export default function MyTimeSheetPage() {
           schedules={scheduleQuery.data ?? []}
           onRequestCorrection={setCorrecting}
           correctionsByEntry={correctionsByEntry}
+          viewerId={user?.id}
         />
       )}
 

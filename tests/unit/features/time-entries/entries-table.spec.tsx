@@ -197,6 +197,35 @@ describe('EntriesTable — status, time-in/out diff, deficit, approvers', () => 
     expect(row.getByText('L2:')).toBeInTheDocument();
   });
 
+  it('marks the pending approver "(you)" when the viewer is that approver', () => {
+    const corrections = new Map([[1, correction('2026-06-13')]]); // pending_l1, L1 = Jane Cruz (id 5)
+    render(
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByEntry={corrections}
+        viewerId={5}
+      />,
+    );
+    const row = within(rowFor('2026-06-13'));
+    expect(row.getByText(/Jane Cruz \(you\)/)).toBeInTheDocument();
+  });
+
+  it('does not mark "(you)" for an approver who is not the viewer', () => {
+    const corrections = new Map([[1, correction('2026-06-13')]]);
+    render(
+      <EntriesTable
+        rows={[entry(1, '2026-06-13')]}
+        schedules={[]}
+        correctionsByEntry={corrections}
+        viewerId={999}
+      />,
+    );
+    const row = within(rowFor('2026-06-13'));
+    expect(row.getByText(/Jane Cruz/)).toBeInTheDocument();
+    expect(row.queryByText(/\(you\)/)).not.toBeInTheDocument();
+  });
+
   it('shows just the lone approver name (no L1/L2 labels) for a single-level chain', () => {
     const corrections = new Map([
       [1, correction('2026-06-13', { l2_approver_id: null, l2_approver_name: null })],
