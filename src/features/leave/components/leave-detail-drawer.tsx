@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Sheet,
   SheetBody,
@@ -14,9 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { approvalKeys } from '@/features/approvals/keys';
+import { useLeaveActions } from '@/features/leave/hooks/use-leave-actions';
 import {
   LEAVE_PORTION_LABELS,
   LEAVE_TYPE_LABELS,
@@ -52,7 +48,6 @@ export function LeaveDetailDrawer({
   canUpdate: boolean;
   canDelete: boolean;
 }) {
-  const queryClient = useQueryClient();
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState('');
   const [editing, setEditing] = useState(false);
@@ -77,67 +72,14 @@ export function LeaveDetailDrawer({
     }
   }, [request]);
 
-  const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: leaveKeys.all });
-    void queryClient.invalidateQueries({ queryKey: approvalKeys.all });
-  };
-
-  const approveMutation = useMutation({
-    mutationFn: () => leaveApi.approve(request!.id),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Request approved.');
-      onClose();
-    },
-    onError: () => toast.error('Could not approve the request.'),
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: () => leaveApi.reject(request!.id, note.trim()),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Request rejected.');
-      onClose();
-    },
-    onError: () => toast.error('Could not reject the request.'),
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: () => leaveApi.admin.cancel(request!.id),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Request cancelled.');
-      onClose();
-    },
-    onError: () => toast.error('Could not cancel the request.'),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: () =>
-      leaveApi.admin.update(request!.id, {
-        leave_type: edit.leave_type,
-        start_date: edit.start_date,
-        end_date: edit.end_date,
-        reason: edit.reason.trim() ? edit.reason.trim() : null,
-      }),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Request updated.');
-      setEditing(false);
-    },
-    onError: () => toast.error('Could not update the request.'),
-  });
+  const { approve, reject, cancel, update } = useLeaveActions(request?.id);
 
   if (!request) return null;
   const pending = isPending(request.status);
   // Edit / approve / reject stay pending-only; cancel follows the broader rule
   // (active + not fully elapsed), matching the backend cancel guard.
   const cancellable = canCancel(request);
-  const busy =
-    approveMutation.isPending ||
-    rejectMutation.isPending ||
-    cancelMutation.isPending ||
-    updateMutation.isPending;
+  const busy = approve.isPending || reject.isPending || cancel.isPending || update.isPending;
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -205,7 +147,17 @@ export function LeaveDetailDrawer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => updateMutation.mutate()}
+                  onClick={() =>
+                    update.mutate(
+                      {
+                        leave_type: edit.leave_type,
+                        start_date: edit.start_date,
+                        end_date: edit.end_date,
+                        reason: edit.reason.trim() ? edit.reason.trim() : null,
+                      },
+                      { onSuccess: () => setEditing(false) },
+                    )
+                  }
                   disabled={busy || edit.end_date < edit.start_date}
                   className={btnPrimary}
                 >
@@ -262,7 +214,7 @@ export function LeaveDetailDrawer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => rejectMutation.mutate()}
+                  onClick={() => reject.mutate(note.trim(), { onSuccess: () => onClose() })}
                   disabled={busy || note.trim().length === 0}
                   className={btnDanger}
                 >
@@ -283,7 +235,7 @@ export function LeaveDetailDrawer({
             {cancellable && canDelete && (
               <button
                 type="button"
-                onClick={() => cancelMutation.mutate()}
+                onClick={() => cancel.mutate(undefined, { onSuccess: () => onClose() })}
                 disabled={busy}
                 className={btnSecondary}
               >
@@ -298,7 +250,7 @@ export function LeaveDetailDrawer({
             {pending && canApproveAny && (
               <button
                 type="button"
-                onClick={() => approveMutation.mutate()}
+                onClick={() => approve.mutate(undefined, { onSuccess: () => onClose() })}
                 disabled={busy}
                 className={btnPrimary}
               >

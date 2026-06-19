@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import {
   Sheet,
   SheetBody,
@@ -14,11 +13,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
-import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
 import { leaveKeys } from '@/features/leave/keys';
+import { useGrantLeave } from '@/features/leave/hooks/use-grant-leave-mutation';
 import {
   GrantAllocationSchema,
   LEAVE_TYPES,
@@ -44,7 +44,6 @@ export function GrantLeaveDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
   const [employeeId, setEmployeeId] = useState<number | ''>('');
 
   const form = useForm<GrantAllocationInput>({
@@ -73,18 +72,14 @@ export function GrantLeaveDrawer({
     enabled: open && selected,
   });
 
-  const grantMutation = useMutation({
-    mutationFn: (input: GrantAllocationInput) => leaveApi.admin.grant(employeeId as number, input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.adminBalances(employeeId) });
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.adminAllocations(employeeId) });
-      toast.success('Leave granted.');
-      form.reset({ leave_type: form.getValues('leave_type'), amount: 1, reason: '' });
-    },
-    onError: (err) => toast.error(grantErrorMessage(err)),
-  });
+  const grantMutation = useGrantLeave(employeeId);
 
-  const onSubmit = form.handleSubmit((input) => grantMutation.mutate(input));
+  const onSubmit = form.handleSubmit((input) =>
+    grantMutation.mutate(input, {
+      onSuccess: () =>
+        form.reset({ leave_type: form.getValues('leave_type'), amount: 1, reason: '' }),
+    }),
+  );
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -191,16 +186,6 @@ export function GrantLeaveDrawer({
   );
 }
 
-function grantErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-    const firstFieldErr = body?.errors ? Object.values(body.errors)[0] : undefined;
-    if (firstFieldErr) return firstFieldErr;
-    if (typeof body?.message === 'string') return body.message;
-  }
-  return 'Could not grant leave.';
-}
-
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950 disabled:bg-neutral-50';
 
@@ -214,21 +199,3 @@ const btnGhost = cn(
   'rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}

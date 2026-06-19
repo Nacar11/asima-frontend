@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import {
   Sheet,
   SheetBody,
@@ -14,10 +13,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
+import { errorMessage } from '@/lib/api-error';
 import { leaveApi } from '@/features/leave/api';
 import { leaveKeys } from '@/features/leave/keys';
+import { useSubmitLeave } from '@/features/leave/hooks/use-submit-leave-mutation';
 import { Select } from '@/components/select';
 import {
   ACCEPTED_ATTACHMENT_ACCEPT,
@@ -58,7 +60,6 @@ const DEFAULTS: SubmitLeaveInput = {
  * submit before the round-trip.
  */
 export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const form = useForm<SubmitLeaveInput>({
     resolver: zodResolver(SubmitLeaveSchema),
@@ -116,31 +117,27 @@ export function ApplyLeaveDrawer({ open, onClose }: { open: boolean; onClose: ()
     retry: false,
   });
 
-  const dayCountError = preview.error instanceof ApiError ? firstFieldError(preview.error) : null;
+  const dayCountError =
+    preview.error instanceof ApiError
+      ? errorMessage(preview.error, 'Those dates are not allowed.')
+      : null;
   const workingDays = preview.data?.working_days ?? null;
   const windowLabel = formatWindow(
     preview.data?.start_time ?? null,
     preview.data?.end_time ?? null,
   );
 
-  const submitMutation = useMutation({
-    mutationFn: (vars: { input: SubmitLeaveInput; file: File | null }) =>
-      leaveApi.me.submit(vars.input, vars.file),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.me() });
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.balances() });
-      toast.success('Leave request submitted.');
-      onClose();
-    },
-    onError: (err) => toast.error(submitErrorMessage(err)),
-  });
+  const submitMutation = useSubmitLeave();
 
   const onSubmit = form.handleSubmit((input) => {
     if (requiresAttachment(input.leave_type) && !file) return; // guarded by the disabled button too
-    submitMutation.mutate({
-      input: { ...input, reason: input.reason?.trim() ? input.reason.trim() : undefined },
-      file: requiresAttachment(input.leave_type) ? file : null,
-    });
+    submitMutation.mutate(
+      {
+        input: { ...input, reason: input.reason?.trim() ? input.reason.trim() : undefined },
+        file: requiresAttachment(input.leave_type) ? file : null,
+      },
+      { onSuccess: () => onClose() },
+    );
   });
 
   const blocked = submitMutation.isPending || !datesReady || !!dayCountError || attachmentMissing;
@@ -289,22 +286,6 @@ function DayCountBanner({
   );
 }
 
-function firstFieldError(err: ApiError): string | null {
-  const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-  if (body?.errors) return Object.values(body.errors)[0] ?? null;
-  return typeof body?.message === 'string' ? body.message : 'Those dates are not allowed.';
-}
-
-function submitErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-    const firstFieldErr = body?.errors ? Object.values(body.errors)[0] : undefined;
-    if (firstFieldErr) return firstFieldErr;
-    if (typeof body?.message === 'string') return body.message;
-  }
-  return 'Could not submit the request.';
-}
-
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950 disabled:bg-neutral-50';
 
@@ -321,21 +302,3 @@ const btnGhost = cn(
   'rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}

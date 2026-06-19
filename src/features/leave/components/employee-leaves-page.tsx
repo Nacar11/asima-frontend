@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CalendarPlus, Plus } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/cn';
@@ -10,6 +9,7 @@ import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
 import { leaveApi } from '@/features/leave/api';
 import { leaveKeys } from '@/features/leave/keys';
+import { useCancelMyLeave } from '@/features/leave/hooks/use-cancel-my-leave-mutation';
 import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel } from '@/features/leave/format';
 import { LeaveRequestStatusCell } from '@/features/leave/components/leave-request-status-cell';
 import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
@@ -19,7 +19,6 @@ const PAGE_LIMIT = 20;
 
 /** /employee/leaves — my balances, my request history, and the apply drawer. */
 export function EmployeeLeavesPage() {
-  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [applyOpen, setApplyOpen] = useState(false);
 
@@ -34,15 +33,7 @@ export function EmployeeLeavesPage() {
     placeholderData: (prev) => prev,
   });
 
-  const cancelMutation = useMutation({
-    mutationFn: (id: number) => leaveApi.me.cancel(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.me() });
-      void queryClient.invalidateQueries({ queryKey: leaveKeys.balances() });
-      toast.success('Leave request cancelled.');
-    },
-    onError: () => toast.error('Could not cancel the request.'),
-  });
+  const cancelMutation = useCancelMyLeave();
 
   return (
     <div className="space-y-6">
