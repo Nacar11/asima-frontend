@@ -2,7 +2,13 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { DAY_NAMES, dayName, formatBreak, trimSeconds, type WorkSchedule } from '@/features/schedule/schemas';
+import {
+  DAY_NAMES,
+  dayName,
+  formatBreak,
+  trimSeconds,
+  type WorkSchedule,
+} from '@/features/schedule/schemas';
 
 type WeeklyGridProps = {
   rows: WorkSchedule[];
@@ -29,7 +35,9 @@ export function WeeklyGrid({ rows, canEdit, canRemove, onEdit, onRemove }: Weekl
             key={dow}
             className={cn(
               'rounded-lg border p-3',
-              row ? 'border-neutral-200 bg-white' : 'border-dashed border-neutral-200 bg-neutral-50',
+              row
+                ? 'border-neutral-200 bg-white'
+                : 'border-dashed border-neutral-200 bg-neutral-50',
             )}
           >
             <div className="flex items-center justify-between">

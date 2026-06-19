@@ -8,7 +8,7 @@ import { RequirePermission } from '@/components/require-permission';
 import { adminScheduleApi } from '@/features/admin-schedule/api';
 import { adminScheduleKeys } from '@/features/admin-schedule/keys';
 import { EmployeePicker, employeeName } from '@/features/admin-schedule/components/employee-picker';
-import { WeeklyGrid } from '@/features/admin-schedule/components/weekly-grid';
+import { ScheduleManager } from '@/features/admin-schedule/components/schedule-manager';
 import type { AdminUser } from '@/features/admin-users/schemas';
 
 export default function AdminSchedulesPage() {
@@ -53,9 +53,7 @@ function AdminSchedulesPageBody() {
             {employeeName(employee)}&apos;s week
           </h2>
 
-          {scheduleQuery.isLoading && (
-            <p className="text-sm text-neutral-500">Loading schedule…</p>
-          )}
+          {scheduleQuery.isLoading && <p className="text-sm text-neutral-500">Loading schedule…</p>}
           {scheduleQuery.error && (
             <EmptyState
               tone="error"
@@ -74,13 +72,7 @@ function AdminSchedulesPageBody() {
             />
           )}
           {scheduleQuery.data && (
-            <WeeklyGrid
-              rows={scheduleQuery.data}
-              canEdit={false}
-              canRemove={false}
-              onEdit={() => undefined}
-              onRemove={() => undefined}
-            />
+            <ScheduleManager employeeId={employee.id} rows={scheduleQuery.data} />
           )}
         </section>
       )}

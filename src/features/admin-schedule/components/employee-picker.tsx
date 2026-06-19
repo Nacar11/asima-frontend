@@ -38,7 +38,8 @@ export function EmployeePicker({
 
   const query = useQuery({
     queryKey: adminScheduleKeys.picker(debounced),
-    queryFn: () => adminUsersApi.list({ search: debounced || undefined, limit: 8, is_active: true }),
+    queryFn: () =>
+      adminUsersApi.list({ search: debounced || undefined, limit: 8, is_active: true }),
     enabled: debounced.length > 0,
     placeholderData: (prev) => prev,
   });
@@ -77,7 +78,7 @@ export function EmployeePicker({
                   type="button"
                   onClick={() => onSelect(u)}
                   className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-neutral-50 focus:outline-none focus:bg-neutral-50',
+                    'flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-neutral-50 focus:bg-neutral-50 focus:outline-none',
                     isSelected && 'bg-neutral-50',
                   )}
                 >
