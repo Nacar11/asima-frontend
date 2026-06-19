@@ -3,8 +3,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { z } from 'zod';
 import {
   Sheet,
@@ -15,11 +13,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
-import { ApiError } from '@/lib/api-client';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { timeEntryKeys } from '@/features/time-entries/keys';
+import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
 import { isoToTimeInput, replaceTimeOnIso } from '@/features/time-correction/datetime';
 import type { TimeEntry } from '@/features/time-entries/schemas';
 
@@ -51,8 +47,6 @@ export function RequestCorrectionDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
-
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: { proposed_time_in: '', proposed_time_out: '', reason: '' },
@@ -68,14 +62,19 @@ export function RequestCorrectionDrawer({
     }
   }, [entry, form]);
 
-  const mutation = useMutation({
-    mutationFn: (values: FormValues) => {
-      if (!entry) throw new Error('No entry selected');
-      // The date is locked to the entry: only the time-of-day changes. Recombine
-      // against the original instant's date so an unchanged field round-trips.
-      // time_out uses the in-instant's date when the entry had no prior out, so
-      // out stays on the same day (same-day rule).
-      return timeCorrectionApi.me.submit({
+  const mutation = useSubmitCorrection({
+    successMessage: 'Correction request submitted.',
+    errorFallback: 'Could not submit the correction.',
+  });
+
+  const onSubmit = form.handleSubmit((values) => {
+    if (!entry) return;
+    // The date is locked to the entry: only the time-of-day changes. Recombine
+    // against the original instant's date so an unchanged field round-trips.
+    // time_out uses the in-instant's date when the entry had no prior out, so
+    // out stays on the same day (same-day rule).
+    mutation.mutate(
+      {
         target_entry_id: entry.id,
         work_date: entry.work_date,
         proposed_time_in: replaceTimeOnIso(entry.time_in, values.proposed_time_in),
@@ -83,18 +82,10 @@ export function RequestCorrectionDrawer({
           ? replaceTimeOnIso(entry.time_out ?? entry.time_in, values.proposed_time_out)
           : null,
         reason: values.reason.trim(),
-      });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
-      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-      toast.success('Correction request submitted.');
-      onClose();
-    },
-    onError: (err) => toast.error(errorMessage(err)),
+      },
+      { onSuccess: () => onClose() },
+    );
   });
-
-  const onSubmit = form.handleSubmit((values) => mutation.mutate(values));
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -141,16 +132,6 @@ export function RequestCorrectionDrawer({
   );
 }
 
-function errorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-    const first = body?.errors ? Object.values(body.errors)[0] : undefined;
-    if (first) return first;
-    if (typeof body?.message === 'string') return body.message;
-  }
-  return 'Could not submit the correction.';
-}
-
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950';
 
@@ -164,21 +145,3 @@ const btnSecondary = cn(
   'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}

@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Sheet,
   SheetBody,
@@ -14,10 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { approvalKeys } from '@/features/approvals/keys';
-import { timeEntryKeys } from '@/features/time-entries/keys';
+import { useTimeCorrectionActions } from '@/features/time-correction/hooks/use-time-correction-actions';
 import { isoToLocalInput, localInputToIso } from '@/features/time-correction/datetime';
 import { isTcPending } from '@/features/time-correction/format';
 import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
@@ -46,7 +41,6 @@ export function TcDetailDrawer({
   canUpdate?: boolean;
   canDelete: boolean;
 }) {
-  const queryClient = useQueryClient();
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState('');
   const [editing, setEditing] = useState(false);
@@ -66,65 +60,11 @@ export function TcDetailDrawer({
     }
   }, [request]);
 
-  const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
-    void queryClient.invalidateQueries({ queryKey: approvalKeys.all });
-    void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-  };
-
-  const approveMutation = useMutation({
-    mutationFn: () => timeCorrectionApi.approve(request!.id),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Correction approved.');
-      onClose();
-    },
-    onError: () => toast.error('Could not approve the correction.'),
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: () => timeCorrectionApi.reject(request!.id, note.trim()),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Correction rejected.');
-      onClose();
-    },
-    onError: () => toast.error('Could not reject the correction.'),
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: () => timeCorrectionApi.admin.cancel(request!.id),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Correction cancelled.');
-      onClose();
-    },
-    onError: () => toast.error('Could not cancel the correction.'),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: () =>
-      timeCorrectionApi.admin.update(request!.id, {
-        work_date: edit.work_date,
-        proposed_time_in: localInputToIso(edit.time_in),
-        proposed_time_out: edit.time_out ? localInputToIso(edit.time_out) : null,
-        reason: edit.reason.trim(),
-      }),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Correction updated.');
-      setEditing(false);
-    },
-    onError: () => toast.error('Could not update the correction.'),
-  });
+  const { approve, reject, cancel, update } = useTimeCorrectionActions(request?.id);
 
   if (!request) return null;
   const pending = isTcPending(request.status);
-  const busy =
-    approveMutation.isPending ||
-    rejectMutation.isPending ||
-    cancelMutation.isPending ||
-    updateMutation.isPending;
+  const busy = approve.isPending || reject.isPending || cancel.isPending || update.isPending;
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -175,7 +115,17 @@ export function TcDetailDrawer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => updateMutation.mutate()}
+                  onClick={() =>
+                    update.mutate(
+                      {
+                        work_date: edit.work_date,
+                        proposed_time_in: localInputToIso(edit.time_in),
+                        proposed_time_out: edit.time_out ? localInputToIso(edit.time_out) : null,
+                        reason: edit.reason.trim(),
+                      },
+                      { onSuccess: () => setEditing(false) },
+                    )
+                  }
                   disabled={busy}
                   className={btnPrimary}
                 >
@@ -224,7 +174,7 @@ export function TcDetailDrawer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => rejectMutation.mutate()}
+                  onClick={() => reject.mutate(note.trim(), { onSuccess: () => onClose() })}
                   disabled={busy || note.trim().length === 0}
                   className={btnDanger}
                 >
@@ -245,7 +195,7 @@ export function TcDetailDrawer({
             {canDelete && (
               <button
                 type="button"
-                onClick={() => cancelMutation.mutate()}
+                onClick={() => cancel.mutate(undefined, { onSuccess: () => onClose() })}
                 disabled={busy}
                 className={btnSecondary}
               >
@@ -260,7 +210,7 @@ export function TcDetailDrawer({
             {canApproveAny && (
               <button
                 type="button"
-                onClick={() => approveMutation.mutate()}
+                onClick={() => approve.mutate(undefined, { onSuccess: () => onClose() })}
                 disabled={busy}
                 className={btnPrimary}
               >

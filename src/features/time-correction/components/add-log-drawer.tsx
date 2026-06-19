@@ -3,8 +3,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { z } from 'zod';
 import {
   Sheet,
@@ -15,11 +13,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
-import { ApiError } from '@/lib/api-client';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { timeEntryKeys } from '@/features/time-entries/keys';
+import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
 import { localDateTimeToIso } from '@/features/time-correction/datetime';
 
 /** Browser-local YYYY-MM-DD for "today" (the latest date a log may be added for). */
@@ -55,8 +51,6 @@ type FormValues = z.infer<typeof FormSchema>;
  * the checks here are UX.
  */
 export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const queryClient = useQueryClient();
-
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: { work_date: '', proposed_time_in: '', proposed_time_out: '', reason: '' },
@@ -67,25 +61,23 @@ export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => 
       form.reset({ work_date: '', proposed_time_in: '', proposed_time_out: '', reason: '' });
   }, [open, form]);
 
-  const mutation = useMutation({
-    mutationFn: (values: FormValues) =>
-      timeCorrectionApi.me.submit({
+  const mutation = useSubmitCorrection({
+    successMessage: 'Log submitted for approval.',
+    errorFallback: 'Could not add the log.',
+  });
+
+  const onSubmit = form.handleSubmit((values) =>
+    mutation.mutate(
+      {
         target_entry_id: null,
         work_date: values.work_date,
         proposed_time_in: localDateTimeToIso(values.work_date, values.proposed_time_in),
         proposed_time_out: localDateTimeToIso(values.work_date, values.proposed_time_out),
         reason: values.reason.trim(),
-      }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: timeCorrectionKeys.all });
-      void queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
-      toast.success('Log submitted for approval.');
-      onClose();
-    },
-    onError: (err) => toast.error(errorMessage(err)),
-  });
-
-  const onSubmit = form.handleSubmit((values) => mutation.mutate(values));
+      },
+      { onSuccess: () => onClose() },
+    ),
+  );
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
@@ -138,16 +130,6 @@ export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => 
   );
 }
 
-function errorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const body = err.body as { errors?: Record<string, string>; message?: string } | null;
-    const first = body?.errors ? Object.values(body.errors)[0] : undefined;
-    if (first) return first;
-    if (typeof body?.message === 'string') return body.message;
-  }
-  return 'Could not add the log.';
-}
-
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950';
 
@@ -161,21 +143,3 @@ const btnSecondary = cn(
   'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}
