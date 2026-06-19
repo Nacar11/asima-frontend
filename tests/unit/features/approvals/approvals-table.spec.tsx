@@ -69,6 +69,12 @@ describe('ApprovalsTable', () => {
     expect(screen.queryByText(/\(you\)/)).toBeNull();
   });
 
+  it('renders the same Status cell for a time-correction row', () => {
+    render(<ApprovalsTable rows={[TC_ROW]} viewerId={5} />);
+    expect(screen.getByText('Pending L1')).toBeInTheDocument();
+    expect(screen.getByText('Daniel Aguilar (you)')).toBeInTheDocument();
+  });
+
   it('renders a Details button that calls onDetails with the row', async () => {
     const onDetails = vi.fn();
     render(<ApprovalsTable rows={[ROW]} onDetails={onDetails} />);
