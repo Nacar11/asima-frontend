@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CalendarPlus, Plus } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
+import { usePagination } from '@/lib/use-pagination';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
@@ -19,7 +21,7 @@ const PAGE_LIMIT = 20;
 
 /** /employee/leaves — my balances, my request history, and the apply drawer. */
 export function EmployeeLeavesPage() {
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext } = usePagination();
   const [applyOpen, setApplyOpen] = useState(false);
 
   const balancesQuery = useQuery({
@@ -137,14 +139,12 @@ export function EmployeeLeavesPage() {
           ))}
 
         {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-          <div className="flex items-center justify-end gap-2 text-xs text-neutral-500">
-            <PagerButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-              Previous
-            </PagerButton>
-            <PagerButton onClick={() => setPage((p) => p + 1)} disabled={!listQuery.data.has_more}>
-              Next
-            </PagerButton>
-          </div>
+          <Pagination
+            page={page}
+            hasMore={listQuery.data.has_more}
+            onPrev={toPrev}
+            onNext={toNext}
+          />
         )}
       </section>
 
@@ -182,15 +182,3 @@ function Td({ children, className }: { children: React.ReactNode; className?: st
   return <td className={cn('px-4 py-2.5 text-neutral-900', className)}>{children}</td>;
 }
 
-const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    type="button"
-    className={cn(
-      'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-      'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);

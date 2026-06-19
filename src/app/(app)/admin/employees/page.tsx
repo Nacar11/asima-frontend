@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Plus, Search, Users } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
 import { RequirePermission } from '@/components/require-permission';
 import { Select } from '@/components/select';
 import { useAuth } from '@/features/auth/use-auth';
@@ -12,6 +13,8 @@ import { hasPermission } from '@/features/auth/permission-utils';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminUserKeys } from '@/features/admin-users/keys';
 import { ApiError } from '@/lib/api-client';
+import { errorMessage } from '@/lib/api-error';
+import { usePagination } from '@/lib/use-pagination';
 import { adminRolesApi } from '@/features/admin-roles/api';
 import { adminRoleKeys } from '@/features/admin-roles/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
@@ -28,8 +31,7 @@ const PAGE_LIMIT = 20;
 
 function describeError(err: unknown): string {
   if (err instanceof ApiError) {
-    const body = err.body as { message?: string | string[] } | null;
-    const msg = Array.isArray(body?.message) ? body!.message.join(', ') : body?.message;
+    const msg = errorMessage(err, '');
     return msg ? `${err.status}: ${msg}` : `Request failed (HTTP ${err.status}). Please try again.`;
   }
   if (err instanceof Error) return err.message;
@@ -54,7 +56,7 @@ function AdminEmployeesPageBody() {
   const { permissions } = usePermissions();
   const canCreate = hasPermission(permissions, 'USER:Create', user?.system_admin ?? false);
 
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext, reset: resetPage } = usePagination();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleId, setRoleId] = useState<number | ''>('');
@@ -71,8 +73,8 @@ function AdminEmployeesPageBody() {
   }, [search]);
 
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, roleId, isActive]);
+    resetPage();
+  }, [debouncedSearch, roleId, isActive, resetPage]);
 
   const rolesQuery = useQuery({
     queryKey: adminRoleKeys.list(),
@@ -164,13 +166,13 @@ function AdminEmployeesPageBody() {
         ))}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-        <Paginator
+        <Pagination
           page={listQuery.data.page}
           hasMore={listQuery.data.has_more}
           total={listQuery.data.total}
           limit={listQuery.data.limit}
-          onPrev={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => p + 1)}
+          onPrev={toPrev}
+          onNext={toNext}
         />
       )}
 
@@ -247,50 +249,3 @@ function Toolbar({
     </div>
   );
 }
-
-function Paginator({
-  page,
-  hasMore,
-  total,
-  limit,
-  onPrev,
-  onNext,
-}: {
-  page: number;
-  hasMore: boolean;
-  total: number;
-  limit: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  const start = (page - 1) * limit + 1;
-  const end = Math.min(total, page * limit);
-  return (
-    <div className="flex items-center justify-between text-xs text-neutral-500">
-      <span>
-        Showing {start}–{end} of {total}
-      </span>
-      <div className="flex gap-2">
-        <PagerButton onClick={onPrev} disabled={page === 1}>
-          Previous
-        </PagerButton>
-        <PagerButton onClick={onNext} disabled={!hasMore}>
-          Next
-        </PagerButton>
-      </div>
-    </div>
-  );
-}
-
-const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    type="button"
-    className={cn(
-      'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-      'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);

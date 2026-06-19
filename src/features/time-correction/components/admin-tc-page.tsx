@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
+import { usePagination } from '@/lib/use-pagination';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz, formatTimeInTz } from '@/lib/format';
 import { useAuth } from '@/features/auth/use-auth';
@@ -41,7 +43,7 @@ export function AdminTimeCorrectionsPage() {
   const canUpdate = hasPermission(permissions, 'TIME_CORRECTION:Update', sysAdmin);
   const canDelete = hasPermission(permissions, 'TIME_CORRECTION:Delete', sysAdmin);
 
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext, reset: resetPage } = usePagination();
   const [status, setStatus] = useState<TcStatus | ''>('');
   const [employeeId, setEmployeeId] = useState<number | ''>('');
   const [from, setFrom] = useState('');
@@ -49,8 +51,8 @@ export function AdminTimeCorrectionsPage() {
   const [selected, setSelected] = useState<TimeCorrectionRequest | null>(null);
 
   useEffect(() => {
-    setPage(1);
-  }, [status, employeeId, from, to]);
+    resetPage();
+  }, [status, employeeId, from, to, resetPage]);
 
   // Row display names come joined from the backend list (employee_name).
   // The users directory is fetched only to populate the employee filter.
@@ -184,14 +186,12 @@ export function AdminTimeCorrectionsPage() {
         ))}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-        <div className="flex items-center justify-end gap-2 text-xs text-neutral-500">
-          <PagerButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-            Previous
-          </PagerButton>
-          <PagerButton onClick={() => setPage((p) => p + 1)} disabled={!listQuery.data.has_more}>
-            Next
-          </PagerButton>
-        </div>
+        <Pagination
+          page={page}
+          hasMore={listQuery.data.has_more}
+          onPrev={toPrev}
+          onNext={toNext}
+        />
       )}
 
       <TcDetailDrawer
@@ -222,15 +222,3 @@ function Th({ children }: { children: React.ReactNode }) {
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
   return <td className={cn('px-4 py-2.5 text-neutral-900', className)}>{children}</td>;
 }
-const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    type="button"
-    className={cn(
-      'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-      'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);

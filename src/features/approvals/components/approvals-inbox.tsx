@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
+import { usePagination } from '@/lib/use-pagination';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { useAuth } from '@/features/auth/use-auth';
 import { hasPermission } from '@/features/auth/permission-utils';
@@ -58,7 +60,7 @@ export function ApprovalsInbox({
   const isSysAdmin = user?.system_admin ?? false;
   const canSeeAll = isSysAdmin || hasPermission(permissions, 'APPROVAL:ApproveAny', isSysAdmin);
 
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext } = usePagination();
   const query = usePendingApprovals({ type, page, limit: PAGE_LIMIT });
 
   const [selected, setSelected] = useState<PendingApproval | null>(null);
@@ -139,13 +141,13 @@ export function ApprovalsInbox({
         ))}
 
       {query.data && query.data.total > PAGE_LIMIT && (
-        <Paginator
+        <Pagination
           page={query.data.page}
           hasMore={query.data.has_more}
           total={query.data.total}
           limit={query.data.limit}
-          onPrev={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => p + 1)}
+          onPrev={toPrev}
+          onNext={toNext}
         />
       )}
 
@@ -167,56 +169,6 @@ export function ApprovalsInbox({
           if (rejecting) rejectRow(rejecting, note);
         }}
       />
-    </div>
-  );
-}
-
-function Paginator({
-  page,
-  hasMore,
-  total,
-  limit,
-  onPrev,
-  onNext,
-}: {
-  page: number;
-  hasMore: boolean;
-  total: number;
-  limit: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  const start = (page - 1) * limit + 1;
-  const end = Math.min(total, page * limit);
-  return (
-    <div className="flex items-center justify-between text-xs text-neutral-500">
-      <span>
-        Showing {start}–{end} of {total}
-      </span>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={onPrev}
-          disabled={page === 1}
-          className={cn(
-            'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-            'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-          )}
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!hasMore}
-          className={cn(
-            'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-            'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-          )}
-        >
-          Next
-        </button>
-      </div>
     </div>
   );
 }

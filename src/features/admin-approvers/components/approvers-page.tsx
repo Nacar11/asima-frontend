@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Search, Users } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
 import { cn } from '@/lib/cn';
+import { usePagination } from '@/lib/use-pagination';
 import { ApiError } from '@/lib/api-client';
 import { useAuth } from '@/features/auth/use-auth';
 import { usePermissions } from '@/features/auth/use-permissions';
@@ -45,7 +47,7 @@ export function ApproversPage() {
     user?.system_admin ?? false,
   );
 
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext, reset: resetPage } = usePagination();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [unassignedOnly, setUnassignedOnly] = useState(false);
@@ -59,8 +61,8 @@ export function ApproversPage() {
   }, [search]);
 
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, unassignedOnly]);
+    resetPage();
+  }, [debouncedSearch, unassignedOnly, resetPage]);
 
   const listQueryKey = adminApproverKeys.list(page, debouncedSearch, unassignedOnly);
 
@@ -272,20 +274,14 @@ export function ApproversPage() {
         ))}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-        <div className="flex items-center justify-between text-xs text-neutral-500">
-          <span>
-            Showing {(page - 1) * PAGE_LIMIT + 1}–
-            {Math.min(listQuery.data.total, page * PAGE_LIMIT)} of {listQuery.data.total}
-          </span>
-          <div className="flex gap-2">
-            <PagerButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-              Previous
-            </PagerButton>
-            <PagerButton onClick={() => setPage((p) => p + 1)} disabled={!listQuery.data.has_more}>
-              Next
-            </PagerButton>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          hasMore={listQuery.data.has_more}
+          total={listQuery.data.total}
+          limit={PAGE_LIMIT}
+          onPrev={toPrev}
+          onNext={toNext}
+        />
       )}
 
       {canUpdate && (
@@ -309,15 +305,3 @@ export function ApproversPage() {
   );
 }
 
-const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    type="button"
-    className={cn(
-      'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-      'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);

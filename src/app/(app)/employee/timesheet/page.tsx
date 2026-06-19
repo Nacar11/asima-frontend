@@ -10,13 +10,15 @@ import { AddLogDrawer } from '@/features/time-correction/components/add-log-draw
 import { useMyCorrectionsByEntry } from '@/features/time-correction/hooks/use-my-active-corrections';
 import { scheduleApi } from '@/features/schedule/api';
 import { scheduleKeys } from '@/features/schedule/keys';
+import { Pagination } from '@/components/pagination';
+import { usePagination } from '@/lib/use-pagination';
 import { cn } from '@/lib/cn';
 import type { TimeEntry } from '@/features/time-entries/schemas';
 
 const PAGE_LIMIT = 20;
 
 export default function MyTimeSheetPage() {
-  const [page, setPage] = useState(1);
+  const { page, toPrev, toNext } = usePagination();
   const [correcting, setCorrecting] = useState<TimeEntry | null>(null);
   const [addingLog, setAddingLog] = useState(false);
 
@@ -66,13 +68,13 @@ export default function MyTimeSheetPage() {
       )}
 
       {listQuery.data && listQuery.data.total > PAGE_LIMIT && (
-        <Paginator
+        <Pagination
           page={listQuery.data.page}
           hasMore={listQuery.data.has_more}
           total={listQuery.data.total}
           limit={listQuery.data.limit}
-          onPrev={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => p + 1)}
+          onPrev={toPrev}
+          onNext={toNext}
         />
       )}
 
@@ -87,49 +89,3 @@ export default function MyTimeSheetPage() {
   );
 }
 
-function Paginator({
-  page,
-  hasMore,
-  total,
-  limit,
-  onPrev,
-  onNext,
-}: {
-  page: number;
-  hasMore: boolean;
-  total: number;
-  limit: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  const start = (page - 1) * limit + 1;
-  const end = Math.min(total, page * limit);
-  return (
-    <div className="flex items-center justify-between text-xs text-neutral-500">
-      <span>
-        Showing {start}–{end} of {total}
-      </span>
-      <div className="flex gap-2">
-        <PagerButton onClick={onPrev} disabled={page === 1}>
-          Previous
-        </PagerButton>
-        <PagerButton onClick={onNext} disabled={!hasMore}>
-          Next
-        </PagerButton>
-      </div>
-    </div>
-  );
-}
-
-const PagerButton = ({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    type="button"
-    className={cn(
-      'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-neutral-700',
-      'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-    )}
-    {...rest}
-  >
-    {children}
-  </button>
-);
