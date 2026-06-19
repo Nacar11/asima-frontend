@@ -1,7 +1,5 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/cn';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
+import { useDeleteAdminUser } from '@/features/admin-users/hooks/use-delete-user-mutation';
 import type { AdminUser } from '@/features/admin-users/schemas';
 
 export function DeleteUserConfirm({
@@ -24,20 +21,7 @@ export function DeleteUserConfirm({
   open: boolean;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: () => {
-      if (!user) throw new Error('No user selected');
-      return adminUsersApi.remove(user.id);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-      toast.success('Employee deleted.');
-      onClose();
-    },
-    onError: () => toast.error('Could not delete employee.'),
-  });
+  const mutation = useDeleteAdminUser(user?.id);
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -60,7 +44,7 @@ export function DeleteUserConfirm({
           </button>
           <button
             type="button"
-            onClick={() => mutation.mutate()}
+            onClick={() => mutation.mutate(undefined, { onSuccess: () => onClose() })}
             disabled={mutation.isPending}
             className={btnDanger}
           >

@@ -2,8 +2,6 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Sheet,
   SheetBody,
@@ -13,8 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
-import { adminUsersApi } from '@/features/admin-users/api';
+import { useResetUserPassword } from '@/features/admin-users/hooks/use-reset-password-mutation';
 import {
   ResetUserPasswordSchema,
   type AdminUser,
@@ -35,18 +34,16 @@ export function ResetPasswordDrawer({
     defaultValues: { new_password: '' },
   });
 
-  const mutation = useMutation({
-    mutationFn: (input: ResetUserPasswordInput) => {
-      if (!user) throw new Error('No user selected');
-      return adminUsersApi.resetPassword(user.id, input);
-    },
-    onSuccess: () => {
-      toast.success('Password reset. Share the new password securely.');
-      form.reset();
-      onClose();
-    },
-    onError: () => toast.error('Could not reset password.'),
-  });
+  const mutation = useResetUserPassword(user?.id);
+
+  const onSubmit = form.handleSubmit((input) =>
+    mutation.mutate(input, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      },
+    }),
+  );
 
   const title = `Reset password — ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
@@ -62,26 +59,15 @@ export function ResetPasswordDrawer({
         </SheetHeader>
 
         <SheetBody>
-          <form
-            id="reset-password-form"
-            onSubmit={form.handleSubmit((input) => mutation.mutate(input))}
-            className="space-y-4"
-            noValidate
-          >
-            <label className="block space-y-1.5">
-              <span className="block text-sm font-medium text-neutral-800">New password</span>
+          <form id="reset-password-form" onSubmit={onSubmit} className="space-y-4" noValidate>
+            <Field label="New password" error={form.formState.errors.new_password?.message}>
               <input
                 type="text"
                 autoComplete="off"
                 className={inputCls}
                 {...form.register('new_password')}
               />
-              {form.formState.errors.new_password && (
-                <span className="block text-xs text-red-600">
-                  {form.formState.errors.new_password.message}
-                </span>
-              )}
-            </label>
+            </Field>
           </form>
         </SheetBody>
 

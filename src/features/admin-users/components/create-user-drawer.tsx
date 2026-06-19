@@ -2,8 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import {
   Sheet,
   SheetBody,
@@ -13,18 +12,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { ApiError } from '@/lib/api-client';
+import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
-import { adminUsersApi } from '@/features/admin-users/api';
 import { adminRolesApi } from '@/features/admin-roles/api';
 import { adminRoleKeys } from '@/features/admin-roles/keys';
-import { adminUserKeys } from '@/features/admin-users/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
+import { useCreateAdminUser } from '@/features/admin-users/hooks/use-create-user-mutation';
 import { CreateAdminUserSchema, type CreateAdminUserInput } from '@/features/admin-users/schemas';
 
 export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const queryClient = useQueryClient();
-
   const rolesQuery = useQuery({
     queryKey: adminRoleKeys.list(),
     queryFn: () => adminRolesApi.list(),
@@ -44,22 +40,7 @@ export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: ()
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: (input: CreateAdminUserInput) => adminUsersApi.create(input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-      toast.success('Employee created.');
-      form.reset();
-      onClose();
-    },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 409) {
-        toast.error('Email already in use.');
-        return;
-      }
-      toast.error('Could not create employee.');
-    },
-  });
+  const mutation = useCreateAdminUser();
 
   const onSubmit = form.handleSubmit((input) => {
     // Drop empty optional title so backend treats it as omitted.
@@ -67,7 +48,12 @@ export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: ()
       ...input,
       title: input.title?.length ? input.title : null,
     };
-    mutation.mutate(payload);
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      },
+    });
   });
 
   return (
@@ -161,21 +147,3 @@ const btnSecondary = cn(
   'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}

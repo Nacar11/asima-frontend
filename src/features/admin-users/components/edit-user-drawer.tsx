@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import {
   Sheet,
   SheetBody,
@@ -14,6 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Field } from '@/components/form/field';
 import { LabeledCheckbox } from '@/components/labeled-checkbox';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
@@ -24,6 +24,7 @@ import { adminRoleKeys } from '@/features/admin-roles/keys';
 import { adminApproversApi } from '@/features/admin-approvers/api';
 import { adminApproverKeys } from '@/features/admin-approvers/keys';
 import { formatRoleName } from '@/features/admin-roles/format';
+import { useEditUser } from '@/features/admin-users/hooks/use-edit-user-mutation';
 import type { SetChainInput } from '@/features/admin-approvers/schemas';
 import {
   UpdateAdminUserSchema,
@@ -43,8 +44,6 @@ export function EditUserDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
-
   const rolesQuery = useQuery({
     queryKey: adminRoleKeys.list(),
     queryFn: () => adminRolesApi.list(),
@@ -132,21 +131,8 @@ export function EditUserDrawer({
   const chainChanged = l1 !== initialL1 || l2 !== initialL2;
   const dirty = form.formState.isDirty || chainChanged;
 
-  const profileMutation = useMutation({
-    mutationFn: (input: UpdateAdminUserInput) => {
-      if (!user) throw new Error('No user selected');
-      return adminUsersApi.update(user.id, input);
-    },
-  });
-
-  const chainMutation = useMutation({
-    mutationFn: (patch: SetChainInput) => {
-      if (!user) throw new Error('No user selected');
-      return adminApproversApi.setChain(user.id, patch);
-    },
-  });
-
-  const saving = profileMutation.isPending || chainMutation.isPending;
+  const mutation = useEditUser(user?.id);
+  const saving = mutation.isPending;
 
   /** Tri-state diff: only send the steps that actually changed. */
   function buildChainPatch(): SetChainInput | null {
@@ -156,35 +142,15 @@ export function EditUserDrawer({
     return Object.keys(patch).length > 0 ? patch : null;
   }
 
-  const onSubmit = form.handleSubmit(async (input) => {
+  const onSubmit = form.handleSubmit((input) => {
     const payload: UpdateAdminUserInput = {
       ...input,
       title: input.title?.length ? input.title : null,
     };
-
-    try {
-      await profileMutation.mutateAsync(payload);
-    } catch {
-      toast.error('Could not update employee.');
-      return;
-    }
-
-    const patch = buildChainPatch();
-    if (patch) {
-      try {
-        await chainMutation.mutateAsync(patch);
-      } catch {
-        // Profile already committed — don't silently roll it back.
-        void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-        toast.error('Profile saved, approvers update failed — retry.');
-        return;
-      }
-    }
-
-    void queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-    void queryClient.invalidateQueries({ queryKey: adminApproverKeys.all });
-    toast.success('Employee updated.');
-    onClose();
+    mutation.mutate(
+      { input: payload, chainPatch: buildChainPatch() },
+      { onSuccess: () => onClose() },
+    );
   });
 
   const title = `Edit ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
@@ -299,24 +265,6 @@ const btnSecondary = cn(
   'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
   'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
 );
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-sm font-medium text-neutral-800">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-red-600">{error}</span>}
-    </label>
-  );
-}
 
 /**
  * Approver picker uses a custom listbox (not a native <select>), so it
