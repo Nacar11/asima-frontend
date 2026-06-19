@@ -3,6 +3,7 @@
 import { useMemo, useRef } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
 import type { SelectOption } from '@/components/select';
+import { formatDateInTz } from '@/lib/format';
 import { InlineApproverCell } from '@/features/admin-approvers/components/inline-approver-cell';
 import type { EmployeeChainView } from '@/features/admin-approvers/schemas';
 
@@ -139,7 +140,7 @@ export function ApproversTable({
                 )}
               </td>
               <td className="px-4 py-3 text-xs text-neutral-500">
-                {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : '—'}
+                {row.updated_at ? formatDateInTz(row.updated_at) : '—'}
               </td>
             </tr>
           ))}
