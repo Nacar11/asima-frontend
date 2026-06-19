@@ -137,6 +137,7 @@ export function ApprovalsInbox({
             onApprove={approveRow}
             onReject={openReject}
             pendingId={pendingId}
+            viewerId={user?.id}
           />
         ))}
 

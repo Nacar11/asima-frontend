@@ -3,6 +3,7 @@
 import { cn } from '@/lib/cn';
 import { formatDateInTz } from '@/lib/format';
 import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
+import { ApprovalStatusCell } from '@/features/approvals/components/approval-status-cell';
 import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
 import type { PendingApproval } from '@/features/approvals/schemas';
 
@@ -22,12 +23,15 @@ export function ApprovalsTable({
   onApprove,
   onReject,
   pendingId,
+  viewerId,
 }: {
   rows: PendingApproval[];
   onDetails?: (row: PendingApproval) => void;
   onApprove?: (row: PendingApproval) => void;
   onReject?: (row: PendingApproval) => void;
   pendingId?: number | null;
+  /** The signed-in user's id — drives the "(you)" marker on the current approver. */
+  viewerId?: number;
 }) {
   const actionable = Boolean(onApprove && onReject);
   const hasActionsColumn = actionable || Boolean(onDetails);
@@ -40,7 +44,7 @@ export function ApprovalsTable({
             <Th>Employee</Th>
             <Th>Summary</Th>
             <Th>Requested</Th>
-            <Th>Step</Th>
+            <Th>Status</Th>
             {hasActionsColumn && <Th className="text-right">Actions</Th>}
           </tr>
         </thead>
@@ -64,7 +68,9 @@ export function ApprovalsTable({
                   )}
                 </Td>
                 <Td>{formatDateInTz(row.requested_at)}</Td>
-                <Td>{row.current_step}</Td>
+                <Td className="whitespace-normal">
+                  <ApprovalStatusCell row={row} viewerId={viewerId} />
+                </Td>
                 {hasActionsColumn && (
                   <Td className="text-right">
                     <div className="flex justify-end gap-2">

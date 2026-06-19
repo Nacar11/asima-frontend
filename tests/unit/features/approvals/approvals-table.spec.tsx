@@ -55,6 +55,20 @@ describe('ApprovalsTable', () => {
     expect(screen.getByText('sick leave, 2026-06-15 to 2026-06-15')).toBeInTheDocument();
   });
 
+  it('renders a Status column with the pending approver, marking "(you)" for the viewer', () => {
+    render(<ApprovalsTable rows={[ROW]} viewerId={5} />);
+    expect(screen.getByRole('columnheader', { name: /status/i })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: /step/i })).toBeNull();
+    expect(screen.getByText('Pending L1')).toBeInTheDocument();
+    expect(screen.getByText('Daniel Aguilar (you)')).toBeInTheDocument();
+  });
+
+  it('shows the plain approver name when the viewer is someone else', () => {
+    render(<ApprovalsTable rows={[ROW]} viewerId={999} />);
+    expect(screen.getByText('Daniel Aguilar')).toBeInTheDocument();
+    expect(screen.queryByText(/\(you\)/)).toBeNull();
+  });
+
   it('renders a Details button that calls onDetails with the row', async () => {
     const onDetails = vi.fn();
     render(<ApprovalsTable rows={[ROW]} onDetails={onDetails} />);
