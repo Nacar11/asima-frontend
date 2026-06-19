@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   CalendarDays,
+  CalendarRange,
   Clock,
   Home,
   Inbox,
@@ -77,6 +78,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: Users,
     section: 'admin',
     requires: 'USER:View',
+  },
+  {
+    href: '/admin/schedules',
+    label: 'Schedules',
+    icon: CalendarRange,
+    section: 'admin',
+    requires: 'SCHEDULE:View',
   },
   {
     href: '/admin/approvers',
