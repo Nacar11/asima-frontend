@@ -21,6 +21,7 @@ const ROW: PendingApproval = {
   requested_at: '2026-06-13T08:00:00.000Z',
   current_step: 1,
   current_approver_id: 5,
+  current_approver_name: 'Daniel Aguilar',
   summary: 'correction for 2026-06-10',
   time_correction: {
     original_time_in: '2026-06-10T02:00:00.000Z',

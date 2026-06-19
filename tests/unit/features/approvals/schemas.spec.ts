@@ -2,18 +2,25 @@ import { describe, expect, it } from 'vitest';
 import { PendingApprovalListSchema, PendingApprovalSchema } from '@/features/approvals/schemas';
 
 describe('PendingApprovalSchema', () => {
+  const wellFormed = {
+    id: 1,
+    kind: 'leave',
+    employee_id: 7,
+    employee_name: 'Jane Smith',
+    requested_at: '2026-05-25T08:00:00.000Z',
+    current_step: 1,
+    current_approver_id: 12,
+    current_approver_name: 'Danielle Aguilar',
+    summary: 'Vacation 2026-06-01 to 2026-06-05',
+  };
+
   it('parses a well-formed row', () => {
-    const row = {
-      id: 1,
-      kind: 'leave',
-      employee_id: 7,
-      employee_name: 'Jane Smith',
-      requested_at: '2026-05-25T08:00:00.000Z',
-      current_step: 1,
-      current_approver_id: 12,
-      summary: 'Vacation 2026-06-01 to 2026-06-05',
-    };
-    expect(() => PendingApprovalSchema.parse(row)).not.toThrow();
+    expect(() => PendingApprovalSchema.parse(wellFormed)).not.toThrow();
+  });
+
+  it('requires current_approver_name (backend always provides a string)', () => {
+    const { current_approver_name: _omit, ...withoutName } = wellFormed;
+    expect(() => PendingApprovalSchema.parse(withoutName)).toThrow();
   });
 
   it('rejects an unknown kind value', () => {

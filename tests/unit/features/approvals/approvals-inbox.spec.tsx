@@ -39,6 +39,7 @@ const ROW: PendingApproval = {
   requested_at: '2026-06-13T08:00:00.000Z',
   current_step: 1,
   current_approver_id: 5,
+  current_approver_name: 'Daniel Aguilar',
   summary: 'sick leave, 2026-06-15 to 2026-06-15',
 };
 

@@ -30,6 +30,8 @@ export const PendingApprovalSchema = z.object({
   requested_at: z.string(),
   current_step: z.number().int().nonnegative(),
   current_approver_id: z.number().int().positive(),
+  /** Display name of the current-step approver; backend guarantees a string ("User #<id>" fallback). */
+  current_approver_name: z.string(),
   summary: z.string(),
   time_correction: PendingApprovalTimeCorrectionSchema.nullable().optional(),
 });
