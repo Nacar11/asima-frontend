@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
+import { useBulkAssignApprovers } from '@/features/admin-approvers/hooks/use-bulk-assign-mutation';
 
 export type ApproverCandidate = { id: number; name: string };
 
@@ -42,7 +39,6 @@ export function BulkAssignDialog({
   employeeIds: number[];
   onAssigned?: () => void;
 }) {
-  const queryClient = useQueryClient();
   const [l1, setL1] = useState<number | ''>('');
   const [l2, setL2] = useState<number | ''>('');
 
@@ -62,22 +58,22 @@ export function BulkAssignDialog({
     ...candidates.map((c) => ({ value: String(c.id), label: c.name })),
   ];
 
-  const mutation = useMutation({
-    mutationFn: () =>
-      adminApproversApi.bulkAssign({
+  const mutation = useBulkAssignApprovers();
+
+  const submit = () =>
+    mutation.mutate(
+      {
         employee_ids: employeeIds,
         l1_approver_id: l1 as number,
         ...(l2 === '' ? {} : { l2_approver_id: l2 as number }),
-      }),
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: adminApproverKeys.all });
-      const skipped = result.skipped.length > 0 ? ` (${result.skipped.length} skipped)` : '';
-      toast.success(`Assigned ${result.assigned} employees.${skipped}`);
-      onAssigned?.();
-      onClose();
-    },
-    onError: () => toast.error('Could not assign approvers.'),
-  });
+      },
+      {
+        onSuccess: () => {
+          onAssigned?.();
+          onClose();
+        },
+      },
+    );
 
   const canSubmit = l1 !== '' && employeeIds.length > 0 && !mutation.isPending;
 
@@ -125,7 +121,7 @@ export function BulkAssignDialog({
           </button>
           <button
             type="button"
-            onClick={() => mutation.mutate()}
+            onClick={submit}
             disabled={!canSubmit}
             className={btnPrimary}
           >

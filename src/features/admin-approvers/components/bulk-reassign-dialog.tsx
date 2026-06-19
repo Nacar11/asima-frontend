@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
+import { useBulkReassignApprovers } from '@/features/admin-approvers/hooks/use-bulk-reassign-mutation';
 
 export type ApproverCandidate = { id: number; name: string };
 
@@ -33,7 +30,6 @@ export function BulkReassignDialog({
   onClose: () => void;
   candidates: ApproverCandidate[];
 }) {
-  const queryClient = useQueryClient();
   const [from, setFrom] = useState<number | ''>('');
   const [to, setTo] = useState<number | ''>('');
 
@@ -49,20 +45,13 @@ export function BulkReassignDialog({
     ...candidates.map((c) => ({ value: String(c.id), label: c.name })),
   ];
 
-  const mutation = useMutation({
-    mutationFn: () =>
-      adminApproversApi.bulkReassign({
-        from_approver_id: from as number,
-        to_approver_id: to as number,
-      }),
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: adminApproverKeys.all });
-      const skipped = result.skipped.length > 0 ? ` (${result.skipped.length} skipped)` : '';
-      toast.success(`Reassigned ${result.reassigned} rows.${skipped}`);
-      onClose();
-    },
-    onError: () => toast.error('Could not reassign approvers.'),
-  });
+  const mutation = useBulkReassignApprovers();
+
+  const submit = () =>
+    mutation.mutate(
+      { from_approver_id: from as number, to_approver_id: to as number },
+      { onSuccess: () => onClose() },
+    );
 
   const canSubmit = from !== '' && to !== '' && from !== to && !mutation.isPending;
 
@@ -111,7 +100,7 @@ export function BulkReassignDialog({
           </button>
           <button
             type="button"
-            onClick={() => mutation.mutate()}
+            onClick={submit}
             disabled={!canSubmit}
             className={btnPrimary}
           >
