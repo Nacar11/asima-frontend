@@ -4,17 +4,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { cn } from '@/lib/cn';
 import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
 import { localDateTimeToIso } from '@/features/time-correction/datetime';
 
@@ -80,66 +71,32 @@ export function AddLogDrawer({ open, onClose }: { open: boolean; onClose: () => 
   );
 
   return (
-    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>Add log</SheetTitle>
-          <SheetDescription>
-            Manually add a timelog for a past day. It needs your approver&apos;s sign-off before it
-            appears on your timesheet.
-          </SheetDescription>
-        </SheetHeader>
-
-        <SheetBody>
-          <form id="add-log-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-            <Field label="Date" error={form.formState.errors.work_date?.message}>
-              <input
-                type="date"
-                max={localToday()}
-                className={inputCls}
-                {...form.register('work_date')}
-              />
-            </Field>
-            <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
-              <input type="time" className={inputCls} {...form.register('proposed_time_in')} />
-            </Field>
-            <Field label="Time out" error={form.formState.errors.proposed_time_out?.message}>
-              <input type="time" className={inputCls} {...form.register('proposed_time_out')} />
-            </Field>
-            <Field label="Reason" error={form.formState.errors.reason?.message}>
-              <textarea rows={3} className={inputCls} {...form.register('reason')} />
-            </Field>
-          </form>
-        </SheetBody>
-
-        <SheetFooter>
-          <button type="button" onClick={onClose} className={btnSecondary}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="add-log-form"
-            disabled={mutation.isPending}
-            className={btnPrimary}
-          >
-            {mutation.isPending ? 'Submitting…' : 'Add log'}
-          </button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <FormDrawer
+      open={open}
+      onClose={onClose}
+      title="Add log"
+      description="Manually add a timelog for a past day. It needs your approver's sign-off before it appears on your timesheet."
+      formId="add-log-form"
+      onSubmit={onSubmit}
+      submitLabel="Add log"
+      pendingLabel="Submitting…"
+      submitting={mutation.isPending}
+    >
+      <Field label="Date" error={form.formState.errors.work_date?.message}>
+        <input type="date" max={localToday()} className={inputCls} {...form.register('work_date')} />
+      </Field>
+      <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
+        <input type="time" className={inputCls} {...form.register('proposed_time_in')} />
+      </Field>
+      <Field label="Time out" error={form.formState.errors.proposed_time_out?.message}>
+        <input type="time" className={inputCls} {...form.register('proposed_time_out')} />
+      </Field>
+      <Field label="Reason" error={form.formState.errors.reason?.message}>
+        <textarea rows={3} className={inputCls} {...form.register('reason')} />
+      </Field>
+    </FormDrawer>
   );
 }
 
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950';
-
-const btnPrimary = cn(
-  'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
-  'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
-  'disabled:cursor-not-allowed disabled:opacity-60',
-);
-
-const btnSecondary = cn(
-  'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
-  'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
-);

@@ -4,17 +4,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { cn } from '@/lib/cn';
 import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
 import { isoToTimeInput, replaceTimeOnIso } from '@/features/time-correction/datetime';
 import type { TimeEntry } from '@/features/time-entries/schemas';
@@ -88,60 +79,29 @@ export function RequestCorrectionDrawer({
   });
 
   return (
-    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>Request correction</SheetTitle>
-          <SheetDescription>
-            {entry ? `Work date ${entry.work_date}` : ''} — adjust the times and tell us why.
-          </SheetDescription>
-        </SheetHeader>
-
-        <SheetBody>
-          <form id="correction-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-            <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
-              <input type="time" className={inputCls} {...form.register('proposed_time_in')} />
-            </Field>
-            <Field
-              label="Time out (optional)"
-              error={form.formState.errors.proposed_time_out?.message}
-            >
-              <input type="time" className={inputCls} {...form.register('proposed_time_out')} />
-            </Field>
-            <Field label="Reason" error={form.formState.errors.reason?.message}>
-              <textarea rows={3} className={inputCls} {...form.register('reason')} />
-            </Field>
-          </form>
-        </SheetBody>
-
-        <SheetFooter>
-          <button type="button" onClick={onClose} className={btnSecondary}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="correction-form"
-            disabled={mutation.isPending}
-            className={btnPrimary}
-          >
-            {mutation.isPending ? 'Submitting…' : 'Submit correction'}
-          </button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <FormDrawer
+      open={open}
+      onClose={onClose}
+      title="Request correction"
+      description={`${entry ? `Work date ${entry.work_date}` : ''} — adjust the times and tell us why.`}
+      formId="correction-form"
+      onSubmit={onSubmit}
+      submitLabel="Submit correction"
+      pendingLabel="Submitting…"
+      submitting={mutation.isPending}
+    >
+      <Field label="Time in" error={form.formState.errors.proposed_time_in?.message}>
+        <input type="time" className={inputCls} {...form.register('proposed_time_in')} />
+      </Field>
+      <Field label="Time out (optional)" error={form.formState.errors.proposed_time_out?.message}>
+        <input type="time" className={inputCls} {...form.register('proposed_time_out')} />
+      </Field>
+      <Field label="Reason" error={form.formState.errors.reason?.message}>
+        <textarea rows={3} className={inputCls} {...form.register('reason')} />
+      </Field>
+    </FormDrawer>
   );
 }
 
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950';
-
-const btnPrimary = cn(
-  'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
-  'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
-  'disabled:cursor-not-allowed disabled:opacity-60',
-);
-
-const btnSecondary = cn(
-  'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
-  'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
-);

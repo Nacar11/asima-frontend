@@ -4,19 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
 import { LabeledCheckbox } from '@/components/labeled-checkbox';
 import { Select } from '@/components/select';
-import { cn } from '@/lib/cn';
 import { adminUsersApi } from '@/features/admin-users/api';
 import { adminUserKeys } from '@/features/admin-users/keys';
 import { adminRolesApi } from '@/features/admin-roles/api';
@@ -156,115 +147,85 @@ export function EditUserDrawer({
   const title = `Edit ${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
   return (
-    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>{title || 'Edit employee'}</SheetTitle>
-          <SheetDescription>
-            Email changes need a verification flow — not editable here. Use Reset password to set a
-            new password.
-          </SheetDescription>
-        </SheetHeader>
+    <FormDrawer
+      open={open}
+      onClose={onClose}
+      title={title || 'Edit employee'}
+      description="Email changes need a verification flow — not editable here. Use Reset password to set a new password."
+      formId="edit-user-form"
+      onSubmit={onSubmit}
+      submitLabel="Save changes"
+      pendingLabel="Saving…"
+      submitting={saving}
+      submitDisabled={saving || !dirty}
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="First name" error={form.formState.errors.first_name?.message}>
+          <input type="text" className={inputCls} {...form.register('first_name')} />
+        </Field>
+        <Field label="Last name" error={form.formState.errors.last_name?.message}>
+          <input type="text" className={inputCls} {...form.register('last_name')} />
+        </Field>
+      </div>
 
-        <SheetBody>
-          <form id="edit-user-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="First name" error={form.formState.errors.first_name?.message}>
-                <input type="text" className={inputCls} {...form.register('first_name')} />
-              </Field>
-              <Field label="Last name" error={form.formState.errors.last_name?.message}>
-                <input type="text" className={inputCls} {...form.register('last_name')} />
-              </Field>
-            </div>
+      <Field label="Title" error={form.formState.errors.title?.message}>
+        <input type="text" className={inputCls} {...form.register('title')} />
+      </Field>
 
-            <Field label="Title" error={form.formState.errors.title?.message}>
-              <input type="text" className={inputCls} {...form.register('title')} />
-            </Field>
+      <Field label="Role" error={form.formState.errors.role_id?.message}>
+        <select
+          className={inputCls}
+          {...form.register('role_id', { valueAsNumber: true })}
+          disabled={rolesQuery.isLoading}
+        >
+          {rolesQuery.data?.data.map((role) => (
+            <option key={role.id} value={role.id}>
+              {formatRoleName(role.name)}
+            </option>
+          ))}
+        </select>
+      </Field>
 
-            <Field label="Role" error={form.formState.errors.role_id?.message}>
-              <select
-                className={inputCls}
-                {...form.register('role_id', { valueAsNumber: true })}
-                disabled={rolesQuery.isLoading}
-              >
-                {rolesQuery.data?.data.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {formatRoleName(role.name)}
-                  </option>
-                ))}
-              </select>
-            </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ApproverField label="Level 1 approver">
+          <Select<string>
+            value={l1 === '' ? '' : String(l1)}
+            onValueChange={(v) => handleL1Change(v === '' ? '' : Number(v))}
+            options={approverOptions}
+            ariaLabel="Level 1 approver"
+            placeholder="— None —"
+            disabled={candidatesQuery.isLoading}
+            className="w-full"
+          />
+        </ApproverField>
+        <ApproverField label="Level 2 approver">
+          <Select<string>
+            value={l2 === '' ? '' : String(l2)}
+            onValueChange={(v) => setL2(v === '' ? '' : Number(v))}
+            options={approverOptions}
+            ariaLabel="Level 2 approver"
+            placeholder="— None —"
+            disabled={candidatesQuery.isLoading || l1 === ''}
+            className="w-full"
+          />
+        </ApproverField>
+      </div>
+      {l1 === '' && (
+        <p className="text-xs text-neutral-500">Assign a Level 1 approver before a Level 2.</p>
+      )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ApproverField label="Level 1 approver">
-                <Select<string>
-                  value={l1 === '' ? '' : String(l1)}
-                  onValueChange={(v) => handleL1Change(v === '' ? '' : Number(v))}
-                  options={approverOptions}
-                  ariaLabel="Level 1 approver"
-                  placeholder="— None —"
-                  disabled={candidatesQuery.isLoading}
-                  className="w-full"
-                />
-              </ApproverField>
-              <ApproverField label="Level 2 approver">
-                <Select<string>
-                  value={l2 === '' ? '' : String(l2)}
-                  onValueChange={(v) => setL2(v === '' ? '' : Number(v))}
-                  options={approverOptions}
-                  ariaLabel="Level 2 approver"
-                  placeholder="— None —"
-                  disabled={candidatesQuery.isLoading || l1 === ''}
-                  className="w-full"
-                />
-              </ApproverField>
-            </div>
-            {l1 === '' && (
-              <p className="text-xs text-neutral-500">
-                Assign a Level 1 approver before a Level 2.
-              </p>
-            )}
-
-            <LabeledCheckbox
-              control={form.control}
-              name="is_active"
-              label="Active"
-              description="Inactive employees can't sign in."
-            />
-          </form>
-        </SheetBody>
-
-        <SheetFooter>
-          <button type="button" onClick={onClose} className={btnSecondary}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="edit-user-form"
-            disabled={saving || !dirty}
-            className={btnPrimary}
-          >
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      <LabeledCheckbox
+        control={form.control}
+        name="is_active"
+        label="Active"
+        description="Inactive employees can't sign in."
+      />
+    </FormDrawer>
   );
 }
 
 const inputCls =
   'block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950 disabled:bg-neutral-50';
-
-const btnPrimary = cn(
-  'rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white shadow-sm',
-  'hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
-  'disabled:cursor-not-allowed disabled:opacity-60',
-);
-
-const btnSecondary = cn(
-  'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700',
-  'hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900',
-);
 
 /**
  * Approver picker uses a custom listbox (not a native <select>), so it
