@@ -1,21 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { useAuth } from '@/features/auth/use-auth';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { usePendingApprovals } from '@/features/approvals/hooks/use-pending-approvals';
-import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
+import { useApprovalActions } from '@/features/approvals/hooks/use-approval-actions';
 import { RejectApprovalDialog } from '@/features/approvals/components/reject-approval-dialog';
 import { ApprovalsEmptyState } from '@/features/approvals/components/approvals-empty-state';
 import { ApprovalsTable } from '@/features/approvals/components/approvals-table';
 import type { PendingApproval, PendingApprovalKind } from '@/features/approvals/schemas';
-import { approvalKeys } from '@/features/approvals/keys';
 import { ApiError } from '@/lib/api-client';
+import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';
 
 const PAGE_LIMIT = 20;
@@ -32,8 +30,7 @@ export type ApprovalDetailDrawerProps = {
 
 function describeError(err: unknown): string {
   if (err instanceof ApiError) {
-    const body = err.body as { message?: string | string[] } | null;
-    const msg = Array.isArray(body?.message) ? body!.message.join(', ') : body?.message;
+    const msg = errorMessage(err, '');
     return msg ? `${err.status}: ${msg}` : `Request failed (HTTP ${err.status}). Please try again.`;
   }
   if (err instanceof Error) return err.message;
@@ -64,40 +61,24 @@ export function ApprovalsInbox({
   const [page, setPage] = useState(1);
   const query = usePendingApprovals({ type, page, limit: PAGE_LIMIT });
 
-  const queryClient = useQueryClient();
   const [selected, setSelected] = useState<PendingApproval | null>(null);
   const [rejecting, setRejecting] = useState<PendingApproval | null>(null);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: approvalKeys.all });
+  const { approve, reject } = useApprovalActions();
 
-  const approveMutation = useMutation({
-    mutationFn: (row: PendingApproval) => {
-      const handlers = APPROVAL_ACTIONS[row.kind];
-      if (!handlers) throw new Error(`No approve handler for kind ${row.kind}`);
-      return handlers.approve(row.id);
-    },
-    onSuccess: () => {
-      void invalidate();
-      toast.success('Request approved.');
-      setSelected(null);
-    },
-    onError: () => toast.error('Could not approve the request.'),
-  });
+  const approveRow = (row: PendingApproval) =>
+    approve.mutate(row, { onSuccess: () => setSelected(null) });
 
-  const rejectMutation = useMutation({
-    mutationFn: ({ row, note }: { row: PendingApproval; note: string }) => {
-      const handlers = APPROVAL_ACTIONS[row.kind];
-      if (!handlers) throw new Error(`No reject handler for kind ${row.kind}`);
-      return handlers.reject(row.id, note);
-    },
-    onSuccess: () => {
-      void invalidate();
-      toast.success('Request rejected.');
-      setRejecting(null);
-      setSelected(null);
-    },
-    onError: () => toast.error('Could not reject the request.'),
-  });
+  const rejectRow = (row: PendingApproval, note: string) =>
+    reject.mutate(
+      { row, note },
+      {
+        onSuccess: () => {
+          setRejecting(null);
+          setSelected(null);
+        },
+      },
+    );
 
   // Opening the reject dialog also closes the drawer so the two overlays
   // never stack. Both the table row and the drawer route through here.
@@ -106,8 +87,8 @@ export function ApprovalsInbox({
     setRejecting(row);
   };
 
-  const busy = approveMutation.isPending || rejectMutation.isPending;
-  const pendingId = approveMutation.isPending ? (approveMutation.variables?.id ?? null) : null;
+  const busy = approve.isPending || reject.isPending;
+  const pendingId = approve.isPending ? (approve.variables?.id ?? null) : null;
   const drawerBusy = busy && selected != null;
 
   return (
@@ -151,7 +132,7 @@ export function ApprovalsInbox({
           <ApprovalsTable
             rows={query.data.data}
             onDetails={(row) => setSelected(row)}
-            onApprove={(row) => approveMutation.mutate(row)}
+            onApprove={approveRow}
             onReject={openReject}
             pendingId={pendingId}
           />
@@ -172,7 +153,7 @@ export function ApprovalsInbox({
         row={selected}
         open={selected !== null}
         onClose={() => setSelected(null)}
-        onApprove={(row) => approveMutation.mutate(row)}
+        onApprove={approveRow}
         onReject={openReject}
         busy={drawerBusy}
       />
@@ -180,10 +161,10 @@ export function ApprovalsInbox({
       <RejectApprovalDialog
         open={rejecting !== null}
         summary={rejecting?.summary ?? ''}
-        pending={rejectMutation.isPending}
+        pending={reject.isPending}
         onClose={() => setRejecting(null)}
         onConfirm={(note) => {
-          if (rejecting) rejectMutation.mutate({ row: rejecting, note });
+          if (rejecting) rejectRow(rejecting, note);
         }}
       />
     </div>
