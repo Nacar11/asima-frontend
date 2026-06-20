@@ -4,4 +4,5 @@ import type { QueryKey } from '@tanstack/react-query';
 export const profileKeys = {
   all: ['profile'] as const,
   me: (): QueryKey => [...profileKeys.all, 'me'],
+  compensation: (): QueryKey => [...profileKeys.all, 'compensation'],
 };
