@@ -60,6 +60,15 @@ export const PERMISSION_CODES = [
 
   'LEAVE_ALLOCATION:Create',
   'LEAVE_ALLOCATION:View',
+
+  // Compensation — Foundation A of the OT feature set
+  // (docs/plans/2026-06-20-employee-compensation-foundation.md). HR-only admin
+  // (ViewAll/Create/Update/Delete); every role gets ViewOwn (read own pay).
+  'COMPENSATION:Create',
+  'COMPENSATION:ViewOwn',
+  'COMPENSATION:ViewAll',
+  'COMPENSATION:Update',
+  'COMPENSATION:Delete',
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
