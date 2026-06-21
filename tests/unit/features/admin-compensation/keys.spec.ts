@@ -11,4 +11,8 @@ describe('adminCompensationKeys', () => {
     expect(adminCompensationKeys.picker('ann')).toEqual(['admin-compensation', 'picker', 'ann']);
     expect(adminCompensationKeys.none()).toEqual(['admin-compensation', 'none']);
   });
+
+  it('audit(id) keys the per-row audit trail', () => {
+    expect(adminCompensationKeys.audit(7)).toEqual(['admin-compensation', 'audit', 7]);
+  });
 });

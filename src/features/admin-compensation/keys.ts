@@ -10,4 +10,5 @@ export const adminCompensationKeys = {
     employeeId,
   ],
   picker: (search: string): QueryKey => [...adminCompensationKeys.all, 'picker', search],
+  audit: (id: number): QueryKey => [...adminCompensationKeys.all, 'audit', id],
 };

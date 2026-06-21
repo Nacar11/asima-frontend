@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { History, Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useCompensationMutations } from '@/features/admin-compensation/hooks/use-compensation-mutations';
 import { SetPayDrawer } from '@/features/admin-compensation/components/set-pay-drawer';
 import { CorrectRateDrawer } from '@/features/admin-compensation/components/correct-rate-drawer';
+import { AuditTrailPanel } from '@/features/admin-compensation/components/audit-trail-panel';
 import { effectiveRange, formatHourly, formatSalary } from '@/features/admin-compensation/format';
 import type {
   Compensation,
@@ -42,6 +43,7 @@ export function CompensationManager({
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [correctOpen, setCorrectOpen] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { setPay, correctRate, removeRate } = useCompensationMutations(employeeId);
 
@@ -77,6 +79,15 @@ export function CompensationManager({
                   )}
                 </p>
                 <p className="text-xs text-neutral-400">Effective {active.effective_from}</p>
+                <button
+                  type="button"
+                  onClick={() => setAuditOpen((v) => !v)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-neutral-500 underline-offset-2 hover:text-neutral-800 hover:underline"
+                  aria-expanded={auditOpen}
+                >
+                  <History className="h-3.5 w-3.5" aria-hidden />
+                  {auditOpen ? 'Hide changes' : 'View changes'}
+                </button>
               </div>
             ) : (
               <p className="mt-2 text-sm text-neutral-500">No compensation set yet.</p>
@@ -138,6 +149,10 @@ export function CompensationManager({
           </div>
         )}
       </div>
+
+      {auditOpen && active && (
+        <AuditTrailPanel compensationId={active.id} currency={active.currency} />
+      )}
 
       {history.length > 0 && (
         <div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">

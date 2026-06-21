@@ -2,14 +2,17 @@ import { z } from 'zod';
 import { ApiClient, apiClient } from '@/lib/api-client';
 import {
   CompensationSchema,
+  CompensationAuditSchema,
   CreateCompensationSchema,
   UpdateCompensationSchema,
   type Compensation,
+  type CompensationAudit,
   type CreateCompensationInput,
   type UpdateCompensationInput,
 } from './schemas';
 
 const CompensationArraySchema = z.array(CompensationSchema);
+const CompensationAuditArraySchema = z.array(CompensationAuditSchema);
 
 /**
  * Admin compensation management. Gated server-side by COMPENSATION:{ViewAll,
@@ -22,6 +25,13 @@ export const adminCompensationApi = {
     return client
       .get<unknown>(`/admin/compensation/employees/${employeeId}`)
       .then((res) => CompensationArraySchema.parse(res));
+  },
+
+  /** The before→after audit trail for one compensation row, newest first. */
+  auditTrail(id: number, client: ApiClient = apiClient()): Promise<CompensationAudit[]> {
+    return client
+      .get<unknown>(`/admin/compensation/${id}/audit`)
+      .then((res) => CompensationAuditArraySchema.parse(res));
   },
 
   /** Set / change pay (effective-dated; ends the prior active row server-side). */
