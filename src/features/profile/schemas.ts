@@ -16,3 +16,17 @@ export const UpdateMyProfileSchema = z.object({
   last_name: z.string().trim().min(1, 'Last name is required').max(100, 'Last name is too long'),
 });
 export type UpdateMyProfileInput = z.infer<typeof UpdateMyProfileSchema>;
+
+/*
+ * GET /users/me/compensation — read-only current pay (or null for a new hire
+ * with none set yet). Only the display fields are validated; zod strips the
+ * rest of the Compensation payload.
+ */
+export const MyCompensationSchema = z.object({
+  id: z.number().int(),
+  monthly_salary: z.number(),
+  hourly_rate: z.number(),
+  hourly_rate_is_overridden: z.boolean(),
+  effective_from: z.string(),
+});
+export type MyCompensation = z.infer<typeof MyCompensationSchema>;

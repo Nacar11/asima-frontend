@@ -15,6 +15,7 @@ import {
   PlaneTakeoff,
   Timer,
   Users,
+  Wallet,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -85,6 +86,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: CalendarRange,
     section: 'admin',
     requires: 'SCHEDULE:View',
+  },
+  {
+    href: '/admin/compensation',
+    label: 'Compensation',
+    icon: Wallet,
+    section: 'admin',
+    requires: 'COMPENSATION:ViewAll',
   },
   {
     href: '/admin/approvers',

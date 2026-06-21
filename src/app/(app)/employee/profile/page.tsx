@@ -6,6 +6,7 @@ import { profileApi } from '@/features/profile/api';
 import { profileKeys } from '@/features/profile/keys';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { PasswordChangeForm } from '@/features/profile/components/password-change-form';
+import { CompensationCard } from '@/features/profile/components/compensation-card';
 
 export default function MyProfilePage() {
   const { data, isLoading, error } = useQuery({
@@ -40,6 +41,8 @@ export default function MyProfilePage() {
         </p>
         <PasswordChangeForm />
       </Card>
+
+      <CompensationCard />
     </div>
   );
 }
