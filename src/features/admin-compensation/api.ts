@@ -4,6 +4,7 @@ import {
   CompensationSchema,
   CompensationAuditSchema,
   CreateCompensationSchema,
+  BulkCreateCompensationSchema,
   UpdateCompensationSchema,
   type Compensation,
   type CompensationAudit,
@@ -40,6 +41,17 @@ export const adminCompensationApi = {
     return client
       .post<unknown>('/admin/compensation', body)
       .then((res) => CompensationSchema.parse(res));
+  },
+
+  /** Set pay for several employees in one all-or-nothing request. */
+  createBulk(
+    items: CreateCompensationInput[],
+    client: ApiClient = apiClient(),
+  ): Promise<Compensation[]> {
+    const body = BulkCreateCompensationSchema.parse({ items });
+    return client
+      .post<unknown>('/admin/compensation/bulk', body)
+      .then((res) => CompensationArraySchema.parse(res));
   },
 
   /** Correct an erroneous row in place. */

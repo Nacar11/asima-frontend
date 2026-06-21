@@ -54,6 +54,12 @@ export const CreateCompensationSchema = z.object({
 });
 export type CreateCompensationInput = z.infer<typeof CreateCompensationSchema>;
 
+/** Admin bulk set-pay payload — matches BulkCreateCompensationDto (all-or-nothing). */
+export const BulkCreateCompensationSchema = z.object({
+  items: z.array(CreateCompensationSchema).min(1),
+});
+export type BulkCreateCompensationInput = z.infer<typeof BulkCreateCompensationSchema>;
+
 /** Admin in-place correction — matches UpdateCompensationDto. */
 export const UpdateCompensationSchema = z.object({
   monthly_salary: z.number().nonnegative().optional(),

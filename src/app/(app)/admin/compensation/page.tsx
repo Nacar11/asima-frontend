@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Wallet } from 'lucide-react';
+import { AlertTriangle, Layers, Wallet } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { RequirePermission } from '@/components/require-permission';
 import {
@@ -9,6 +9,7 @@ import {
   employeeName,
 } from '@/features/admin-compensation/components/employee-picker';
 import { CompensationManager } from '@/features/admin-compensation/components/compensation-manager';
+import { BulkSetPayDrawer } from '@/features/admin-compensation/components/bulk-set-pay-drawer';
 import { useEmployeeCompensation } from '@/features/admin-compensation/hooks/use-employee-compensation';
 import type { AdminUser } from '@/features/admin-users/schemas';
 
@@ -22,18 +23,31 @@ export default function AdminCompensationPage() {
 
 function AdminCompensationPageBody() {
   const [employee, setEmployee] = useState<AdminUser | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const compensationQuery = useEmployeeCompensation(employee?.id ?? null);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Compensation</h1>
-        <p className="text-sm text-neutral-500">
-          View and set any employee&apos;s pay. Rates are effective-dated and HR-only.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-neutral-900">Compensation</h1>
+          <p className="text-sm text-neutral-500">
+            View and set any employee&apos;s pay. Rates are effective-dated and HR-only.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setBulkOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+        >
+          <Layers className="h-4 w-4" aria-hidden />
+          Bulk set pay
+        </button>
       </div>
 
       <EmployeePicker selected={employee} onSelect={setEmployee} />
+
+      <BulkSetPayDrawer open={bulkOpen} onClose={() => setBulkOpen(false)} />
 
       {employee === null && (
         <EmptyState
