@@ -27,6 +27,7 @@ export const MyCompensationSchema = z.object({
   monthly_salary: z.number(),
   hourly_rate: z.number(),
   hourly_rate_is_overridden: z.boolean(),
+  currency: z.string().default('PHP'),
   effective_from: z.string(),
 });
 export type MyCompensation = z.infer<typeof MyCompensationSchema>;

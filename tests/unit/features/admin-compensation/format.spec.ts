@@ -12,6 +12,14 @@ describe('compensation formatting', () => {
     expect(s.endsWith('/hr')).toBe(true);
   });
 
+  it('uses the currency from the API payload (defaults to PHP)', () => {
+    // Default — the single-tenant PHP path.
+    expect(formatSalary(1000)).toContain('₱');
+    // A different code (the API now supplies currency) is honoured.
+    expect(formatSalary(1000, 'USD')).toContain('$');
+    expect(formatHourly(10, 'USD')).toContain('$');
+  });
+
   it('renders an effective range, using "present" for the active (open) row', () => {
     expect(effectiveRange('2026-06-01', null)).toBe('2026-06-01 → present');
     expect(effectiveRange('2026-06-01', '2026-06-30')).toBe('2026-06-01 → 2026-06-30');

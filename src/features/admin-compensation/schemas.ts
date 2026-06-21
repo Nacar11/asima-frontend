@@ -12,6 +12,7 @@ export const CompensationSchema = z.object({
   monthly_salary: z.number(),
   hourly_rate: z.number(),
   hourly_rate_is_overridden: z.boolean(),
+  currency: z.string().default('PHP'),
   effective_from: z.string(),
   effective_to: z.string().nullable(),
   created_by: z.number().int().nullable(),

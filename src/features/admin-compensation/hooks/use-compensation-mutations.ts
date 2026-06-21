@@ -5,13 +5,19 @@ import { toast } from 'sonner';
 import { adminCompensationApi } from '@/features/admin-compensation/api';
 import { adminCompensationKeys } from '@/features/admin-compensation/keys';
 import { errorMessage } from '@/lib/api-error';
-import type { CreateCompensationInput } from '@/features/admin-compensation/schemas';
+import type {
+  CreateCompensationInput,
+  UpdateCompensationInput,
+} from '@/features/admin-compensation/schemas';
 
 /**
- * Set-pay and remove-rate mutations for one employee. Both invalidate that
- * employee's history so the manager re-renders the new active row. Errors
- * surface the backend's per-field message (e.g. future-date 422, or the
- * "only the active row can be deleted" 409).
+ * Set-pay, correct-in-place and remove-rate mutations for one employee. All
+ * invalidate that employee's history so the manager re-renders the new active
+ * row. Errors surface the backend's per-field message (e.g. future-date 422,
+ * or the "only the active row can be deleted" 409).
+ *
+ * `setPay` records a real pay change (new effective-dated row); `correctRate`
+ * fixes an erroneous row IN PLACE (no new history) via PATCH.
  */
 export function useCompensationMutations(employeeId: number) {
   const queryClient = useQueryClient();
@@ -27,6 +33,16 @@ export function useCompensationMutations(employeeId: number) {
     onError: (err) => toast.error(errorMessage(err, 'Could not update compensation.')),
   });
 
+  const correctRate = useMutation({
+    mutationFn: ({ id, patch }: { id: number; patch: UpdateCompensationInput }) =>
+      adminCompensationApi.update(id, patch),
+    onSuccess: () => {
+      void invalidate();
+      toast.success('Rate corrected.');
+    },
+    onError: (err) => toast.error(errorMessage(err, 'Could not correct the rate.')),
+  });
+
   const removeRate = useMutation({
     mutationFn: (id: number) => adminCompensationApi.remove(id),
     onSuccess: () => {
@@ -36,5 +52,5 @@ export function useCompensationMutations(employeeId: number) {
     onError: (err) => toast.error(errorMessage(err, 'Could not remove the rate.')),
   });
 
-  return { setPay, removeRate };
+  return { setPay, correctRate, removeRate };
 }

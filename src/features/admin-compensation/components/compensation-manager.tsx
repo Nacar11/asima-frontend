@@ -1,12 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useCompensationMutations } from '@/features/admin-compensation/hooks/use-compensation-mutations';
 import { SetPayDrawer } from '@/features/admin-compensation/components/set-pay-drawer';
+import { CorrectRateDrawer } from '@/features/admin-compensation/components/correct-rate-drawer';
 import { effectiveRange, formatHourly, formatSalary } from '@/features/admin-compensation/format';
-import type { Compensation, CreateCompensationInput } from '@/features/admin-compensation/schemas';
+import type {
+  Compensation,
+  CreateCompensationInput,
+  UpdateCompensationInput,
+} from '@/features/admin-compensation/schemas';
 
 const btnPrimary = cn(
   'inline-flex items-center gap-1.5 rounded-md bg-neutral-950 px-3 py-1.5 text-sm font-medium text-white shadow-sm',
@@ -36,14 +41,20 @@ export function CompensationManager({
   rows: Compensation[];
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [correctOpen, setCorrectOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const { setPay, removeRate } = useCompensationMutations(employeeId);
+  const { setPay, correctRate, removeRate } = useCompensationMutations(employeeId);
 
   const active = rows.find((r) => r.effective_to === null) ?? null;
   const history = rows.filter((r) => r.effective_to !== null);
 
   const submitSetPay = (input: CreateCompensationInput) =>
     setPay.mutate(input, { onSuccess: () => setDrawerOpen(false) });
+
+  const submitCorrect = (patch: UpdateCompensationInput) => {
+    if (!active) return;
+    correctRate.mutate({ id: active.id, patch }, { onSuccess: () => setCorrectOpen(false) });
+  };
 
   return (
     <div className="space-y-4">
@@ -54,11 +65,11 @@ export function CompensationManager({
             {active ? (
               <div className="mt-2 space-y-1">
                 <p className="text-2xl font-semibold text-neutral-950">
-                  {formatSalary(active.monthly_salary)}
+                  {formatSalary(active.monthly_salary, active.currency)}
                   <span className="text-sm font-normal text-neutral-500"> / month</span>
                 </p>
                 <p className="flex items-center text-sm text-neutral-600">
-                  {formatHourly(active.hourly_rate)}
+                  {formatHourly(active.hourly_rate, active.currency)}
                   {active.hourly_rate_is_overridden && (
                     <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
                       overridden
@@ -81,6 +92,12 @@ export function CompensationManager({
               )}
               {active ? 'Change pay' : 'Set pay'}
             </button>
+            {active && (
+              <button type="button" onClick={() => setCorrectOpen(true)} className={btnSecondary}>
+                <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                Correct
+              </button>
+            )}
             {active && (
               <button
                 type="button"
@@ -135,7 +152,8 @@ export function CompensationManager({
                   {effectiveRange(r.effective_from, r.effective_to)}
                 </span>
                 <span className="text-neutral-800">
-                  {formatSalary(r.monthly_salary)} · {formatHourly(r.hourly_rate)}
+                  {formatSalary(r.monthly_salary, r.currency)} ·{' '}
+                  {formatHourly(r.hourly_rate, r.currency)}
                 </span>
               </li>
             ))}
@@ -151,6 +169,17 @@ export function CompensationManager({
         onClose={() => setDrawerOpen(false)}
         onSubmit={submitSetPay}
       />
+
+      {active && (
+        <CorrectRateDrawer
+          active={active}
+          employeeName={employeeName}
+          open={correctOpen}
+          submitting={correctRate.isPending}
+          onClose={() => setCorrectOpen(false)}
+          onSubmit={submitCorrect}
+        />
+      )}
     </div>
   );
 }

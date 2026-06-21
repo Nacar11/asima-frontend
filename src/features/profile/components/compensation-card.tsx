@@ -6,17 +6,15 @@ import { usePermissions } from '@/features/auth/use-permissions';
 import { hasPermission } from '@/features/auth/permission-utils';
 import { useMyCompensation } from '@/features/profile/hooks/use-my-compensation-query';
 
-const salaryFmt = new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-  minimumFractionDigits: 2,
-});
-const rateFmt = new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 4,
-});
+/** Currency comes from the API payload (the backend's COMPENSATION_CURRENCY). */
+function money(currency: string, maximumFractionDigits = 2): Intl.NumberFormat {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits,
+  });
+}
 
 /**
  * Read-only "my pay" card for the profile page. Self-gates on
@@ -50,13 +48,13 @@ export function CompensationCard() {
             <div>
               <dt className="text-neutral-500">Monthly salary</dt>
               <dd className="mt-0.5 text-lg font-semibold text-neutral-950">
-                {salaryFmt.format(data.monthly_salary)}
+                {money(data.currency).format(data.monthly_salary)}
               </dd>
             </div>
             <div>
               <dt className="text-neutral-500">Hourly rate</dt>
               <dd className="mt-0.5 text-lg font-semibold text-neutral-950">
-                {rateFmt.format(data.hourly_rate)}
+                {money(data.currency, 4).format(data.hourly_rate)}
               </dd>
             </div>
             <div className="col-span-2">
