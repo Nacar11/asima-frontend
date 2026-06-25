@@ -5,11 +5,12 @@ Next.js (App Router) SPA for Asima. TypeScript, React Query, zod, shadcn/ui.
 System-level context (cross-cutting concepts, terminology, API conventions)
 lives in the parent `CLAUDE.md`. This file is **frontend-only rules**.
 
-## Architecture: Feature-Sliced (NOT hexagonal)
+## Architecture: Feature-Sliced (NOT the backend's DDD layering)
 
 The frontend is organized as vertical feature slices. We deliberately do
-**not** mirror the backend's hexagonal domain/ports/adapters layering — the
-backend owns the domain, and React Query is our infrastructure/state layer.
+**not** mirror the backend's Domain-Driven Design layering (aggregates /
+value objects / ports / mappers) — the backend owns the domain, and React
+Query is our infrastructure/state layer.
 The two ideas worth borrowing (an anti-corruption boundary and dependency
 inversion) already exist: zod at `api.ts`, and token/refresh injected into
 `lib/api-client`. Do not add `domain/ → ports/ → adapters/` folders.
