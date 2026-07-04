@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  PASSWORD_COMPLEXITY_MESSAGE,
-  PASSWORD_COMPLEXITY_REGEX,
-} from '@/features/profile/password-schemas';
+import { PASSWORD_COMPLEXITY_MESSAGE, PASSWORD_COMPLEXITY_REGEX } from '@/features/profile';
 
 /* Mirrors asima-backend/src/roles/domain/role.ts (slim — no nested perms). */
 export const AdminRoleSlimSchema = z.object({

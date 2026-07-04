@@ -2,8 +2,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminUsersApi } from '@/features/admin-users/api';
-import type { ResetUserPasswordInput } from '@/features/admin-users/schemas';
+import { adminUsersApi } from '../api';
+import type { ResetUserPasswordInput } from '../schemas';
 
 /**
  * Admin force-reset of a user's password. Toasts success/error; the component

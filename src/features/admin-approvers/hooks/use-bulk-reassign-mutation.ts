@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
-import type { BulkReassignInput } from '@/features/admin-approvers/schemas';
+import { adminApproversApi } from '../api';
+import { adminApproverKeys } from '../keys';
+import type { BulkReassignInput } from '../schemas';
 
 /**
  * Org-wide approver reassignment ("replace X with Y everywhere"). Invalidates

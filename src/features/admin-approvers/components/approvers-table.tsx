@@ -4,8 +4,8 @@ import { useMemo, useRef } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
 import type { SelectOption } from '@/components/select';
 import { formatDateInTz } from '@/lib/format';
-import { InlineApproverCell } from '@/features/admin-approvers/components/inline-approver-cell';
-import type { EmployeeChainView } from '@/features/admin-approvers/schemas';
+import { InlineApproverCell } from './inline-approver-cell';
+import type { EmployeeChainView } from '../schemas';
 
 export type ApproverCandidate = { id: number; name: string };
 

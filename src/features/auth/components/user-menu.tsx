@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
-import { useAuth } from '@/features/auth/use-auth';
+import { useAuth } from '../use-auth';
 import { cn } from '@/lib/cn';
 
 /**

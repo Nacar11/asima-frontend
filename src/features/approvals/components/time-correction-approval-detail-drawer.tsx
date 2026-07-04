@@ -12,12 +12,12 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { isTcPending } from '@/features/time-correction/format';
-import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
-import { TimeDiff } from '@/features/time-correction/components/time-in-out-diff';
-import type { PendingApproval } from '@/features/approvals/schemas';
+import { timeCorrectionApi } from '@/features/time-correction';
+import { timeCorrectionKeys } from '@/features/time-correction';
+import { isTcPending } from '@/features/time-correction';
+import { TcStatusBadge } from '@/features/time-correction';
+import { TimeDiff } from '@/features/time-correction';
+import type { PendingApproval } from '../schemas';
 
 /**
  * Approver-facing detail drawer for a single time-correction request in the

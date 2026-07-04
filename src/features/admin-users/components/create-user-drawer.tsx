@@ -5,11 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { adminRolesApi } from '@/features/admin-roles/api';
-import { adminRoleKeys } from '@/features/admin-roles/keys';
-import { formatRoleName } from '@/features/admin-roles/format';
-import { useCreateAdminUser } from '@/features/admin-users/hooks/use-create-user-mutation';
-import { CreateAdminUserSchema, type CreateAdminUserInput } from '@/features/admin-users/schemas';
+import { adminRolesApi } from '@/features/admin-roles';
+import { adminRoleKeys } from '@/features/admin-roles';
+import { formatRoleName } from '@/features/admin-roles';
+import { useCreateAdminUser } from '../hooks/use-create-user-mutation';
+import { CreateAdminUserSchema, type CreateAdminUserInput } from '../schemas';
 
 export function CreateUserDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const rolesQuery = useQuery({

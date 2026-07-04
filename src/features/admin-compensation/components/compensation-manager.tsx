@@ -3,16 +3,12 @@
 import { useState } from 'react';
 import { History, Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { useCompensationMutations } from '@/features/admin-compensation/hooks/use-compensation-mutations';
-import { SetPayDrawer } from '@/features/admin-compensation/components/set-pay-drawer';
-import { CorrectRateDrawer } from '@/features/admin-compensation/components/correct-rate-drawer';
-import { AuditTrailPanel } from '@/features/admin-compensation/components/audit-trail-panel';
-import { effectiveRange, formatHourly, formatSalary } from '@/features/admin-compensation/format';
-import type {
-  Compensation,
-  CreateCompensationInput,
-  UpdateCompensationInput,
-} from '@/features/admin-compensation/schemas';
+import { useCompensationMutations } from '../hooks/use-compensation-mutations';
+import { SetPayDrawer } from './set-pay-drawer';
+import { CorrectRateDrawer } from './correct-rate-drawer';
+import { AuditTrailPanel } from './audit-trail-panel';
+import { effectiveRange, formatHourly, formatSalary } from '../format';
+import type { Compensation, CreateCompensationInput, UpdateCompensationInput } from '../schemas';
 
 const btnPrimary = cn(
   'inline-flex items-center gap-1.5 rounded-md bg-neutral-950 px-3 py-1.5 text-sm font-medium text-white shadow-sm',

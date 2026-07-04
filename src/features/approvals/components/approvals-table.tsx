@@ -2,10 +2,10 @@
 
 import { cn } from '@/lib/cn';
 import { formatDateInTz } from '@/lib/format';
-import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
-import { ApprovalStatusCell } from '@/features/approvals/components/approval-status-cell';
-import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
-import type { PendingApproval } from '@/features/approvals/schemas';
+import { APPROVAL_ACTIONS } from '../actions';
+import { ApprovalStatusCell } from './approval-status-cell';
+import { TimeInOutDiff } from '@/features/time-correction';
+import type { PendingApproval } from '../schemas';
 
 /**
  * Single-kind approvals inbox table (one table per resource page; the kind

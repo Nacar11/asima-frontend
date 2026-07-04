@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AuthUserSchema } from '@/features/auth/schemas';
+import { AuthUserSchema } from '@/features/auth';
 
 /*
  * The full /users/me payload returned by the backend includes the

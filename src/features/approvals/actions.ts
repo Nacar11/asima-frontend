@@ -1,6 +1,6 @@
-import { leaveApi } from '@/features/leave/api';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import type { PendingApprovalKind } from '@/features/approvals/schemas';
+import { leaveApi } from '@/features/leave';
+import { timeCorrectionApi } from '@/features/time-correction';
+import type { PendingApprovalKind } from './schemas';
 
 /**
  * Per-kind approve/reject handlers for the cross-resource inbox. The

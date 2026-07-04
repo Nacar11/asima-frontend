@@ -1,8 +1,8 @@
 import { cn } from '@/lib/cn';
 import { formatRelative } from '@/lib/format';
 import { approverLabel } from '@/lib/approver-label';
-import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
-import type { LeaveRequest } from '@/features/leave/schemas';
+import { LeaveStatusBadge } from './leave-status-badge';
+import type { LeaveRequest } from '../schemas';
 
 /**
  * The `STATUS` cell for the My-requests table: the status badge plus the

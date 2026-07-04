@@ -1,6 +1,6 @@
 import { formatTimeInTz } from '@/lib/format';
-import type { WorkSchedule } from '@/features/schedule/schemas';
-import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
+import type { WorkSchedule } from '@/features/schedule';
+import type { TimeCorrectionRequest } from '@/features/time-correction';
 import type { TimeEntry } from './schemas';
 
 /* "09:00" or "09:00:00" → minutes since midnight. */

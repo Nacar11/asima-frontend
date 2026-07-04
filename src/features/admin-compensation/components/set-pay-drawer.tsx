@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FormDrawer } from '@/components/form-drawer';
 import { cn } from '@/lib/cn';
-import type { CreateCompensationInput } from '@/features/admin-compensation/schemas';
+import type { CreateCompensationInput } from '../schemas';
 
 function todayStr(): string {
   const d = new Date();

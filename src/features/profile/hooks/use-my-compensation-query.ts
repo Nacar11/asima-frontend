@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { profileApi } from '@/features/profile/api';
-import { profileKeys } from '@/features/profile/keys';
+import { profileApi } from '../api';
+import { profileKeys } from '../keys';
 
 /**
  * My current compensation (read-only). `enabled` gates the fetch on the

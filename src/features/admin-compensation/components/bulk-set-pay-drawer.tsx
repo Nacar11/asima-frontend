@@ -4,13 +4,10 @@ import { useRef, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { FormDrawer } from '@/components/form-drawer';
 import { cn } from '@/lib/cn';
-import {
-  EmployeePicker,
-  employeeName,
-} from '@/features/admin-compensation/components/employee-picker';
-import { useBulkSetPay } from '@/features/admin-compensation/hooks/use-bulk-set-pay';
-import type { AdminUser } from '@/features/admin-users/schemas';
-import type { CreateCompensationInput } from '@/features/admin-compensation/schemas';
+import { EmployeePicker, employeeName } from './employee-picker';
+import { useBulkSetPay } from '../hooks/use-bulk-set-pay';
+import type { AdminUser } from '@/features/admin-users';
+import type { CreateCompensationInput } from '../schemas';
 
 function todayStr(): string {
   const d = new Date();

@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  DAY_NAMES,
-  formatBreak,
-  trimSeconds,
-  type WorkSchedule,
-} from '@/features/schedule/schemas';
+import { DAY_NAMES, formatBreak, trimSeconds, type WorkSchedule } from '../schemas';
 
 /*
  * Weekly schedule grid. Backend returns 0..7 active rows (one per active

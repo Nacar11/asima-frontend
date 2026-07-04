@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn';
-import { LEAVE_STATUS_META } from '@/features/leave/format';
-import type { LeaveStatus } from '@/features/leave/schemas';
+import { LEAVE_STATUS_META } from '../format';
+import type { LeaveStatus } from '../schemas';
 
 export function LeaveStatusBadge({ status }: { status: LeaveStatus }) {
   const meta = LEAVE_STATUS_META[status];

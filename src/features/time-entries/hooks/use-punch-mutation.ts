@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { timeEntriesApi } from '@/features/time-entries/api';
-import { timeEntryKeys } from '@/features/time-entries/keys';
+import { timeEntriesApi } from '../api';
+import { timeEntryKeys } from '../keys';
 import { ApiError } from '@/lib/api-client';
 
 /**

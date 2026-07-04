@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import type { GrantAllocationInput } from '@/features/leave/schemas';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import type { GrantAllocationInput } from '../schemas';
 import { errorMessage } from '@/lib/api-error';
 
 /**

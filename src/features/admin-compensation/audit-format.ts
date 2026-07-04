@@ -1,5 +1,5 @@
-import { formatSalary } from '@/features/admin-compensation/format';
-import type { CompensationAudit } from '@/features/admin-compensation/schemas';
+import { formatSalary } from './format';
+import type { CompensationAudit } from './schemas';
 
 const ACTION_LABELS: Record<CompensationAudit['action'], string> = {
   created: 'Set',

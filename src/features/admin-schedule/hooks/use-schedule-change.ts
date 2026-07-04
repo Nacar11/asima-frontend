@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminScheduleApi } from '@/features/admin-schedule/api';
-import { adminScheduleKeys } from '@/features/admin-schedule/keys';
-import type { PreviewedCancel, ScheduleChangeIntent } from '@/features/admin-schedule/schemas';
+import { adminScheduleApi } from '../api';
+import { adminScheduleKeys } from '../keys';
+import type { PreviewedCancel, ScheduleChangeIntent } from '../schemas';
 
 /**
  * The two halves of the cascade flow: `preview` (dry-run, no toast — the

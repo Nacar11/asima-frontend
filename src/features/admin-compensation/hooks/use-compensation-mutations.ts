@@ -2,13 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminCompensationApi } from '@/features/admin-compensation/api';
-import { adminCompensationKeys } from '@/features/admin-compensation/keys';
+import { adminCompensationApi } from '../api';
+import { adminCompensationKeys } from '../keys';
 import { errorMessage } from '@/lib/api-error';
-import type {
-  CreateCompensationInput,
-  UpdateCompensationInput,
-} from '@/features/admin-compensation/schemas';
+import type { CreateCompensationInput, UpdateCompensationInput } from '../schemas';
 
 /**
  * Set-pay, correct-in-place and remove-rate mutations for one employee. All

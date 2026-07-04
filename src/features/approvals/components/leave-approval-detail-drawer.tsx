@@ -12,17 +12,12 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import {
-  LEAVE_PORTION_LABELS,
-  LEAVE_TYPE_LABELS,
-  formatWindow,
-  isPending,
-} from '@/features/leave/format';
-import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
-import { LeaveAttachment } from '@/features/leave/components/leave-attachment';
-import type { PendingApproval } from '@/features/approvals/schemas';
+import { leaveApi } from '@/features/leave';
+import { leaveKeys } from '@/features/leave';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow, isPending } from '@/features/leave';
+import { LeaveStatusBadge } from '@/features/leave';
+import { LeaveAttachment } from '@/features/leave';
+import type { PendingApproval } from '../schemas';
 
 /**
  * Approver-facing detail drawer for a single leave request in the pending-

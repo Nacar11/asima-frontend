@@ -12,17 +12,17 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { useLeaveActions } from '@/features/leave/hooks/use-leave-actions';
+import { useLeaveActions } from '../hooks/use-leave-actions';
 import {
   LEAVE_PORTION_LABELS,
   LEAVE_TYPE_LABELS,
   canCancel,
   formatWindow,
   isPending,
-} from '@/features/leave/format';
-import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
-import { LeaveAttachment } from '@/features/leave/components/leave-attachment';
-import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '@/features/leave/schemas';
+} from '../format';
+import { LeaveStatusBadge } from './leave-status-badge';
+import { LeaveAttachment } from './leave-attachment';
+import { LEAVE_TYPES, type LeaveRequest, type LeaveType } from '../schemas';
 
 /**
  * HR detail + action drawer for a single leave request.

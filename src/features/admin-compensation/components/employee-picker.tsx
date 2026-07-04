@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminCompensationKeys } from '@/features/admin-compensation/keys';
-import type { AdminUser } from '@/features/admin-users/schemas';
+import { adminUsersApi } from '@/features/admin-users';
+import { adminCompensationKeys } from '../keys';
+import type { AdminUser } from '@/features/admin-users';
 
 const inputCls = cn(
   'h-9 w-full rounded-md border border-neutral-300 bg-white pl-8 pr-3 text-sm text-neutral-900 shadow-sm',

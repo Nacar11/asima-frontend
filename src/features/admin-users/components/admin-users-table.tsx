@@ -1,13 +1,13 @@
 'use client';
 
 import { KeyRound, Pencil, Trash2 } from 'lucide-react';
-import { useAuth } from '@/features/auth/use-auth';
-import { usePermissions } from '@/features/auth/use-permissions';
-import { hasPermission } from '@/features/auth/permission-utils';
+import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/auth';
+import { hasPermission } from '@/features/auth';
 import { formatDateInTz } from '@/lib/format';
-import { formatRoleName } from '@/features/admin-roles/format';
+import { formatRoleName } from '@/features/admin-roles';
 import { cn } from '@/lib/cn';
-import type { AdminUser } from '@/features/admin-users/schemas';
+import type { AdminUser } from '../schemas';
 
 export function AdminUsersTable({
   rows,

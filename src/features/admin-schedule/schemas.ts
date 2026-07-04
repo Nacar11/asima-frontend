@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { WorkScheduleSchema } from '@/features/schedule/schemas';
+import { WorkScheduleSchema } from '@/features/schedule';
 
 /**
  * Admin schedule-change (cascade) schemas. Mirror the backend

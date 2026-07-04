@@ -1,7 +1,7 @@
 'use client';
 
-import { ApprovalsInbox } from '@/features/approvals/components/approvals-inbox';
-import { LeaveApprovalDetailDrawer } from '@/features/approvals/components/leave-approval-detail-drawer';
+import { ApprovalsInbox } from './approvals-inbox';
+import { LeaveApprovalDetailDrawer } from './leave-approval-detail-drawer';
 
 /** Leave-only pending-approvals inbox (`/leave-approvals`). */
 export function LeaveApprovalsPage() {

@@ -10,22 +10,18 @@ import { cn } from '@/lib/cn';
 import { usePagination } from '@/lib/use-pagination';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
-import { useAuth } from '@/features/auth/use-auth';
-import { usePermissions } from '@/features/auth/use-permissions';
-import { hasPermission } from '@/features/auth/permission-utils';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '@/features/leave/schemas';
-import {
-  LEAVE_PORTION_LABELS,
-  LEAVE_STATUS_META,
-  LEAVE_TYPE_LABELS,
-} from '@/features/leave/format';
-import { LeaveStatusBadge } from '@/features/leave/components/leave-status-badge';
-import { LeaveDetailDrawer } from '@/features/leave/components/leave-detail-drawer';
-import { GrantLeaveDrawer } from '@/features/leave/components/grant-leave-drawer';
+import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/auth';
+import { hasPermission } from '@/features/auth';
+import { adminUsersApi } from '@/features/admin-users';
+import { adminUserKeys } from '@/features/admin-users';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import { LEAVE_STATUSES, type LeaveRequest, type LeaveStatus } from '../schemas';
+import { LEAVE_PORTION_LABELS, LEAVE_STATUS_META, LEAVE_TYPE_LABELS } from '../format';
+import { LeaveStatusBadge } from './leave-status-badge';
+import { LeaveDetailDrawer } from './leave-detail-drawer';
+import { GrantLeaveDrawer } from './grant-leave-drawer';
 
 const PAGE_LIMIT = 20;
 

@@ -2,7 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { profileApi, type ChangeMyPasswordRequest } from '@/features/profile/api';
+import { profileApi, type ChangeMyPasswordRequest } from '../api';
 
 /**
  * Change the current user's password. Toasts success; the component handles

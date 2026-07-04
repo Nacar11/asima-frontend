@@ -8,5 +8,23 @@
         "message": "Use a keys.ts factory (e.g. leaveKeys.list()) instead of an inline queryKey array. See asima-frontend/CLAUDE.md."
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/features/**/*.ts", "src/features/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/*/*", "@/features/*/*/**"],
+                "message": "Cross-slice imports must go through the slice's public barrel ('@/features/<slice>'), never its internals. Same-slice imports must be relative ('./x'). See asima-frontend/CLAUDE.md and frontend-architecture.md §3."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

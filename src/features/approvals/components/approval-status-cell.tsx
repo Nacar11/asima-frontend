@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn';
 import { approverLabel } from '@/lib/approver-label';
-import type { PendingApproval } from '@/features/approvals/schemas';
+import type { PendingApproval } from '../schemas';
 
 /**
  * The `STATUS` cell for the approvals inbox: a "Pending L{n}" badge plus a line

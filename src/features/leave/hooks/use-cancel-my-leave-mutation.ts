@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
 
 /** Cancel one of my own leave requests; invalidates my requests + balances. */
 export function useCancelMyLeave() {

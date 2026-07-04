@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { timeCorrectionApi, type SubmitCorrectionPayload } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { timeEntryKeys } from '@/features/time-entries/keys';
+import { timeCorrectionApi, type SubmitCorrectionPayload } from '../api';
+import { timeCorrectionKeys } from '../keys';
+import { timeEntryKeys } from '@/features/time-entries';
 import { errorMessage } from '@/lib/api-error';
 
 /**

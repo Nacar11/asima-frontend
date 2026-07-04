@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/features/auth/use-auth';
+import { useAuth } from '../use-auth';
 
 /*
  * Route guard for the (app) group. Gates protected pages on auth status:

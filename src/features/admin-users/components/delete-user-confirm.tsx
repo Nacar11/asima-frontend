@@ -9,8 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/cn';
-import { useDeleteAdminUser } from '@/features/admin-users/hooks/use-delete-user-mutation';
-import type { AdminUser } from '@/features/admin-users/schemas';
+import { useDeleteAdminUser } from '../hooks/use-delete-user-mutation';
+import type { AdminUser } from '../schemas';
 
 export function DeleteUserConfirm({
   user,

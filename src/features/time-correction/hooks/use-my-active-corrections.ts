@@ -2,9 +2,9 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import type { TcStatus, TimeCorrectionRequest } from '@/features/time-correction/schemas';
+import { timeCorrectionApi } from '../api';
+import { timeCorrectionKeys } from '../keys';
+import type { TcStatus, TimeCorrectionRequest } from '../schemas';
 
 /** Statuses that block a second correction for the same entry (mirrors the
  *  backend's `findActiveForEntry`) — and exactly the ones the timesheet

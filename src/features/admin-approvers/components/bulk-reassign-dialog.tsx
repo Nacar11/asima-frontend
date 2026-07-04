@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select } from '@/components/select';
 import { cn } from '@/lib/cn';
-import { useBulkReassignApprovers } from '@/features/admin-approvers/hooks/use-bulk-reassign-mutation';
+import { useBulkReassignApprovers } from '../hooks/use-bulk-reassign-mutation';
 
 export type ApproverCandidate = { id: number; name: string };
 

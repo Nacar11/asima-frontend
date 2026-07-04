@@ -17,9 +17,9 @@ import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { errorMessage } from '@/lib/api-error';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { useSubmitLeave } from '@/features/leave/hooks/use-submit-leave-mutation';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import { useSubmitLeave } from '../hooks/use-submit-leave-mutation';
 import { Select } from '@/components/select';
 import {
   ACCEPTED_ATTACHMENT_ACCEPT,
@@ -31,8 +31,8 @@ import {
   type DayPortion,
   type LeaveType,
   type SubmitLeaveInput,
-} from '@/features/leave/schemas';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow } from '@/features/leave/format';
+} from '../schemas';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, formatWindow } from '../format';
 
 const LEAVE_TYPE_OPTIONS = LEAVE_TYPES.map((t) => ({
   value: t,

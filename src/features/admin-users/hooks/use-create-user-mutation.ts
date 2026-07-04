@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
-import type { CreateAdminUserInput } from '@/features/admin-users/schemas';
+import { adminUsersApi } from '../api';
+import { adminUserKeys } from '../keys';
+import type { CreateAdminUserInput } from '../schemas';
 import { ApiError } from '@/lib/api-client';
 
 /**

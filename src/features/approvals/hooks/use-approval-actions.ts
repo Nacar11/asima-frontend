@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { APPROVAL_ACTIONS } from '@/features/approvals/actions';
-import { approvalKeys } from '@/features/approvals/keys';
-import type { PendingApproval } from '@/features/approvals/schemas';
+import { APPROVAL_ACTIONS } from '../actions';
+import { approvalKeys } from '../keys';
+import type { PendingApproval } from '../schemas';
 
 /**
  * Approve / reject the current approver's pending requests. The per-kind

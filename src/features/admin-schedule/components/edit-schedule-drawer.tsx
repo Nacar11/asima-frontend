@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { FormDrawer } from '@/components/form-drawer';
 import { cn } from '@/lib/cn';
-import { dayName, trimSeconds, type WorkSchedule } from '@/features/schedule/schemas';
-import type { ScheduleChangeIntent } from '@/features/admin-schedule/schemas';
+import { dayName, trimSeconds, type WorkSchedule } from '@/features/schedule';
+import type { ScheduleChangeIntent } from '../schemas';
 
 export function todayStr(): string {
   const d = new Date();

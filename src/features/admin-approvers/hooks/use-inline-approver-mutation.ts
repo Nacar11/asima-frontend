@@ -3,8 +3,8 @@
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { SelectOption } from '@/components/select';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import type { EmployeeChainList, SetChainInput } from '@/features/admin-approvers/schemas';
+import { adminApproversApi } from '../api';
+import type { EmployeeChainList, SetChainInput } from '../schemas';
 
 /**
  * Commit a single approver step (L1 or L2) for one employee with an optimistic

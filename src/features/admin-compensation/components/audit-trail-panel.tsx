@@ -1,7 +1,7 @@
 'use client';
 
-import { useCompensationAudit } from '@/features/admin-compensation/hooks/use-compensation-audit';
-import { auditActionLabel, describeAuditChange } from '@/features/admin-compensation/audit-format';
+import { useCompensationAudit } from '../hooks/use-compensation-audit';
+import { auditActionLabel, describeAuditChange } from '../audit-format';
 
 function whenStr(iso: string): string {
   const d = new Date(iso);

@@ -9,14 +9,14 @@ import { usePagination } from '@/lib/use-pagination';
 import { cn } from '@/lib/cn';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz } from '@/lib/format';
-import { useAuth } from '@/features/auth/use-auth';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { useCancelMyLeave } from '@/features/leave/hooks/use-cancel-my-leave-mutation';
-import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel } from '@/features/leave/format';
-import { LeaveRequestStatusCell } from '@/features/leave/components/leave-request-status-cell';
-import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
-import { ApplyLeaveDrawer } from '@/features/leave/components/apply-leave-drawer';
+import { useAuth } from '@/features/auth';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import { useCancelMyLeave } from '../hooks/use-cancel-my-leave-mutation';
+import { LEAVE_PORTION_LABELS, LEAVE_TYPE_LABELS, canCancel } from '../format';
+import { LeaveRequestStatusCell } from './leave-request-status-cell';
+import { LeaveBalanceSummary } from './leave-balance-summary';
+import { ApplyLeaveDrawer } from './apply-leave-drawer';
 
 const PAGE_LIMIT = 20;
 

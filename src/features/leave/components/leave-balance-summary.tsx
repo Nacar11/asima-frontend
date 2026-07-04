@@ -1,8 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/cn';
-import { LEAVE_TYPE_LABELS } from '@/features/leave/format';
-import type { LeaveBalance } from '@/features/leave/schemas';
+import { LEAVE_TYPE_LABELS } from '../format';
+import type { LeaveBalance } from '../schemas';
 
 /**
  * Per-type balance cards for /employee/leaves — available (prominent), with

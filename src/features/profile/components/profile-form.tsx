@@ -4,12 +4,8 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field } from '@/components/form/field';
-import { useUpdateProfile } from '@/features/profile/hooks/use-update-profile-mutation';
-import {
-  UpdateMyProfileSchema,
-  type MyProfile,
-  type UpdateMyProfileInput,
-} from '@/features/profile/schemas';
+import { useUpdateProfile } from '../hooks/use-update-profile-mutation';
+import { UpdateMyProfileSchema, type MyProfile, type UpdateMyProfileInput } from '../schemas';
 import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';
 

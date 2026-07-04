@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FormDrawer } from '@/components/form-drawer';
 import { cn } from '@/lib/cn';
-import type { Compensation, UpdateCompensationInput } from '@/features/admin-compensation/schemas';
+import type { Compensation, UpdateCompensationInput } from '../schemas';
 
 const fieldCls = cn(
   'h-9 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 shadow-sm',

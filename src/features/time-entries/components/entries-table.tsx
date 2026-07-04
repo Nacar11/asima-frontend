@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDateInTz } from '@/lib/format';
-import { durationMinutes, formatDuration, type TimeEntry } from '@/features/time-entries/schemas';
+import { durationMinutes, formatDuration, type TimeEntry } from '../schemas';
 import {
   findScheduleForDate,
   scheduledRegularHours,
@@ -12,10 +12,10 @@ import {
   approverStates,
   type ApproverLevelState,
   type TimesheetStatus,
-} from '@/features/time-entries/metrics';
-import type { WorkSchedule } from '@/features/schedule/schemas';
-import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
-import { TimeInOutDiff } from '@/features/time-correction/components/time-in-out-diff';
+} from '../metrics';
+import type { WorkSchedule } from '@/features/schedule';
+import type { TimeCorrectionRequest } from '@/features/time-correction';
+import { TimeInOutDiff } from '@/features/time-correction';
 import { approverLabel } from '@/lib/approver-label';
 import { cn } from '@/lib/cn';
 

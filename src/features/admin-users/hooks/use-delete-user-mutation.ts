@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
+import { adminUsersApi } from '../api';
+import { adminUserKeys } from '../keys';
 
 /**
  * Soft-delete an employee. Invalidates the user list and toasts success/error;

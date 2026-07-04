@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/cn';
-import type { AffectedRequest, ScheduleChangeImpact } from '@/features/admin-schedule/schemas';
+import type { AffectedRequest, ScheduleChangeImpact } from '../schemas';
 
 const KIND_LABEL: Record<AffectedRequest['kind'], string> = {
   leave: 'Leave',

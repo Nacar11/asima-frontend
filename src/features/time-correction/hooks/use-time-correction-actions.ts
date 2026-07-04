@@ -2,11 +2,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import { approvalKeys } from '@/features/approvals/keys';
-import { timeEntryKeys } from '@/features/time-entries/keys';
-import type { UpdateCorrectionInput } from '@/features/time-correction/schemas';
+import { timeCorrectionApi } from '../api';
+import { timeCorrectionKeys } from '../keys';
+import { approvalKeys } from '@/features/approvals';
+import { timeEntryKeys } from '@/features/time-entries';
+import type { UpdateCorrectionInput } from '../schemas';
 
 /**
  * HR/approver lifecycle actions for a single correction (approve override,

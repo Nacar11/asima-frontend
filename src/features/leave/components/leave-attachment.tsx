@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/cn';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
 
 /**
  * Renders a leave request's attachment. For images it shows a thumbnail that

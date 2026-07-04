@@ -2,10 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { approvalKeys } from '@/features/approvals/keys';
-import type { UpdateLeaveInput } from '@/features/leave/schemas';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import { approvalKeys } from '@/features/approvals';
+import type { UpdateLeaveInput } from '../schemas';
 
 /**
  * HR/approver lifecycle actions for a single leave request (approve override,

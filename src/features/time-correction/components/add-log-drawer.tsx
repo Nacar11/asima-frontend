@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
-import { localDateTimeToIso } from '@/features/time-correction/datetime';
+import { useSubmitCorrection } from '../hooks/use-submit-correction-mutation';
+import { localDateTimeToIso } from '../datetime';
 
 /** Browser-local YYYY-MM-DD for "today" (the latest date a log may be added for). */
 function localToday(): string {

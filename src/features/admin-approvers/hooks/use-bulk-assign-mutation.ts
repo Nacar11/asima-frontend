@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
-import type { BulkAssignInput } from '@/features/admin-approvers/schemas';
+import { adminApproversApi } from '../api';
+import { adminApproverKeys } from '../keys';
+import type { BulkAssignInput } from '../schemas';
 
 /**
  * Bulk-assign an L1 (and optional L2) approver to a set of employees.

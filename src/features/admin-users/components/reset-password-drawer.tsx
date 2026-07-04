@@ -4,12 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { useResetUserPassword } from '@/features/admin-users/hooks/use-reset-password-mutation';
-import {
-  ResetUserPasswordSchema,
-  type AdminUser,
-  type ResetUserPasswordInput,
-} from '@/features/admin-users/schemas';
+import { useResetUserPassword } from '../hooks/use-reset-password-mutation';
+import { ResetUserPasswordSchema, type AdminUser, type ResetUserPasswordInput } from '../schemas';
 
 export function ResetPasswordDrawer({
   user,

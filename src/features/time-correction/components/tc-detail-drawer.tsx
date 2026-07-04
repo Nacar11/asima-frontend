@@ -12,11 +12,11 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { useTimeCorrectionActions } from '@/features/time-correction/hooks/use-time-correction-actions';
-import { isoToLocalInput, localInputToIso } from '@/features/time-correction/datetime';
-import { isTcPending } from '@/features/time-correction/format';
-import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
-import type { TimeCorrectionRequest } from '@/features/time-correction/schemas';
+import { useTimeCorrectionActions } from '../hooks/use-time-correction-actions';
+import { isoToLocalInput, localInputToIso } from '../datetime';
+import { isTcPending } from '../format';
+import { TcStatusBadge } from './tc-status-badge';
+import type { TimeCorrectionRequest } from '../schemas';
 
 /**
  * HR detail + action drawer for a single time-correction request.

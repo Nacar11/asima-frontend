@@ -2,7 +2,7 @@
 
 import { type QueryKey } from '@tanstack/react-query';
 import { Select, type SelectOption } from '@/components/select';
-import { useInlineApproverUpdate } from '@/features/admin-approvers/hooks/use-inline-approver-mutation';
+import { useInlineApproverUpdate } from '../hooks/use-inline-approver-mutation';
 
 /**
  * One inline-editable approver cell in the /admin/approvers table.

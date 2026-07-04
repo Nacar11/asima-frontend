@@ -8,7 +8,7 @@ import {
   formatBreak,
   trimSeconds,
   type WorkSchedule,
-} from '@/features/schedule/schemas';
+} from '@/features/schedule';
 
 type WeeklyGridProps = {
   rows: WorkSchedule[];

@@ -1,9 +1,9 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { approvalsApi } from '@/features/approvals/api';
-import { approvalKeys } from '@/features/approvals/keys';
-import type { PendingApprovalsQuery } from '@/features/approvals/schemas';
+import { approvalsApi } from '../api';
+import { approvalKeys } from '../keys';
+import type { PendingApprovalsQuery } from '../schemas';
 
 export function usePendingApprovals(params: PendingApprovalsQuery) {
   return useQuery({

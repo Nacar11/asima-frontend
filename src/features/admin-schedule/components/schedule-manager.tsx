@@ -3,22 +3,15 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ApiError } from '@/lib/api-client';
-import { useAuth } from '@/features/auth/use-auth';
-import { usePermissions } from '@/features/auth/use-permissions';
-import { hasPermission } from '@/features/auth/permission-utils';
-import type { WorkSchedule } from '@/features/schedule/schemas';
-import { WeeklyGrid } from '@/features/admin-schedule/components/weekly-grid';
-import {
-  EditScheduleDrawer,
-  todayStr,
-} from '@/features/admin-schedule/components/edit-schedule-drawer';
-import { ImpactDialog } from '@/features/admin-schedule/components/impact-dialog';
-import { useScheduleChange } from '@/features/admin-schedule/hooks/use-schedule-change';
-import {
-  previewedFrom,
-  type ScheduleChangeImpact,
-  type ScheduleChangeIntent,
-} from '@/features/admin-schedule/schemas';
+import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/auth';
+import { hasPermission } from '@/features/auth';
+import type { WorkSchedule } from '@/features/schedule';
+import { WeeklyGrid } from './weekly-grid';
+import { EditScheduleDrawer, todayStr } from './edit-schedule-drawer';
+import { ImpactDialog } from './impact-dialog';
+import { useScheduleChange } from '../hooks/use-schedule-change';
+import { previewedFrom, type ScheduleChangeImpact, type ScheduleChangeIntent } from '../schemas';
 
 /**
  * The actionable schedule surface for one employee: the weekly grid plus the

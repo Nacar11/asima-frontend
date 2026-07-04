@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { profileApi } from '@/features/profile/api';
-import { profileKeys } from '@/features/profile/keys';
-import type { UpdateMyProfileInput } from '@/features/profile/schemas';
+import { profileApi } from '../api';
+import { profileKeys } from '../keys';
+import type { UpdateMyProfileInput } from '../schemas';
 
 /**
  * Update the current user's profile. Owns the server-state orchestration —

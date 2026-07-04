@@ -2,12 +2,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
-import type { SetChainInput } from '@/features/admin-approvers/schemas';
-import type { UpdateAdminUserInput } from '@/features/admin-users/schemas';
+import { adminUsersApi } from '../api';
+import { adminUserKeys } from '../keys';
+import { adminApproversApi } from '@/features/admin-approvers';
+import { adminApproverKeys } from '@/features/admin-approvers';
+import type { SetChainInput } from '@/features/admin-approvers';
+import type { UpdateAdminUserInput } from '../schemas';
 
 /**
  * Raised when the profile update committed but the subsequent approver-chain

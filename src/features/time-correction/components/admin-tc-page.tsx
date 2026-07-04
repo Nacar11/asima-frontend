@@ -10,21 +10,17 @@ import { cn } from '@/lib/cn';
 import { usePagination } from '@/lib/use-pagination';
 import { ApiError } from '@/lib/api-client';
 import { formatDateTimeInTz, formatTimeInTz } from '@/lib/format';
-import { useAuth } from '@/features/auth/use-auth';
-import { usePermissions } from '@/features/auth/use-permissions';
-import { hasPermission } from '@/features/auth/permission-utils';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
-import { timeCorrectionApi } from '@/features/time-correction/api';
-import { timeCorrectionKeys } from '@/features/time-correction/keys';
-import {
-  TC_STATUSES,
-  type TcStatus,
-  type TimeCorrectionRequest,
-} from '@/features/time-correction/schemas';
-import { TC_STATUS_META } from '@/features/time-correction/format';
-import { TcStatusBadge } from '@/features/time-correction/components/tc-status-badge';
-import { TcDetailDrawer } from '@/features/time-correction/components/tc-detail-drawer';
+import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/auth';
+import { hasPermission } from '@/features/auth';
+import { adminUsersApi } from '@/features/admin-users';
+import { adminUserKeys } from '@/features/admin-users';
+import { timeCorrectionApi } from '../api';
+import { timeCorrectionKeys } from '../keys';
+import { TC_STATUSES, type TcStatus, type TimeCorrectionRequest } from '../schemas';
+import { TC_STATUS_META } from '../format';
+import { TcStatusBadge } from './tc-status-badge';
+import { TcDetailDrawer } from './tc-detail-drawer';
 
 const PAGE_LIMIT = 20;
 

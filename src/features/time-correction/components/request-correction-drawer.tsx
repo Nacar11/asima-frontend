@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
-import { useSubmitCorrection } from '@/features/time-correction/hooks/use-submit-correction-mutation';
-import { isoToTimeInput, replaceTimeOnIso } from '@/features/time-correction/datetime';
-import type { TimeEntry } from '@/features/time-entries/schemas';
+import { useSubmitCorrection } from '../hooks/use-submit-correction-mutation';
+import { isoToTimeInput, replaceTimeOnIso } from '../datetime';
+import type { TimeEntry } from '@/features/time-entries';
 
 const FormSchema = z
   .object({

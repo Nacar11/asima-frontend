@@ -4,11 +4,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field } from '@/components/form/field';
-import { useChangePassword } from '@/features/profile/hooks/use-change-password-mutation';
-import {
-  ChangeMyPasswordInputSchema,
-  type ChangeMyPasswordInput,
-} from '@/features/profile/password-schemas';
+import { useChangePassword } from '../hooks/use-change-password-mutation';
+import { ChangeMyPasswordInputSchema, type ChangeMyPasswordInput } from '../password-schemas';
 import { ApiError } from '@/lib/api-client';
 import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';

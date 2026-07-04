@@ -8,20 +8,16 @@ import { FormDrawer } from '@/components/form-drawer';
 import { Field } from '@/components/form/field';
 import { LabeledCheckbox } from '@/components/labeled-checkbox';
 import { Select } from '@/components/select';
-import { adminUsersApi } from '@/features/admin-users/api';
-import { adminUserKeys } from '@/features/admin-users/keys';
-import { adminRolesApi } from '@/features/admin-roles/api';
-import { adminRoleKeys } from '@/features/admin-roles/keys';
-import { adminApproversApi } from '@/features/admin-approvers/api';
-import { adminApproverKeys } from '@/features/admin-approvers/keys';
-import { formatRoleName } from '@/features/admin-roles/format';
-import { useEditUser } from '@/features/admin-users/hooks/use-edit-user-mutation';
-import type { SetChainInput } from '@/features/admin-approvers/schemas';
-import {
-  UpdateAdminUserSchema,
-  type AdminUser,
-  type UpdateAdminUserInput,
-} from '@/features/admin-users/schemas';
+import { adminUsersApi } from '../api';
+import { adminUserKeys } from '../keys';
+import { adminRolesApi } from '@/features/admin-roles';
+import { adminRoleKeys } from '@/features/admin-roles';
+import { adminApproversApi } from '@/features/admin-approvers';
+import { adminApproverKeys } from '@/features/admin-approvers';
+import { formatRoleName } from '@/features/admin-roles';
+import { useEditUser } from '../hooks/use-edit-user-mutation';
+import type { SetChainInput } from '@/features/admin-approvers';
+import { UpdateAdminUserSchema, type AdminUser, type UpdateAdminUserInput } from '../schemas';
 
 /** Empty string is the "— None —" sentinel for the approver selects. */
 type ApproverValue = number | '';

@@ -16,16 +16,12 @@ import {
 import { Field } from '@/components/form/field';
 import { cn } from '@/lib/cn';
 import { formatDateTimeInTz } from '@/lib/format';
-import { leaveApi } from '@/features/leave/api';
-import { leaveKeys } from '@/features/leave/keys';
-import { useGrantLeave } from '@/features/leave/hooks/use-grant-leave-mutation';
-import {
-  GrantAllocationSchema,
-  LEAVE_TYPES,
-  type GrantAllocationInput,
-} from '@/features/leave/schemas';
-import { LEAVE_TYPE_LABELS } from '@/features/leave/format';
-import { LeaveBalanceSummary } from '@/features/leave/components/leave-balance-summary';
+import { leaveApi } from '../api';
+import { leaveKeys } from '../keys';
+import { useGrantLeave } from '../hooks/use-grant-leave-mutation';
+import { GrantAllocationSchema, LEAVE_TYPES, type GrantAllocationInput } from '../schemas';
+import { LEAVE_TYPE_LABELS } from '../format';
+import { LeaveBalanceSummary } from './leave-balance-summary';
 
 const DEFAULTS: GrantAllocationInput = { leave_type: 'vacation', amount: 1, reason: '' };
 

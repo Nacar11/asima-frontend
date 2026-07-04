@@ -1,10 +1,10 @@
 'use client';
 
 import { Card } from '@/components/layout/app-shell';
-import { useAuth } from '@/features/auth/use-auth';
-import { usePermissions } from '@/features/auth/use-permissions';
-import { hasPermission } from '@/features/auth/permission-utils';
-import { useMyCompensation } from '@/features/profile/hooks/use-my-compensation-query';
+import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/auth';
+import { hasPermission } from '@/features/auth';
+import { useMyCompensation } from '../hooks/use-my-compensation-query';
 
 /** Currency comes from the API payload (the backend's COMPENSATION_CURRENCY). */
 function money(currency: string, maximumFractionDigits = 2): Intl.NumberFormat {

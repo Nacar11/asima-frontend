@@ -2,10 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { adminCompensationApi } from '@/features/admin-compensation/api';
-import { adminCompensationKeys } from '@/features/admin-compensation/keys';
+import { adminCompensationApi } from '../api';
+import { adminCompensationKeys } from '../keys';
 import { errorMessage } from '@/lib/api-error';
-import type { CreateCompensationInput } from '@/features/admin-compensation/schemas';
+import type { CreateCompensationInput } from '../schemas';
 
 /**
  * Bulk set-pay mutation (all-or-nothing). Invalidates the whole slice so every

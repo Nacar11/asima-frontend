@@ -1,5 +1,5 @@
 import { ApiClient, apiClient } from '@/lib/api-client';
-import type { WorkSchedule } from '@/features/schedule/schemas';
+import type { WorkSchedule } from '@/features/schedule';
 import {
   AdminScheduleListSchema,
   ScheduleChangeImpactSchema,
