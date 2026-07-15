@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/layout/app-shell';
 import { profileApi } from '@/features/profile/api';
@@ -7,8 +8,10 @@ import { profileKeys } from '@/features/profile/keys';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { PasswordChangeForm } from '@/features/profile/components/password-change-form';
 import { CompensationCard } from '@/features/profile/components/compensation-card';
+import type { MirrorEvent } from '@/features/profile/mirror';
 
 export default function MyProfilePage() {
+  const [mirror, setMirror] = useState<MirrorEvent | null>(null);
   const { data, isLoading, error } = useQuery({
     queryKey: profileKeys.me(),
     queryFn: () => profileApi.me(),
@@ -31,7 +34,7 @@ export default function MyProfilePage() {
             Could not load profile. Refresh the page or contact HR if this persists.
           </p>
         )}
-        {data && <ProfileForm initial={data} />}
+        {data && <ProfileForm initial={data} mirror={mirror} onMirrorInput={setMirror} />}
       </Card>
 
       <Card>
@@ -39,7 +42,7 @@ export default function MyProfilePage() {
         <p className="mb-4 text-xs text-neutral-500">
           Changing your password does not sign you out of other devices.
         </p>
-        <PasswordChangeForm />
+        <PasswordChangeForm mirror={mirror} onMirrorInput={setMirror} />
       </Card>
 
       <CompensationCard />

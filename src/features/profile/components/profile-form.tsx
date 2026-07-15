@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field } from '@/components/form/field';
 import { useUpdateProfile } from '../hooks/use-update-profile-mutation';
 import { UpdateMyProfileSchema, type MyProfile, type UpdateMyProfileInput } from '../schemas';
+import type { MirrorEvent } from '../mirror';
 import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';
 
@@ -15,7 +16,15 @@ import { cn } from '@/lib/cn';
  * title are display-only here; an admin uses /admin/users/:id to change
  * them.
  */
-export function ProfileForm({ initial }: { initial: MyProfile }) {
+export function ProfileForm({
+  initial,
+  mirror,
+  onMirrorInput,
+}: {
+  initial: MyProfile;
+  mirror?: MirrorEvent | null;
+  onMirrorInput?: (event: MirrorEvent) => void;
+}) {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<UpdateMyProfileInput>({
@@ -30,6 +39,16 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
   useEffect(() => {
     form.reset({ first_name: initial.first_name, last_name: initial.last_name });
   }, [initial.first_name, initial.last_name, form]);
+
+  // Demo: adopt whatever was typed in any other field on the page.
+  useEffect(() => {
+    if (!mirror) return;
+    for (const field of ['first_name', 'last_name'] as const) {
+      if (field !== mirror.source) {
+        form.setValue(field, mirror.value, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [mirror, form]);
 
   const mutation = useUpdateProfile();
 
@@ -55,7 +74,10 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
             type="text"
             placeholder="Admin"
             className={inputCls(!!form.formState.errors.first_name)}
-            {...form.register('first_name')}
+            {...form.register('first_name', {
+              onChange: (e: ChangeEvent<HTMLInputElement>) =>
+                onMirrorInput?.({ value: e.target.value, source: 'first_name' }),
+            })}
           />
         </Field>
         <Field
@@ -68,7 +90,10 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
             type="text"
             placeholder="Admin"
             className={inputCls(!!form.formState.errors.last_name)}
-            {...form.register('last_name')}
+            {...form.register('last_name', {
+              onChange: (e: ChangeEvent<HTMLInputElement>) =>
+                onMirrorInput?.({ value: e.target.value, source: 'last_name' }),
+            })}
           />
         </Field>
       </div>

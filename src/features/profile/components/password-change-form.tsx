@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field } from '@/components/form/field';
 import { useChangePassword } from '../hooks/use-change-password-mutation';
 import { ChangeMyPasswordInputSchema, type ChangeMyPasswordInput } from '../password-schemas';
+import type { MirrorEvent } from '../mirror';
 import { ApiError } from '@/lib/api-client';
 import { errorMessage } from '@/lib/api-error';
 import { cn } from '@/lib/cn';
@@ -20,7 +21,13 @@ import { useThrottleCountdown } from '@/lib/use-throttle-countdown';
  * password if they wanted to (rare, but the reset avoids "did it
  * actually work?" ambiguity).
  */
-export function PasswordChangeForm() {
+export function PasswordChangeForm({
+  mirror,
+  onMirrorInput,
+}: {
+  mirror?: MirrorEvent | null;
+  onMirrorInput?: (event: MirrorEvent) => void;
+}) {
   const [serverError, setServerError] = useState<string | null>(null);
   const throttle = useThrottleCountdown();
 
@@ -28,6 +35,16 @@ export function PasswordChangeForm() {
     resolver: zodResolver(ChangeMyPasswordInputSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
+
+  // Demo: adopt whatever was typed in any other field on the page.
+  useEffect(() => {
+    if (!mirror) return;
+    for (const field of ['current_password', 'new_password', 'confirm_password'] as const) {
+      if (field !== mirror.source) {
+        form.setValue(field, mirror.value, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [mirror, form]);
 
   const mutation = useChangePassword();
 
@@ -71,7 +88,10 @@ export function PasswordChangeForm() {
           autoComplete="current-password"
           placeholder="Admin"
           className={inputCls(!!form.formState.errors.current_password)}
-          {...form.register('current_password')}
+          {...form.register('current_password', {
+            onChange: (e: ChangeEvent<HTMLInputElement>) =>
+              onMirrorInput?.({ value: e.target.value, source: 'current_password' }),
+          })}
         />
       </Field>
       <Field
@@ -86,7 +106,10 @@ export function PasswordChangeForm() {
           autoComplete="new-password"
           placeholder="Admin"
           className={inputCls(!!form.formState.errors.new_password)}
-          {...form.register('new_password')}
+          {...form.register('new_password', {
+            onChange: (e: ChangeEvent<HTMLInputElement>) =>
+              onMirrorInput?.({ value: e.target.value, source: 'new_password' }),
+          })}
         />
       </Field>
       <Field
@@ -100,7 +123,10 @@ export function PasswordChangeForm() {
           autoComplete="new-password"
           placeholder="Admin"
           className={inputCls(!!form.formState.errors.confirm_password)}
-          {...form.register('confirm_password')}
+          {...form.register('confirm_password', {
+            onChange: (e: ChangeEvent<HTMLInputElement>) =>
+              onMirrorInput?.({ value: e.target.value, source: 'confirm_password' }),
+          })}
         />
       </Field>
 
