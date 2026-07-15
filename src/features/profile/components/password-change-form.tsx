@@ -69,6 +69,7 @@ export function PasswordChangeForm() {
           id="current_password"
           type="password"
           autoComplete="current-password"
+          placeholder="Admin"
           className={inputCls(!!form.formState.errors.current_password)}
           {...form.register('current_password')}
         />
@@ -83,6 +84,7 @@ export function PasswordChangeForm() {
           id="new_password"
           type="password"
           autoComplete="new-password"
+          placeholder="Admin"
           className={inputCls(!!form.formState.errors.new_password)}
           {...form.register('new_password')}
         />
@@ -96,6 +98,7 @@ export function PasswordChangeForm() {
           id="confirm_password"
           type="password"
           autoComplete="new-password"
+          placeholder="Admin"
           className={inputCls(!!form.formState.errors.confirm_password)}
           {...form.register('confirm_password')}
         />
