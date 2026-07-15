@@ -53,7 +53,6 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
           <input
             id="first_name"
             type="text"
-            placeholder="Admin"
             className={inputCls(!!form.formState.errors.first_name)}
             {...form.register('first_name')}
           />
@@ -66,7 +65,6 @@ export function ProfileForm({ initial }: { initial: MyProfile }) {
           <input
             id="last_name"
             type="text"
-            placeholder="Admin"
             className={inputCls(!!form.formState.errors.last_name)}
             {...form.register('last_name')}
           />
