@@ -64,6 +64,41 @@ features/<slice>/
 React Query for server-state; React context for session/auth
 (`AuthProvider`). No Redux/Zustand — do not add a global store without an ADR.
 
+## Production deployment
+
+Live on **Vercel** at `https://asima-frontend-tawny.vercel.app`, talking to
+the Render-hosted API. Auto-deploys on push to `main`. Full runbook:
+`../docs/universal-guidelines/deployment-and-production-stack.md`.
+
+Two env vars, both `NEXT_PUBLIC_*` and therefore **baked at build time** —
+changing either needs a redeploy, not a restart:
+
+```
+NEXT_PUBLIC_API_BASE_URL=https://asima-backend-1.onrender.com/api/v1
+NEXT_PUBLIC_APP_NAME=asima
+```
+
+Set them for **every** Vercel environment. Scoping to Production only leaves
+Preview builds without them.
+
+**`next.config.ts` fails a production build when `NEXT_PUBLIC_API_BASE_URL`
+is missing or malformed.** That guard exists because the build used to
+succeed without it: `lib/env.ts` documents its validation as a hard error,
+but nothing in app code calls `env()` — `lib/api-client.ts` reads
+`process.env` directly and falls back to `http://localhost:3000/api/v1`. A
+deploy that forgot the variable shipped that fallback to browsers, pointing
+every visitor at their own machine, with a green build and nothing in the log
+to explain it. Don't remove the guard, and don't add a fallback that hides a
+missing value. `next dev` is unaffected.
+
+**The API's CORS allow-list is exact string matching.** The origin registered
+on the backend is scheme + host with no path and no trailing slash. Preview
+deployments get fresh hostnames and will fail CORS unless explicitly added.
+
+**Never put Supabase credentials in this app.** Attachments are proxied
+through authenticated API endpoints; the storage bucket is private and its S3
+keys bypass RLS, so they are server-only.
+
 ## Documentation lives in the parent repo
 
 All **committed documentation** — plan snapshots, ADRs, and guidelines —
